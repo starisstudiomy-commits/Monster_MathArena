@@ -350,6 +350,20 @@ body{
 }
 #splash.hidden{opacity:0;pointer-events:none;transition:opacity .5s}
 @keyframes splashFadeIn{from{opacity:0}to{opacity:1}}
+
+/* Preload / Loading Screen */
+#preloadScreen{
+  position:fixed;inset:0;z-index:9999;
+  background:#0A0A0A;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  transition:opacity .5s ease;
+}
+#preloadScreen.hidden{opacity:0;pointer-events:none}
+.preload-emoji{font-size:56px;animation:mon-breathe 1.2s ease-in-out infinite}
+.preload-title{font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+.preload-bar-wrap{width:min(70vw,280px);height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+.preload-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-light),var(--gold));transition:width .2s ease;border-radius:999px}
+.preload-txt{font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.55);font-family:var(--font)}
 .splash-enter{
   position:relative;z-index:2;
   background:linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
@@ -1563,6 +1577,35 @@ const ART = {
   gold_boost_token:'assets/items/gold_boost_token.png', rare_combo_token:'assets/items/rare_combo_token.png'
 };
 function megaArtId(bossId){return ART['mega_'+bossId]?('mega_'+bossId):bossId;}
+
+function preloadAllAssets(cb){
+  const urls=[...new Set(['assets/splashscreen.png','assets/logo_matharena.png','assets/gem.png',...Object.values(ART)])];
+  const total=urls.length;
+  const ov=document.createElement('div');
+  ov.id='preloadScreen';
+  ov.innerHTML=`<div class="preload-emoji">🦁</div><div class="preload-title">Monster Math Arena</div><div class="preload-bar-wrap"><div class="preload-bar" id="preloadBar"></div></div><div class="preload-txt" id="preloadTxt">Memuatkan aset... 0%</div>`;
+  document.body.appendChild(ov);
+  let loaded=0,done=false;
+  function finish(){
+    if(done)return;done=true;
+    ov.classList.add('hidden');
+    setTimeout(()=>ov.remove(),500);
+    cb();
+  }
+  if(total===0)return finish();
+  const safety=setTimeout(finish,45000);
+  urls.forEach(src=>{
+    const img=new Image();
+    img.onload=img.onerror=()=>{
+      loaded++;
+      const pct=Math.round(loaded/total*100);
+      const bar=document.getElementById('preloadBar');if(bar)bar.style.width=pct+'%';
+      const txt=document.getElementById('preloadTxt');if(txt)txt.textContent='Memuatkan aset... '+pct+'%';
+      if(loaded>=total){clearTimeout(safety);finish();}
+    };
+    img.src=src;
+  });
+}
 
 /* ============================================================
    2) DATA MONSTER
@@ -5065,7 +5108,7 @@ setInterval(()=>{if(state&&state.stats)state.stats.playSeconds+=5;},5000);
 window.addEventListener('beforeunload',save);
 
 try{load();if(!state)state=defaultState();if(!state.progress)state.progress={chapter:0,stage:0};if(!state.stats)state.stats=defaultState().stats;if(!state.collection)state.collection={};if(!state.deck)state.deck=[];if(!state.difficulty)state.difficulty='medium';
-route('splash');
+preloadAllAssets(()=>route('splash'));
 }catch(e){console.error('Boot error:',e);state=defaultState();save();route('welcome');}
 
 document.addEventListener('click',function startBGM(){try{if(state?.settings?.music)startBGM();}catch(e){}document.removeEventListener('click',startBGM);},{once:true});
