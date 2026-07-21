@@ -364,6 +364,9 @@ body{
 .preload-bar-wrap{width:min(70vw,280px);height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
 .preload-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-light),var(--gold));transition:width .2s ease;border-radius:999px}
 .preload-txt{font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.55);font-family:var(--font)}
+
+.inc-wobble{animation:incPodWobble .6s ease}
+@keyframes incPodWobble{0%,100%{transform:rotate(0)}20%{transform:rotate(-3deg)}40%{transform:rotate(3deg)}60%{transform:rotate(-2deg)}80%{transform:rotate(2deg)}}
 .splash-enter{
   position:relative;z-index:2;
   background:linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
@@ -2287,7 +2290,8 @@ const sfx={
   click(){beep(800,.04,'sine',.06);},
   open(){beep(440,.06,'sine',.08);setTimeout(()=>beep(660,.08,'sine',.1),80);},
   evolve(){[440,554,659,880,1047].forEach((f,i)=>setTimeout(()=>beep(f,.15,'sine',.1),i*100));},
-  bossAppear(){beep(150,.3,'sawtooth',.1);setTimeout(()=>beep(100,.4,'sawtooth',.08),200);}
+  bossAppear(){beep(150,.3,'sawtooth',.1);setTimeout(()=>beep(100,.4,'sawtooth',.08),200);},
+  incWarm(){beep(880,.05,'sine',.05);setTimeout(()=>beep(1200,.06,'sine',.05),50);}
 };
 function evoNoiseBuffer(dur){
   const c=getAudioCtx();const n=c.sampleRate*dur;
@@ -2523,7 +2527,7 @@ function nextTutorial(){tutorialStep++;if(tutorialStep>=5){state.tutorialDone=tr
    12) ROUTER + SCREENS
    ============================================================ */
 let current='welcome';
-function route(name){if(typeof stopTimer==='function')stopTimer();current=name;save();window.scrollTo(0,0);({splash:renderSplash,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
+function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);({splash:renderSplash,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
 
 function isPro(){ return state?.license && validateKey(state.license); }
 
@@ -2535,6 +2539,7 @@ function enterGame(){
   const el=$('#splash');if(el)el.classList.add('hidden');
   sfxSplashSting();
   sfx.open();
+  startIncubatorWatch();
   showMonsterIntro(()=>{route(state.started?'home':'welcome');});
 }
 function showMonsterIntro(cb){
@@ -2614,9 +2619,20 @@ function renderHome(){
     const lastLogin = localStorage.getItem('mma_last_login');
     if(lastLogin !== today){
       state.gold += 30;
+      // 🥚 MOD: EGG INCUBATOR - Streak harian ringan: balik esok = streak naik, terlepas hari = streak reset (tiada penalti lain)
+      const yesterday = new Date(Date.now()-86400000).toDateString();
+      const streak = lastLogin===yesterday ? (parseInt(localStorage.getItem('mma_login_streak')||'1',10)+1) : 1;
+      localStorage.setItem('mma_login_streak', String(streak));
       localStorage.setItem('mma_last_login', today);
+      let toastMsg='Bonus harian +30 🪙! Selamat kembali! (Streak '+streak+' hari)';
+      if(state.incubator?.status==='incubating'){
+        const warmBonus=Math.min(streak,5)*2;
+        state.incubator.warmth+=warmBonus;
+        toastMsg+=' 🥚+'+warmBonus+' kehangatan!';
+        checkHatchReady();
+      }
       save();
-      setTimeout(()=>showToast('🎁','Bonus harian +30 🪙! Selamat kembali!'), 1000);
+      setTimeout(()=>showToast('🎁',toastMsg), 1000);
     }
     const curChapter=state?.progress?.chapter||0;
     const chapter=CHAPTERS[curChapter]||CHAPTERS[0];
@@ -3769,7 +3785,11 @@ function answer(idx){
     // 🥚 MOD: EGG INCUBATOR - Bonus Topik Lemah: jawapan betul dlm tier paling lemah (state.stats.byTier) bagi Drakonum 2x progress evolusi
     if(fam==='drakonum'&&weakestIncubatorTier()===tierKey){state.collection.drakonum.correct++;showToast('🎯','Topik lemah! Evolusi 2x!');}
     // 🥚 MOD: EGG INCUBATOR - jawapan betul dlm mana-mana battle (bukan cuma Egg Hunt) turut tambah warmth telur yg sedang dieram
-    if(state.incubator?.status==='incubating'){state.incubator.warmth+=INC_CFG.WARMTH_PER_CORRECT;checkHatchReady();}
+    if(state.incubator?.status==='incubating'){
+      state.incubator.warmth+=INC_CFG.WARMTH_PER_CORRECT;
+      floatDmg('🥚+'+INC_CFG.WARMTH_PER_CORRECT,'norm',8,8);sfx.incWarm();
+      checkHatchReady();
+    }
     checkEvolve(fam);confetti();
   }else{
     btns[idx].classList.add('wrong');
@@ -4788,7 +4808,6 @@ const INC_CFG={
   FACTS:['Nombor genap boleh dibahagi 2 tanpa baki!','5+5=10 — pasangan nombor genap paling comel!','Tolak ialah songsang tambah!','Nombor 0 tak mengubah apa-apa bila ditambah!'],
 };
 function incNow(){return Date.now();}
-function incTopic(){return pick(CHAPTERS.slice(0,(state?.progress?.chapter||0)+1).map(c=>c.topic));}
 function incTraitOf(){return INC_CFG.TRAITS.find(t=>t.k===state.collection?.drakonum?.trait)||{atk:0,hp:0};}
 function weakestIncubatorTier(){let w=null,lo=101;[1,2,3].forEach(t=>{const b=state.stats.byTier[t];const n=(b?.c||0)+(b?.w||0);if(n>=3){const a=b.c/n*100;if(a<lo){lo=a;w=t;}}});return w;}
 
@@ -4804,10 +4823,40 @@ function checkHatchReady(){
     inc.status='ready';
     if(!inc.notified){
       inc.notified=true;
+      showToast('🥚','Telur sedia menetas! Kembali ke Inkubator!');
+      sfx.win();
       try{if('Notification'in window){if(Notification.permission==='granted')new Notification('🥚 Telur sedia menetas!',{body:'Kembali ke Inkubator sekarang!'});else if(Notification.permission!=='denied')Notification.requestPermission();}}catch(e){}
     }
   }
 }
+let incWatchInterval=null;
+function startIncubatorWatch(){
+  if(incWatchInterval)return;
+  incWatchInterval=setInterval(()=>{try{if(state?.incubator?.status==='incubating'){accrueIncubatorWarmth();save();}}catch(e){}},30000);
+}
+// 🥚 MOD: EGG INCUBATOR - Ambient heartbeat semasa mengeram, makin laju bila kehangatan menghampiri sedia
+function incHeartbeatOnce(){
+  if(!state?.settings?.sound)return;
+  try{
+    const c=getAudioCtx();const t0=c.currentTime;
+    [0,.13].forEach((dt,i)=>{
+      const o=c.createOscillator();o.type='sine';
+      o.frequency.setValueAtTime(i?55:70,t0+dt);o.frequency.exponentialRampToValueAtTime(30,t0+dt+.12);
+      const g=c.createGain();g.gain.setValueAtTime(.0001,t0+dt);
+      g.gain.exponentialRampToValueAtTime(i?.1:.16,t0+dt+.015);g.gain.exponentialRampToValueAtTime(.0001,t0+dt+.14);
+      o.connect(g);g.connect(c.destination);o.start(t0+dt);o.stop(t0+dt+.16);
+    });
+  }catch(e){}
+}
+let incHeartbeatInterval=null;
+function startIncHeartbeat(pct){
+  stopIncHeartbeat();
+  if(!state?.settings?.sound)return;
+  const delay=Math.round(1700-clamp(pct,0,100)/100*1100);
+  incHeartbeatOnce();
+  incHeartbeatInterval=setInterval(incHeartbeatOnce,delay);
+}
+function stopIncHeartbeat(){if(incHeartbeatInterval){clearInterval(incHeartbeatInterval);incHeartbeatInterval=null;}}
 function eggSVG(stage){ // 0=utuh 1=retak sikit(80%+) 2=retak penuh(sedia)
   const cr=stage>=2?`<path d="M100 55 L90 90 L108 98 L94 130 L104 158" fill="none" stroke="#3A2E12" stroke-width="3" opacity=".75"/><path d="M70 100 L82 115 L68 128" fill="none" stroke="#3A2E12" stroke-width="2.5" opacity=".65"/>`:stage>=1?`<path d="M100 60 L92 92 L106 100" fill="none" stroke="#3A2E12" stroke-width="2.5" opacity=".6"/>`:'';
   return`<svg viewBox="0 0 200 210" style="width:100%;height:100%"><defs>
@@ -4873,6 +4922,7 @@ function renderIncubator(){
     accrueIncubatorWarmth();save();
     const inc=state.incubator;
     const pct=clamp(inc.warmth/INC_CFG.WARMTH_NEEDED*100,0,100);
+    if(inc.status==='incubating')startIncHeartbeat(pct);else stopIncHeartbeat();
     const remain=INC_CFG.WARMTH_NEEDED-inc.warmth;
     const estMin=Math.max(0,remain*3);const eh=Math.floor(estMin/60),em=estMin%60;
     const drak=state.collection?.drakonum;
@@ -4882,17 +4932,20 @@ function renderIncubator(){
 
     const itemNames={nutrient:'Nutrien',vitamin:'Vitamin',serum:'Serum'};
     const itemIcons={nutrient:'🧪',vitamin:'💊',serum:'💉'};
+    // 🥚 MOD: EGG INCUBATOR - Kejutan pod rawak semasa mengeram (bina suspense, ~1 drpd 4 kali buka skrin)
+    const wobble=inc.status==='incubating'&&Math.random()<0.25;
 
     app.innerHTML=topbar()+`
     <div class="panel" style="text-align:center">
       <h2 class="display" style="font-size:18px;margin-bottom:2px">🥚 Inkubator</h2>
       <p style="color:var(--text-secondary);font-size:11px;margin-bottom:10px">Kehangatan untuk menetas</p>
-      <div style="max-width:180px;margin:0 auto;position:relative">${podSVG(inc.status)}
+      <div class="${wobble?'inc-wobble':''}" style="max-width:180px;margin:0 auto;position:relative">${podSVG(inc.status)}
         ${inc.status!=='empty'?`<div style="position:absolute;left:50%;bottom:36px;transform:translateX(-50%);width:70px;height:74px">${eggSVG(inc.status==='ready'?2:(pct>=80?1:0))}</div>`:''}
       </div>
       ${inc.status==='empty'?`<button class="btn btn-cta" style="margin-top:8px" onclick="MMA.startEggHunt()">🔍 CARI TELUR</button>`
         :inc.status==='ready'?`<button class="btn btn-cta" style="margin-top:8px" onclick="MMA.hatchDrakonum()">🐣 TETAS!</button>`
-        :`<p style="font-size:11px;color:var(--text-secondary);margin-top:6px">🔥 ${Math.min(inc.warmth,INC_CFG.WARMTH_NEEDED)}/${INC_CFG.WARMTH_NEEDED} · ⏱ ${eh}j${em}m</p>`}
+        :`<p style="font-size:11px;color:var(--text-secondary);margin-top:6px">🔥 ${Math.min(inc.warmth,INC_CFG.WARMTH_NEEDED)}/${INC_CFG.WARMTH_NEEDED} · ⏱ ${eh}j${em}m</p>
+        ${wobble?`<p style="font-size:11px;color:var(--gold);margin-top:4px;font-weight:700">✨ Sesuatu bergerak di dalam telur...</p>`:''}`}
     </div>
 
     <div class="panel" style="text-align:center;margin-top:12px">
@@ -4938,6 +4991,13 @@ function renderIncubator(){
       ${inc.status==='empty'&&state.eggStorage>0?`<button class="btn btn-secondary btn-sm" onclick="MMA.takeEggFromStorage()">📤 Ambil dari Storan</button>`:''}
       ${state.storageUnlocked<INC_CFG.STORAGE_CAP?`<button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="MMA.unlockStorageSlot()">🔓 Buka slot (${INC_CFG.STORAGE_UNLOCK_COST}🪙)</button>`:''}
     </div>
+
+    ${(state.journal||[]).length?`<div class="panel" style="margin-top:12px">
+      <div style="font-weight:700;font-size:13px;color:var(--gold);margin-bottom:6px">📖 Jurnal Inkubator</div>
+      <div style="display:flex;flex-direction:column;gap:6px;text-align:left">
+        ${state.journal.slice(-10).reverse().map(j=>`<div style="font-size:11px;color:var(--text-secondary);padding:6px 8px;border-radius:8px;background:var(--glass);border:1px solid var(--glass-border)">${esc(j.txt)}</div>`).join('')}
+      </div>
+    </div>`:''}
 
     <button class="btn btn-ghost" style="margin-top:12px" onclick="MMA.route('home')">🏠 Rumah</button>
     `;
@@ -4994,7 +5054,7 @@ function nextEggHuntQuestion(){
   try{
     if(!EH)return;
     if(EH.idx>=EH.total){finishEggHunt();return;}
-    curEHQ=genQuestion(rand(1,3),incTopic());
+    curEHQ=genQuestion(rand(1,3),getWeakestTopic());
     const qt=$('#ehQtext');if(qt)qt.innerHTML=curEHQ.prompt;
     const ch=$('#ehChoices');if(ch)ch.innerHTML=curEHQ.choices.map((c,i)=>`<button class="choice" onclick="MMA.answerEggHunt(${i})">${c.label??c}</button>`).join('');
     const fb=$('#ehFeedback');if(fb)fb.textContent='';
@@ -5078,7 +5138,7 @@ function injectSelectedIncubatorItem(){
     const objective=state.incubator.status==='incubating'?'warmth':(drak?.owned&&drak.stage<5?'evolusi':null);
     if(!objective){showToast('🧪','Tiada telur/monster untuk disuntik!');return;}
     if((state.incubatorItems[it]||0)<1){showToast('🧪','Item tak cukup!');return;}
-    const q=genQuestion(3,incTopic());
+    const q=genQuestion(3,getWeakestTopic());
     showIncubatorChallenge(q,it,objective);
   }catch(e){console.error('injectSelectedIncubatorItem error:',e);}
 }
