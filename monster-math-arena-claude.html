@@ -1013,14 +1013,15 @@ body{
   animation:dmgpop 1s ease-out forwards;
 }
 
-.dmg.norm{font-size:24px;color:white}
-.dmg.crit{font-size:30px;color:var(--warning)}
+.dmg.norm{font-size:28px;color:white;text-shadow:0 0 10px rgba(0,0,0,.5),0 2px 4px rgba(0,0,0,.4)}
+.dmg.crit{font-size:34px;color:var(--warning);text-shadow:0 0 14px rgba(245,158,11,.7),0 2px 4px rgba(0,0,0,.4)}
 .dmg.ult{
-  font-size:36px;
+  font-size:42px;
   background:linear-gradient(135deg, var(--purple-light), var(--pink), var(--cyan));
   -webkit-background-clip:text;
   background-clip:text;
   color:transparent;
+  filter:drop-shadow(0 0 12px rgba(236,72,153,.6));
 }
 .dmg.enemy{font-size:20px;color:var(--danger)}
 
@@ -1085,14 +1086,27 @@ body{
 }
 @keyframes proj-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
 
-.shake-hard{animation:shake-hard .45s ease-out}
+.shake-hard{animation:shake-hard .55s ease-out}
 @keyframes shake-hard{
+  0%,100%{transform:translateX(0) translateY(0)}
+  10%{transform:translateX(-28px) translateY(4px) rotate(-4deg)}
+  22%{transform:translateX(26px) translateY(-4px) rotate(4deg)}
+  34%{transform:translateX(-22px) translateY(3px) rotate(-3deg)}
+  46%{transform:translateX(20px) translateY(-3px) rotate(3deg)}
+  58%{transform:translateX(-14px) translateY(2px) rotate(-2deg)}
+  70%{transform:translateX(10px) rotate(1deg)}
+  82%{transform:translateX(-5px)}
+  92%{transform:translateX(2px)}
+}
+.shake-med{animation:shake-med .4s ease-out}
+@keyframes shake-med{
   0%,100%{transform:translateX(0)}
-  15%{transform:translateX(-20px) rotate(-3deg)}
-  30%{transform:translateX(20px) rotate(3deg)}
-  45%{transform:translateX(-15px) rotate(-2deg)}
-  60%{transform:translateX(15px) rotate(2deg)}
-  80%{transform:translateX(-6px)}
+  12%{transform:translateX(-13px) rotate(-2deg)}
+  28%{transform:translateX(12px) rotate(2deg)}
+  44%{transform:translateX(-9px) rotate(-1.5deg)}
+  60%{transform:translateX(7px) rotate(1deg)}
+  76%{transform:translateX(-4px)}
+  90%{transform:translateX(2px)}
 }
 
 #arena.punch{transform:scale(var(--punch-scale,1.11));transition:transform .14s ease-out}
@@ -1101,19 +1115,20 @@ body{
   0%{filter:drop-shadow(3px 0 0 rgba(255,0,60,.5)) drop-shadow(-3px 0 0 rgba(0,220,255,.5))}
   100%{filter:none}
 }
-.impact{animation:hit-recoil-big .42s ease,flash-hit-big .42s ease}
+.impact{animation:hit-recoil-big .48s cubic-bezier(.36,.07,.19,.97),flash-hit-big .48s ease}
 @keyframes hit-recoil-big{
   0%{transform:translateX(0) rotate(0) scale(1)}
-  12%{transform:translateX(-38px) rotate(-11deg) scale(.83)}
-  30%{transform:translateX(28px) rotate(7deg) scale(1.1)}
-  50%{transform:translateX(-17px) rotate(-4deg) scale(1.02)}
-  70%{transform:translateX(9px) rotate(2deg) scale(1)}
+  10%{transform:translateX(-48px) rotate(-14deg) scale(.76)}
+  28%{transform:translateX(34px) rotate(9deg) scale(1.16)}
+  46%{transform:translateX(-22px) rotate(-5deg) scale(1.05)}
+  64%{transform:translateX(12px) rotate(2.5deg) scale(1)}
+  80%{transform:translateX(-5px) rotate(-1deg) scale(1)}
   100%{transform:translateX(0) rotate(0) scale(1)}
 }
 @keyframes flash-hit-big{
   0%{filter:brightness(1)}
-  12%{filter:brightness(3.5) saturate(1.8) contrast(1.3)}
-  35%{filter:brightness(1.6)}
+  10%{filter:brightness(4.2) saturate(2.2) contrast(1.4)}
+  35%{filter:brightness(1.8)}
   100%{filter:brightness(1)}
 }
 @keyframes shock-expand{0%{transform:scale(.2);opacity:1}100%{transform:scale(6);opacity:0}}
@@ -3722,7 +3737,7 @@ function doDamageToEnemy(dmg,mult){
   
   lunge('#monArt',()=>{
     // Hit-stop + semua impact effects
-    const hitStop=big?70:40;
+    const hitStop=big?95:60;
     setTimeout(()=>{
       impactRecoil('#enemyArt');
       cameraPunch(big);
@@ -3731,13 +3746,18 @@ function doDamageToEnemy(dmg,mult){
       const elem=FAMILIES[fam]?FAMILIES[fam].elem:'🔥';
       const colors={'🔥':'#FBBF24','💧':'#60A5FA','⚡':'#BAE6FD','🌿':'#34D399','🪨':'#D6D3D1','🌪️':'#A78BFA','✨':'#FDE68A','🌑':'#818CF8','🏆':'#FDE68A'};
       spawnParticles(colors[elem]||'#FBBF24',big);
-      if(big){
+      if(dmg>0){
         const arenaEl=document.getElementById('arena');
-        if(arenaEl){arenaEl.classList.remove('shake-hard');void arenaEl.offsetWidth;arenaEl.classList.add('shake-hard');setTimeout(()=>arenaEl.classList.remove('shake-hard'),500);}
+        if(arenaEl){
+          const shakeCls=big?'shake-hard':'shake-med';
+          arenaEl.classList.remove('shake-hard','shake-med');void arenaEl.offsetWidth;
+          arenaEl.classList.add(shakeCls);
+          setTimeout(()=>arenaEl.classList.remove(shakeCls),big?550:400);
+        }
       }
       const fb=$('#feedback');if(fb)fb.textContent=dmg<=0?'🛡️ Diblok!':big?'🔥 Serangan Ultimate!':'⚔ Attack!';
     },hitStop);
-    setTimeout(()=>retractLunge('#monArt'),60);
+    setTimeout(()=>retractLunge('#monArt'),hitStop+20);
   });
   
   const monEl=document.getElementById('monArt');
@@ -4148,33 +4168,33 @@ function cameraPunch(big){
   const a=document.getElementById('arena');if(!a)return;
   a.style.transformOrigin='center center';
   a.classList.remove('punch');void a.offsetWidth;
-  a.style.setProperty('--punch-scale', big?'1.22':'1.11');
+  a.style.setProperty('--punch-scale', big?'1.32':'1.17');
   a.classList.add('punch');
-  setTimeout(()=>a.classList.remove('punch'),big?280:180);
+  setTimeout(()=>a.classList.remove('punch'),big?320:200);
   a.classList.remove('aberrate');void a.offsetWidth;a.classList.add('aberrate');
 }
 function spawnParticles(elemColor,big){
   const arena=document.getElementById('arena');if(!arena)return;
-  const n=big?28:16;
+  const n=big?34:22;
   for(let i=0;i<n;i++){
     const s=document.createElement('div');
-    const sz=big?rand(6,18):rand(4,12);
-    s.style.cssText=`position:absolute;z-index:6;pointer-events:none;border-radius:50%;background:${elemColor};box-shadow:0 0 ${big?16:8}px ${elemColor};width:${sz}px;height:${sz}px;left:60%;top:35%;opacity:1;transition:all ${.5+rand(0,big?.4:.2)}s cubic-bezier(0,.6,1,1)`;
+    const sz=big?rand(6,20):rand(5,14);
+    s.style.cssText=`position:absolute;z-index:6;pointer-events:none;border-radius:50%;background:${elemColor};box-shadow:0 0 ${big?18:10}px ${elemColor};width:${sz}px;height:${sz}px;left:60%;top:35%;opacity:1;transition:all ${.5+rand(0,big?.4:.25)}s cubic-bezier(0,.6,1,1)`;
     arena.appendChild(s);
     requestAnimationFrame(()=>{
-      s.style.transform=`translate(${rand(-100,100)}px,${rand(-120,-30)}px) scale(${rand(.1,.5)}) rotate(${rand(0,360)}deg)`;
+      s.style.transform=`translate(${rand(-120,120)}px,${rand(-140,-30)}px) scale(${rand(.1,.5)}) rotate(${rand(0,360)}deg)`;
       s.style.opacity='0';
     });
     setTimeout(()=>s.remove(),1000);
   }
-  if(big){
-    for(let i=0;i<2;i++){
-      const r=document.createElement('div');
-      r.style.cssText=`position:absolute;z-index:5;pointer-events:none;border-radius:50%;border:${i?4:3}px solid ${elemColor};width:10px;height:10px;left:60%;top:35%;box-shadow:0 0 24px ${elemColor};animation:shock-expand ${.5+i*.12}s ease-out forwards`;
-      arena.appendChild(r);setTimeout(()=>r.remove(),700);
-    }
-    whiteFlash();
+  const rings=big?2:1;
+  for(let i=0;i<rings;i++){
+    const r=document.createElement('div');
+    const w=big?(i?4:3):2;
+    r.style.cssText=`position:absolute;z-index:5;pointer-events:none;border-radius:50%;border:${w}px solid ${elemColor};width:10px;height:10px;left:60%;top:35%;box-shadow:0 0 ${big?24:14}px ${elemColor};animation:shock-expand ${.5+i*.12}s ease-out forwards`;
+    arena.appendChild(r);setTimeout(()=>r.remove(),700);
   }
+  if(big)whiteFlash();
 }
 function whiteFlash(){
   let w=document.getElementById('whiteflash');
