@@ -3309,7 +3309,7 @@ function answerBonus(idx){
     const chosen=curBMQ.choices[idx];const ans=chosen?.value??chosen;const correct=ans===curBMQ.answer;
     state.stats.questions++;
     if(correct){
-      btns[idx].classList.add('correct');BM.correct++;state.stats.correct++;sfx.correct();confetti();
+      btns[idx].classList.add('correct');BM.correct++;state.stats.correct++;sfx.correct();
     }else{
       btns[idx].classList.add('wrong');
       const correctIdx=curBMQ.choices.findIndex(c=>(c?.value??c)===curBMQ.answer);
@@ -3790,7 +3790,7 @@ function answer(idx){
       floatDmg('🥚+'+INC_CFG.WARMTH_PER_CORRECT,'norm',8,8);sfx.incWarm();
       checkHatchReady();
     }
-    checkEvolve(fam);confetti();
+    checkEvolve(fam);
   }else{
     btns[idx].classList.add('wrong');
     const correctIdx=curQ.choices.findIndex(c=>(c?.value??c)===curQ.answer);
@@ -5070,7 +5070,7 @@ function answerEggHunt(idx){
     const chosen=curEHQ.choices[idx];const ans=chosen?.value??chosen;const correct=ans===curEHQ.answer;
     state.stats.questions++;
     if(correct){
-      btns[idx].classList.add('correct');EH.correct++;state.stats.correct++;state.gold+=5;sfx.correct();confetti();
+      btns[idx].classList.add('correct');EH.correct++;state.stats.correct++;state.gold+=5;sfx.correct();
       if(state.incubator.status==='incubating'){state.incubator.warmth+=INC_CFG.WARMTH_PER_CORRECT;checkHatchReady();}
     }else{
       btns[idx].classList.add('wrong');
