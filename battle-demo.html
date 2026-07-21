@@ -165,8 +165,9 @@ h1{font-family:var(--display);font-size:14px;letter-spacing:2px;text-align:cente
 <div class="notes">
 <b>📌 Nota integrasi (bukan sebahagian demo untuk pemain):</b><br>
 1️⃣ <b>Swap monster</b> — tekan mana-mana slot di bawah bila-bila masa (percuma, disekat semasa animasi serangan sahaja). Lihat <code>swapMonster()</code>.<br>
-2️⃣ <b>Effect PNG</b> — letak fail <code>assets/effects/fire.png</code>, <code>electric.png</code>, <code>water.png</code> (ikut elemen monster). Kalau fail tiada, demo auto-fallback ke particle CSS supaya tak "pecah". Lihat <code>EFFECT_PNG</code> + <code>applyElementEffect()</code>.<br>
-3️⃣ <b>Enemy lunge</b> — musuh sentiasa balas serang lepas setiap soalan: damage kecil kalau jawapan BETUL, damage penuh kalau SALAH. Lihat <code>enemyCounterLunge()</code>.
+2️⃣ <b>Effect PNG (monster→musuh)</b> — letak fail <code>assets/effects/fire.png</code>, <code>electric.png</code>, <code>water.png</code> (ikut elemen monster). Kalau fail tiada, demo auto-fallback ke particle CSS supaya tak "pecah". Lihat <code>EFFECT_PNG</code> + <code>applyElementEffect()</code>.<br>
+3️⃣ <b>Effect PNG (musuh→monster)</b> — letak fail <code>assets/effects/hit_impact.png</code> (generik, sebab musuh tiada elemen). Sama fallback macam di atas. Lihat <code>HIT_IMPACT_PNG</code> + <code>applyHitImpactEffect()</code>.<br>
+4️⃣ <b>Enemy lunge</b> — musuh sentiasa balas serang lepas setiap soalan: damage kecil kalau jawapan BETUL, damage penuh kalau SALAH, dan tunggu effect impact habis dulu sebelum soalan seterusnya. Lihat <code>enemyCounterLunge()</code>.
 </div>
 
 <script>
@@ -180,6 +181,9 @@ const DECK=[
 ];
 const EFFECT_PNG={fire:'assets/effects/fire.png',electric:'assets/effects/electric.png',water:'assets/effects/water.png'};
 const FALLBACK_COLOR={fire:'#FB923C',electric:'#FDE047',water:'#38BDF8'};
+// 🎯 Effect generik bila MONSTER kena serang musuh (musuh tiada elemen dlm game ni)
+const HIT_IMPACT_PNG='assets/effects/hit_impact.png';
+const HIT_FALLBACK_COLOR='#E5E7EB';
 
 let curHp={},activeIdx=0,locked=false;
 DECK.forEach(m=>curHp[m.key]=m.hp);
@@ -319,37 +323,46 @@ function enemyCounterLunge(playerWasCorrect){
       beep(150,.08,'square',.09);
       render();
       feedback(playerWasCorrect?'🛡️ Musuh balas serangan lemah (-'+dmg+')':'💥 Musuh serang penuh! (-'+dmg+')');
-      setTimeout(()=>{
-        retractLunge('#enemyArt',-1);
+      // Musuh kembali ke posisi serta-merta, tapi soalan seterusnya cuma
+      // muncul SELEPAS effect impact pada monster habis main (onDone).
+      retractLunge('#enemyArt',-1);
+      applyHitImpactEffect(()=>{
         locked=false;
         if(curHp[m.key]<=0){
           const next=DECK.findIndex((mn,i)=>curHp[mn.key]>0);
           if(next<0){endBattle(false);return;}
           if(next!==activeIdx){activeIdx=next;render();feedback(activeMon().name+' masuk bertarung! (auto)');}
         }
-        setTimeout(nextQuestion,600);
-      },80);
+        setTimeout(nextQuestion,300);
+      });
     },50);
   });
 }
 
 /* ============================================================
    2) ELEMENTAL EFFECT OVERLAY (PNG + fallback particle)
+   — generik: boleh apply pada #enemyArt (serangan monster→musuh, ikut
+     elemen) ATAU #monArt (serangan musuh→monster, effect impact generik)
    ============================================================ */
-function applyElementEffect(elem,onDone){
-  const host=$('#enemyArt');
-  const src=EFFECT_PNG[elem];
+function applyEffect(hostSel,src,fallbackColor,onDone){
+  const host=$(hostSel);
   const img=new Image();
   img.className='effect-overlay';
-  img.style.color=FALLBACK_COLOR[elem]||'#fff';
-  // Effect diaplikasikan terus pada host (badge musuh), BUKAN parent-nya, supaya
-  // sentiasa center-lock pada sprite musuh walau apa jua layout sekitarnya.
+  img.style.color=fallbackColor;
+  // Effect diaplikasikan terus pada host (badge sprite), BUKAN parent-nya,
+  // supaya sentiasa center-lock walau apa jua layout sekitarnya.
   img.onload=()=>{ host.appendChild(img); requestAnimationFrame(()=>img.classList.add('go')); setTimeout(()=>{img.remove();if(onDone)onDone();},600); };
-  img.onerror=()=>{ img.remove(); spawnFallbackFx(elem,onDone); };
+  img.onerror=()=>{ img.remove(); spawnFallbackFx(hostSel,fallbackColor,onDone); };
   img.src=src;
 }
-function spawnFallbackFx(elem,onDone){
-  const host=$('#enemyArt');const color=FALLBACK_COLOR[elem]||'#fff';
+function applyElementEffect(elem,onDone){
+  applyEffect('#enemyArt',EFFECT_PNG[elem],FALLBACK_COLOR[elem]||'#fff',onDone);
+}
+function applyHitImpactEffect(onDone){
+  applyEffect('#monArt',HIT_IMPACT_PNG,HIT_FALLBACK_COLOR,onDone);
+}
+function spawnFallbackFx(hostSel,color,onDone){
+  const host=$(hostSel);
   const n=14;
   for(let i=0;i<n;i++){
     const p=document.createElement('div');
@@ -361,7 +374,7 @@ function spawnFallbackFx(elem,onDone){
     setTimeout(()=>p.remove(),550);
   }
   setTimeout(()=>{if(onDone)onDone();},550);
-  // brief elemental flicker (electric) / flash (fire/water)
+  // brief flicker/flash
   host.style.transition='filter .12s ease';
   host.style.filter='brightness(2.2) saturate(1.6)';
   setTimeout(()=>host.style.filter='',150);
