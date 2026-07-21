@@ -271,7 +271,7 @@ function answer(val,btn){
 
   if(correct){
     feedback('✅ Betul! Menyerang...');
-    playerAttack(()=>{ setTimeout(()=>enemyCounterLunge(true),250); });
+    playerAttack(()=>enemyCounterLunge(true));
   }else{
     feedback('❌ Salah... musuh menyerang!');
     setTimeout(()=>enemyCounterLunge(false),300);
@@ -289,13 +289,15 @@ function playerAttack(cb){
       enemy.hp=clamp(enemy.hp-dmg,0,enemy.max);
       impactRecoil('#enemyArt','impact-enemy');
       cameraPunch(false);
-      applyElementEffect(m.elem);
       floatDmg('-'+dmg,'norm',62,20);
       shakeArena(false);
       beep(200,.06,'sawtooth',.1);
       render();
       if(enemy.hp<=0){setTimeout(()=>endBattle(true),500);locked=false;return;}
-      setTimeout(()=>{retractLunge('#monArt',1);if(cb)cb();},80);
+      // Monster kembali ke posisi serta-merta, tapi musuh baru boleh balas
+      // serang SELEPAS effect elemen habis main sepenuhnya (onDone callback).
+      retractLunge('#monArt',1);
+      applyElementEffect(m.elem,()=>{if(cb)cb();});
     },50);
   });
 }
@@ -334,29 +336,31 @@ function enemyCounterLunge(playerWasCorrect){
 /* ============================================================
    2) ELEMENTAL EFFECT OVERLAY (PNG + fallback particle)
    ============================================================ */
-function applyElementEffect(elem){
+function applyElementEffect(elem,onDone){
   const host=$('#enemyArt');
   const src=EFFECT_PNG[elem];
   const img=new Image();
   img.className='effect-overlay';
   img.style.color=FALLBACK_COLOR[elem]||'#fff';
-  img.onload=()=>{ host.parentElement.style.position='relative'; host.parentElement.appendChild(img); requestAnimationFrame(()=>img.classList.add('go')); setTimeout(()=>img.remove(),600); };
-  img.onerror=()=>{ img.remove(); spawnFallbackFx(elem); };
+  // Effect diaplikasikan terus pada host (badge musuh), BUKAN parent-nya, supaya
+  // sentiasa center-lock pada sprite musuh walau apa jua layout sekitarnya.
+  img.onload=()=>{ host.appendChild(img); requestAnimationFrame(()=>img.classList.add('go')); setTimeout(()=>{img.remove();if(onDone)onDone();},600); };
+  img.onerror=()=>{ img.remove(); spawnFallbackFx(elem,onDone); };
   img.src=src;
 }
-function spawnFallbackFx(elem){
+function spawnFallbackFx(elem,onDone){
   const host=$('#enemyArt');const color=FALLBACK_COLOR[elem]||'#fff';
-  const wrap=host.parentElement;wrap.style.position='relative';
   const n=14;
   for(let i=0;i<n;i++){
     const p=document.createElement('div');
     const sz=rand(4,10);
     p.className='fx-particle';
     p.style.cssText=`left:50%;top:50%;width:${sz}px;height:${sz}px;background:${color};box-shadow:0 0 8px ${color};opacity:1;transition:all .5s cubic-bezier(0,.6,1,1)`;
-    wrap.appendChild(p);
+    host.appendChild(p);
     requestAnimationFrame(()=>{p.style.transform=`translate(${rand(-45,45)}px,${rand(-55,-10)}px) scale(${rand(2,6)/10})`;p.style.opacity='0';});
     setTimeout(()=>p.remove(),550);
   }
+  setTimeout(()=>{if(onDone)onDone();},550);
   // brief elemental flicker (electric) / flash (fire/water)
   host.style.transition='filter .12s ease';
   host.style.filter='brightness(2.2) saturate(1.6)';
