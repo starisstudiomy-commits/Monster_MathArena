@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Battle Demo — Monster Math Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Nunito:wght@600;700;800;900&family=Varela+Round&display=swap" rel="stylesheet">
+<style>
+:root{
+  --font:"Varela Round",system-ui,sans-serif;
+  --display:"Orbitron",monospace;
+  --readable:"Nunito",system-ui,sans-serif;
+  --gold:#D4AF37; --gold-light:#F5D55E; --gold-dark:#B8860B;
+  --glass:rgba(212,175,55,.08); --glass-border:rgba(212,175,55,.25);
+  --text:#F5F0E1; --text-secondary:#C4B896; --text-muted:#8B7D5E;
+  --surface:#0A0A0A;
+  --success:#4CAF50; --warning:#FFC107; --danger:#F44336;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:var(--font);font-weight:500;color:var(--text);background:var(--surface);min-height:100dvh;padding:14px;max-width:480px;margin:0 auto}
+
+h1{font-family:var(--display);font-size:14px;letter-spacing:2px;text-align:center;color:var(--gold);margin-bottom:2px}
+.subtitle{text-align:center;font-size:10px;color:var(--text-muted);margin-bottom:12px;letter-spacing:1px}
+
+/* ===== Arena ===== */
+.arena{
+  position:relative;border-radius:20px;padding:14px;overflow:hidden;
+  background:linear-gradient(180deg, rgba(10,10,10,.9), rgba(20,20,20,.95));
+  border:2px solid var(--glass-border);
+}
+.fighter{display:flex;align-items:center;gap:10px;position:relative;z-index:2}
+.fighter.enemy{flex-direction:row-reverse;text-align:right}
+.hpwrap{flex:1;min-width:0}
+.hpname{font-weight:600;font-size:10px;display:flex;justify-content:space-between;gap:4px;color:var(--text-secondary)}
+.hpbar{height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-top:4px;border:1px solid rgba(255,255,255,.1)}
+.hpfill{height:100%;background:linear-gradient(90deg, var(--success), #34D399);transition:width .4s cubic-bezier(.4,0,.2,1);border-radius:4px;box-shadow:0 0 8px rgba(16,185,129,.5)}
+.hpfill.low{background:linear-gradient(90deg, var(--danger), #F87171);box-shadow:0 0 8px rgba(239,68,68,.5)}
+.enemy-hpfill{background:linear-gradient(90deg, #F44336, #FF6B6B)}
+.vs{text-align:center;font-family:var(--display);color:var(--text-muted);font-size:13px;letter-spacing:2px;margin:4px 0;position:relative;z-index:2}
+
+.monbadge{
+  width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:40px;position:relative;flex:0 0 auto;
+  box-shadow:0 4px 20px rgba(0,0,0,.5), inset 0 0 0 3px rgba(255,255,255,.15);
+}
+#enemyArt{background:linear-gradient(135deg,#78716C,#3F3A38)}
+
+/* Damage numbers */
+.dmg{position:absolute;z-index:6;font-family:var(--display);font-weight:800;font-style:italic;pointer-events:none;animation:dmgpop 1s ease-out forwards}
+@keyframes dmgpop{0%{opacity:0;transform:translateY(8px) scale(.5)}20%{opacity:1;transform:translateY(-4px) scale(1.2)}100%{opacity:0;transform:translateY(-60px) scale(.8)}}
+.dmg.norm{font-size:26px;color:white;text-shadow:0 0 10px rgba(0,0,0,.5),0 2px 4px rgba(0,0,0,.4)}
+.dmg.enemy{font-size:20px;color:var(--danger)}
+
+/* Lunge / impact (player attacking) */
+.lunge-active{will-change:transform}
+@keyframes shake-med{0%,100%{transform:translateX(0)}12%{transform:translateX(-13px) rotate(-2deg)}28%{transform:translateX(12px) rotate(2deg)}44%{transform:translateX(-9px) rotate(-1.5deg)}60%{transform:translateX(7px) rotate(1deg)}76%{transform:translateX(-4px)}90%{transform:translateX(2px)}}
+.shake-med{animation:shake-med .4s ease-out}
+@keyframes shake-hard{0%,100%{transform:translateX(0)}10%{transform:translateX(-24px) rotate(-3deg)}25%{transform:translateX(22px) rotate(3deg)}40%{transform:translateX(-16px) rotate(-2deg)}55%{transform:translateX(14px) rotate(2deg)}70%{transform:translateX(-8px)}85%{transform:translateX(4px)}}
+.shake-hard{animation:shake-hard .5s ease-out}
+#arena.punch{transform:scale(var(--punch-scale,1.11));transition:transform .14s ease-out}
+.impact{animation:hit-recoil-big .46s cubic-bezier(.36,.07,.19,.97),flash-hit-big .46s ease}
+@keyframes hit-recoil-big{
+  0%{transform:translateX(0) rotate(0) scale(1)}
+  10%{transform:translateX(-40px) rotate(-12deg) scale(.8)}
+  28%{transform:translateX(30px) rotate(8deg) scale(1.14)}
+  46%{transform:translateX(-19px) rotate(-4deg) scale(1.04)}
+  64%{transform:translateX(10px) rotate(2deg) scale(1)}
+  100%{transform:translateX(0) rotate(0) scale(1)}
+}
+.impact-enemy{animation:hit-recoil-enemy .4s cubic-bezier(.36,.07,.19,.97),flash-hit-big .4s ease}
+@keyframes hit-recoil-enemy{
+  0%{transform:translateX(0) rotate(0) scale(1)}
+  10%{transform:translateX(30px) rotate(10deg) scale(.85)}
+  28%{transform:translateX(-22px) rotate(-6deg) scale(1.1)}
+  50%{transform:translateX(12px) rotate(3deg) scale(1.02)}
+  70%{transform:translateX(-6px) rotate(-1deg) scale(1)}
+  100%{transform:translateX(0) rotate(0) scale(1)}
+}
+@keyframes flash-hit-big{0%{filter:brightness(1)}10%{filter:brightness(4) saturate(2) contrast(1.3)}35%{filter:brightness(1.7)}100%{filter:brightness(1)}}
+
+/* Elemental effect overlay */
+.effect-overlay{position:absolute;z-index:8;pointer-events:none;width:96px;height:96px;left:50%;top:50%;transform:translate(-50%,-50%) scale(.5);opacity:0;object-fit:contain;filter:drop-shadow(0 0 14px currentColor)}
+.effect-overlay.go{animation:effectPop .55s ease-out forwards}
+@keyframes effectPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-6deg)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(3deg)}70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.3) rotate(0)}}
+.fx-particle{position:absolute;z-index:7;pointer-events:none;border-radius:50%}
+
+/* ===== HP bars section spacing ===== */
+.hprow{margin-top:10px}
+
+/* ===== Deck bench ===== */
+.bench{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.bench-slot{
+  flex:1;max-width:120px;padding:8px 6px;border-radius:14px;text-align:center;cursor:pointer;
+  background:var(--glass);border:2px solid var(--glass-border);transition:all .2s ease;position:relative;
+}
+.bench-slot.active{border-color:var(--gold);box-shadow:0 0 16px rgba(212,175,55,.35);background:rgba(212,175,55,.14)}
+.bench-slot.fainted{opacity:.35;cursor:not-allowed}
+.bench-slot:not(.active):not(.fainted):active{transform:scale(.95)}
+.bench-emoji{font-size:26px}
+.bench-name{font-size:10px;font-weight:700;color:var(--text);margin-top:2px}
+.bench-hpbar{height:5px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;margin-top:4px}
+.bench-hpfill{height:100%;background:linear-gradient(90deg,var(--success),#34D399);border-radius:3px}
+.bench-hpfill.low{background:linear-gradient(90deg,var(--danger),#F87171)}
+.bench-tag{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:8px;background:var(--gold);color:#0A0A0A;padding:1px 6px;border-radius:8px;font-weight:800;letter-spacing:.5px}
+.bench-swap-in{animation:swapIn .35s cubic-bezier(.2,1.3,.4,1)}
+@keyframes swapIn{0%{opacity:0;transform:scale(.5) translateY(10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+
+/* ===== Question / choices ===== */
+.qbox{position:relative;border-radius:14px;padding:16px 12px;text-align:center;margin:14px 0 8px;background:rgba(212,175,55,.08);border:1px solid var(--glass-border)}
+.qtext{font-family:var(--readable);font-weight:800;font-size:clamp(22px,5vw,28px);color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+.choices{display:flex;justify-content:center;gap:6px;max-width:400px;margin:0 auto}
+.choice{
+  font-family:var(--readable);font-weight:800;font-size:18px;padding:12px 6px;flex:1;
+  border-radius:12px;border:2px solid var(--glass-border);background:rgba(255,255,255,.05);color:var(--text);
+  cursor:pointer;transition:all .15s ease;
+}
+.choice:active{transform:scale(.95)}
+.choice.correct{background:linear-gradient(135deg,#2E7D32,#1B5E20)!important;border-color:var(--success)!important;box-shadow:0 0 20px rgba(76,175,80,.6)!important;color:#fff!important}
+.choice.wrong{background:linear-gradient(135deg,#C62828,#B71C1C)!important;border-color:var(--danger)!important;box-shadow:0 0 20px rgba(244,67,54,.6)!important;color:#fff!important}
+.feedback{text-align:center;font-weight:700;min-height:16px;margin-top:8px;font-size:12px;color:var(--text-secondary)}
+
+/* ===== End overlay ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px}
+.overlay h2{font-family:var(--display);font-size:20px;color:var(--gold)}
+.btn{font-family:var(--font);font-weight:700;font-size:13px;color:#0A0A0A;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;border-radius:12px;padding:12px 28px;cursor:pointer}
+
+/* ===== Notes panel ===== */
+.notes{margin-top:18px;padding:12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px dashed var(--glass-border);font-size:10.5px;line-height:1.6;color:var(--text-muted)}
+.notes b{color:var(--text-secondary)}
+.notes code{background:rgba(255,255,255,.08);padding:1px 4px;border-radius:4px;color:var(--gold-light)}
+</style>
+</head>
+<body>
+
+<h1>⚔ BATTLE DEMO</h1>
+<div class="subtitle">Deck-Swap · Elemental Effects · Enemy Lunge</div>
+
+<div class="arena" id="arena">
+  <div class="fighter enemy">
+    <div class="monbadge" id="enemyArt">🟢</div>
+    <div class="hpwrap">
+      <div class="hpname"><span id="enemyName">Slime King</span><span id="enemyHpTxt">150/150</span></div>
+      <div class="hpbar"><div class="hpfill enemy-hpfill" id="ehp" style="width:100%"></div></div>
+    </div>
+  </div>
+  <div class="vs">⚔</div>
+  <div class="fighter">
+    <div class="monbadge" id="monArt">🔥</div>
+    <div class="hpwrap">
+      <div class="hpname"><span id="monName">Flamy</span><span id="mhpTxt">55/55</span></div>
+      <div class="hpbar"><div class="hpfill" id="mhp" style="width:100%"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="bench" id="bench"></div>
+
+<div class="qbox"><div class="qtext" id="qtext">…</div></div>
+<div class="choices" id="choices"></div>
+<div class="feedback" id="feedback"></div>
+
+<div class="notes">
+<b>📌 Nota integrasi (bukan sebahagian demo untuk pemain):</b><br>
+1️⃣ <b>Swap monster</b> — tekan mana-mana slot di bawah bila-bila masa (percuma, disekat semasa animasi serangan sahaja). Lihat <code>swapMonster()</code>.<br>
+2️⃣ <b>Effect PNG</b> — letak fail <code>assets/effects/fire.png</code>, <code>electric.png</code>, <code>water.png</code> (ikut elemen monster). Kalau fail tiada, demo auto-fallback ke particle CSS supaya tak "pecah". Lihat <code>EFFECT_PNG</code> + <code>applyElementEffect()</code>.<br>
+3️⃣ <b>Enemy lunge</b> — musuh sentiasa balas serang lepas setiap soalan: damage kecil kalau jawapan BETUL, damage penuh kalau SALAH. Lihat <code>enemyCounterLunge()</code>.
+</div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+const DECK=[
+  {key:'flamy',   name:'Flamy',   emoji:'🔥', elem:'fire',     hp:55,  atk:20, g1:'#F59E0B', g2:'#EF4444', color:'#FBBF24'},
+  {key:'thundy',  name:'Thundy',  emoji:'⚡', elem:'electric', hp:60,  atk:18, g1:'#F59E0B', g2:'#D97706', color:'#FDE68A'},
+  {key:'sumagon', name:'Sumagon', emoji:'💧', elem:'water',    hp:98,  atk:11, g1:'#3B82F6', g2:'#2563EB', color:'#60A5FA'},
+];
+const EFFECT_PNG={fire:'assets/effects/fire.png',electric:'assets/effects/electric.png',water:'assets/effects/water.png'};
+const FALLBACK_COLOR={fire:'#FB923C',electric:'#FDE047',water:'#38BDF8'};
+
+let curHp={},activeIdx=0,locked=false;
+DECK.forEach(m=>curHp[m.key]=m.hp);
+let enemy={name:'Slime King',emoji:'🟢',hp:150,max:150,atk:9};
+let curQ=null;
+
+function $(s){return document.querySelector(s);}
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function activeMon(){return DECK[activeIdx];}
+function allFainted(){return DECK.every(m=>curHp[m.key]<=0);}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(){
+  const m=activeMon();
+  $('#enemyArt').textContent=enemy.emoji;
+  $('#enemyName').textContent=enemy.name;
+  $('#enemyHpTxt').textContent=Math.max(0,enemy.hp)+'/'+enemy.max;
+  $('#ehp').style.width=clamp(enemy.hp/enemy.max*100,0,100)+'%';
+  $('#ehp').classList.toggle('low',enemy.hp/enemy.max<.3);
+
+  $('#monArt').textContent=m.emoji;
+  $('#monArt').style.background=`linear-gradient(135deg,${m.g1},${m.g2})`;
+  $('#monName').textContent=m.name;
+  $('#mhpTxt').textContent=Math.max(0,curHp[m.key])+'/'+m.hp;
+  $('#mhp').style.width=clamp(curHp[m.key]/m.hp*100,0,100)+'%';
+  $('#mhp').classList.toggle('low',curHp[m.key]/m.hp<.3);
+
+  renderBench();
+}
+function renderBench(){
+  const bench=$('#bench');
+  bench.innerHTML=DECK.map((mn,i)=>{
+    const hp=curHp[mn.key],pct=clamp(hp/mn.hp*100,0,100),fainted=hp<=0,active=i===activeIdx;
+    return `<div class="bench-slot ${active?'active':''} ${fainted?'fainted':''}" data-idx="${i}">
+      ${active?'<div class="bench-tag">AKTIF</div>':''}
+      <div class="bench-emoji">${fainted?'💀':mn.emoji}</div>
+      <div class="bench-name">${mn.name}</div>
+      <div class="bench-hpbar"><div class="bench-hpfill ${pct<30?'low':''}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+  bench.querySelectorAll('.bench-slot').forEach(el=>el.addEventListener('click',()=>swapMonster(parseInt(el.dataset.idx,10))));
+}
+
+/* ============================================================
+   1) DECK SWAP — percuma, bila-bila masa (bukan semasa animasi)
+   ============================================================ */
+function swapMonster(idx){
+  if(locked)return; // disekat semasa animasi serangan sahaja
+  if(idx===activeIdx)return;
+  if(curHp[DECK[idx].key]<=0){feedback('💀 Monster ini dah pengsan!');return;}
+  activeIdx=idx;
+  render();
+  const art=$('#monArt');art.classList.remove('bench-swap-in');void art.offsetWidth;art.classList.add('bench-swap-in');
+  feedback(activeMon().name+' masuk bertarung! 🔄');
+  beep(500,.05,'sine',.05);setTimeout(()=>beep(700,.06,'sine',.05),60);
+}
+
+/* ============================================================
+   QUESTIONS
+   ============================================================ */
+function genQuestion(){
+  const a=rand(1,10),b=rand(1,10),op=Math.random()<.5?'+':'-';
+  const [x,y]=op==='-'&&a<b?[b,a]:[a,b];
+  const answer=op==='+'?x+y:x-y;
+  const choices=new Set([answer]);
+  while(choices.size<3)choices.add(clamp(answer+rand(-4,4),0,99));
+  return{prompt:`${x} ${op} ${y} = ?`,answer,choices:[...choices].sort(()=>Math.random()-.5)};
+}
+function nextQuestion(){
+  if(allFainted()||enemy.hp<=0)return;
+  curQ=genQuestion();
+  $('#qtext').textContent=curQ.prompt;
+  $('#choices').innerHTML=curQ.choices.map(c=>`<button class="choice" data-v="${c}">${c}</button>`).join('');
+  $('#choices').querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>answer(parseInt(b.dataset.v,10),b)));
+  $('#feedback').textContent='';
+}
+function feedback(t){$('#feedback').textContent=t;}
+
+function answer(val,btn){
+  if(locked||!curQ)return;
+  locked=true;
+  const correct=val===curQ.answer;
+  const btns=$('#choices').querySelectorAll('.choice');
+  btns.forEach(b=>{if(parseInt(b.dataset.v,10)===curQ.answer)b.classList.add('correct');});
+  if(!correct)btn.classList.add('wrong');
+
+  if(correct){
+    feedback('✅ Betul! Menyerang...');
+    playerAttack(()=>{ setTimeout(()=>enemyCounterLunge(true),250); });
+  }else{
+    feedback('❌ Salah... musuh menyerang!');
+    setTimeout(()=>enemyCounterLunge(false),300);
+  }
+}
+
+/* ============================================================
+   PLAYER ATTACK (lunge kanan)
+   ============================================================ */
+function playerAttack(cb){
+  const m=activeMon();
+  const dmg=m.atk+rand(-2,3);
+  lunge('#monArt',1,()=>{
+    setTimeout(()=>{
+      enemy.hp=clamp(enemy.hp-dmg,0,enemy.max);
+      impactRecoil('#enemyArt','impact-enemy');
+      cameraPunch(false);
+      applyElementEffect(m.elem);
+      floatDmg('-'+dmg,'norm',62,20);
+      shakeArena(false);
+      beep(200,.06,'sawtooth',.1);
+      render();
+      if(enemy.hp<=0){setTimeout(()=>endBattle(true),500);locked=false;return;}
+      setTimeout(()=>{retractLunge('#monArt',1);if(cb)cb();},80);
+    },50);
+  });
+}
+
+/* ============================================================
+   3) ENEMY COUNTER-LUNGE (kiri) — setiap pusingan
+   ============================================================ */
+function enemyCounterLunge(playerWasCorrect){
+  const m=activeMon();
+  const full=enemy.atk+rand(-1,2);
+  const dmg=playerWasCorrect?Math.max(1,Math.round(full*0.35)):full;
+  lunge('#enemyArt',-1,()=>{
+    setTimeout(()=>{
+      curHp[m.key]=clamp(curHp[m.key]-dmg,0,m.hp);
+      impactRecoil('#monArt','impact');
+      cameraPunch(!playerWasCorrect);
+      floatDmg('-'+dmg,'enemy',20,55);
+      shakeArena(!playerWasCorrect);
+      beep(150,.08,'square',.09);
+      render();
+      feedback(playerWasCorrect?'🛡️ Musuh balas serangan lemah (-'+dmg+')':'💥 Musuh serang penuh! (-'+dmg+')');
+      setTimeout(()=>{
+        retractLunge('#enemyArt',-1);
+        locked=false;
+        if(curHp[m.key]<=0){
+          const next=DECK.findIndex((mn,i)=>curHp[mn.key]>0);
+          if(next<0){endBattle(false);return;}
+          if(next!==activeIdx){activeIdx=next;render();feedback(activeMon().name+' masuk bertarung! (auto)');}
+        }
+        setTimeout(nextQuestion,600);
+      },80);
+    },50);
+  });
+}
+
+/* ============================================================
+   2) ELEMENTAL EFFECT OVERLAY (PNG + fallback particle)
+   ============================================================ */
+function applyElementEffect(elem){
+  const host=$('#enemyArt');
+  const src=EFFECT_PNG[elem];
+  const img=new Image();
+  img.className='effect-overlay';
+  img.style.color=FALLBACK_COLOR[elem]||'#fff';
+  img.onload=()=>{ host.parentElement.style.position='relative'; host.parentElement.appendChild(img); requestAnimationFrame(()=>img.classList.add('go')); setTimeout(()=>img.remove(),600); };
+  img.onerror=()=>{ img.remove(); spawnFallbackFx(elem); };
+  img.src=src;
+}
+function spawnFallbackFx(elem){
+  const host=$('#enemyArt');const color=FALLBACK_COLOR[elem]||'#fff';
+  const wrap=host.parentElement;wrap.style.position='relative';
+  const n=14;
+  for(let i=0;i<n;i++){
+    const p=document.createElement('div');
+    const sz=rand(4,10);
+    p.className='fx-particle';
+    p.style.cssText=`left:50%;top:50%;width:${sz}px;height:${sz}px;background:${color};box-shadow:0 0 8px ${color};opacity:1;transition:all .5s cubic-bezier(0,.6,1,1)`;
+    wrap.appendChild(p);
+    requestAnimationFrame(()=>{p.style.transform=`translate(${rand(-45,45)}px,${rand(-55,-10)}px) scale(${rand(2,6)/10})`;p.style.opacity='0';});
+    setTimeout(()=>p.remove(),550);
+  }
+  // brief elemental flicker (electric) / flash (fire/water)
+  host.style.transition='filter .12s ease';
+  host.style.filter='brightness(2.2) saturate(1.6)';
+  setTimeout(()=>host.style.filter='',150);
+}
+
+/* ============================================================
+   SHARED FX ENGINE (lunge / impact / shake / dmg) — mirror dari main game
+   ============================================================ */
+function getLungeDist(){
+  const mon=$('#monArt'),ene=$('#enemyArt');
+  if(!mon||!ene)return 90;
+  const mr=mon.getBoundingClientRect(),er=ene.getBoundingClientRect();
+  return Math.max((er.left-mr.right)*0.85,60);
+}
+// dir: 1 = menyerang ke kanan (player→enemy), -1 = menyerang ke kiri (enemy→player)
+function lunge(sel,dir,onImpact){
+  const e=$(sel);if(!e)return;
+  const dist=getLungeDist()*dir,back=-dist*0.2;
+  const start=performance.now(),antDur=80,strikeDur=100;
+  function ant(now){
+    const t=Math.min((now-start)/antDur,1),eased=1-Math.pow(1-t,2);
+    e.style.transform=`translateX(${back*eased}px) scale(${1-0.09*eased})`;
+    if(t<1)requestAnimationFrame(ant);else strikePhase();
+  }
+  function strikePhase(){
+    const s=performance.now();
+    function f(now){
+      const t=Math.min((now-s)/strikeDur,1),eased=t*t*t;
+      e.style.transform=`translateX(${dist*eased}px) scale(${1+0.2*eased})`;
+      if(t<1)requestAnimationFrame(f);else{if(onImpact)onImpact();}
+    }
+    requestAnimationFrame(f);
+  }
+  requestAnimationFrame(ant);
+}
+function retractLunge(sel,dir){
+  const e=$(sel);if(!e)return;
+  const dist=getLungeDist()*dir;
+  const start=performance.now();
+  function f(now){
+    const t=Math.min((now-start)/200,1),eased=1-Math.pow(1-t,3);
+    e.style.transform=`translateX(${(1-eased)*dist}px) scale(${1+0.2*(1-eased)})`;
+    if(t<1)requestAnimationFrame(f);else e.style.transform='';
+  }
+  requestAnimationFrame(f);
+}
+function impactRecoil(sel,cls){const e=$(sel);if(!e)return;e.classList.remove('impact','impact-enemy');void e.offsetWidth;e.classList.add(cls);}
+function cameraPunch(big){
+  const a=$('#arena');if(!a)return;
+  a.style.transformOrigin='center center';
+  a.classList.remove('punch');void a.offsetWidth;
+  a.style.setProperty('--punch-scale',big?'1.2':'1.1');
+  a.classList.add('punch');
+  setTimeout(()=>a.classList.remove('punch'),big?260:170);
+}
+function shakeArena(big){
+  const a=$('#arena');if(!a)return;
+  const cls=big?'shake-hard':'shake-med';
+  a.classList.remove('shake-hard','shake-med');void a.offsetWidth;
+  a.classList.add(cls);
+  setTimeout(()=>a.classList.remove(cls),big?520:420);
+}
+function floatDmg(txt,cls,left,top){
+  const p=$('#arena');if(!p)return;
+  const f=document.createElement('div');
+  f.className='dmg '+cls;f.textContent=txt;f.style.left=left+'%';f.style.top=top+'%';
+  p.appendChild(f);setTimeout(()=>f.remove(),1000);
+}
+let actx=null;
+function getCtx(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();return actx;}
+function beep(freq,dur,type,vol){
+  try{const ctx=getCtx();const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=freq;o.connect(g);g.connect(ctx.destination);g.gain.setValueAtTime(vol,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur);o.start();o.stop(ctx.currentTime+dur);}catch(e){}
+}
+
+/* ============================================================
+   END BATTLE
+   ============================================================ */
+function endBattle(won){
+  locked=true;
+  const ov=document.createElement('div');ov.className='overlay';
+  ov.innerHTML=`<h2>${won?'🏆 MENANG!':'💀 KALAH...'}</h2><p style="color:var(--text-secondary);font-size:12px">${won?'Musuh berjaya dikalahkan!':'Semua monster kamu pengsan.'}</p><button class="btn" id="restartBtn">🔄 MAIN SEMULA</button>`;
+  document.body.appendChild(ov);
+  $('#restartBtn').addEventListener('click',()=>location.reload());
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+render();
+nextQuestion();
+document.addEventListener('click',function unlock(){try{getCtx();}catch(e){}document.removeEventListener('click',unlock);},{once:true});
+</script>
+</body>
+</html>
