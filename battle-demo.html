@@ -179,8 +179,16 @@ const DECK=[
   {key:'thundy',  name:'Thundy',  emoji:'⚡', elem:'electric', hp:60,  atk:18, g1:'#F59E0B', g2:'#D97706', color:'#FDE68A'},
   {key:'sumagon', name:'Sumagon', emoji:'💧', elem:'water',    hp:98,  atk:11, g1:'#3B82F6', g2:'#2563EB', color:'#60A5FA'},
 ];
-const EFFECT_PNG={fire:'assets/effects/fire.png',electric:'assets/effects/electric.png',water:'assets/effects/water.png'};
-const FALLBACK_COLOR={fire:'#FB923C',electric:'#FDE047',water:'#38BDF8'};
+const EFFECT_PNG={
+  fire:'assets/effects/fire.png', electric:'assets/effects/electric.png', water:'assets/effects/water.png',
+  nature:'assets/effects/nature.png', rock:'assets/effects/rock.png', wind:'assets/effects/wind.png',
+  light:'assets/effects/light.png', dark:'assets/effects/dark.png', golden:'assets/effects/golden.png',
+};
+const FALLBACK_COLOR={
+  fire:'#FB923C', electric:'#FDE047', water:'#38BDF8',
+  nature:'#4ADE80', rock:'#A8A29E', wind:'#67E8F9',
+  light:'#F1F5F9', dark:'#A78BFA', golden:'#FBBF24',
+};
 // 🎯 Effect generik bila MONSTER kena serang musuh (musuh tiada elemen dlm game ni)
 const HIT_IMPACT_PNG='assets/effects/hit_impact.png';
 const HIT_FALLBACK_COLOR='#E5E7EB';
