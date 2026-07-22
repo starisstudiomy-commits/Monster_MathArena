@@ -1668,8 +1668,41 @@ const FAMILIES = {
       {id:'drakonum_4',name:'Sky Drakonum',hp:155,atk:46},
       {id:'drakonum_5',name:'Drakonum Prime',hp:200,atk:60},
     ]},
+  elosius:{name:'Elosius',elem:'☀️',eg:'linear-gradient(135deg,#BAE6FD,#0EA5E9)',g1:'#BAE6FD',g2:'#0EA5E9',iris:'#075985',role:'Ultra-Rare — Penyembuhan & HP Tinggi',
+    stages:[
+      {id:'elosius_1',name:'Elolet',hp:70,atk:14},
+      {id:'elosius_2',name:'Elosius',hp:95,atk:20},
+      {id:'elosius_3',name:'Elosius Radiant',hp:125,atk:28},
+      {id:'elosius_4',name:'Divine Elosius',hp:160,atk:38},
+      {id:'elosius_5',name:'Elosius Prime',hp:205,atk:50},
+    ]},
+  voltigon:{name:'Voltigon',elem:'⛈️',eg:'linear-gradient(135deg,#818CF8,#4338CA)',g1:'#818CF8',g2:'#4338CA',iris:'#312E81',role:'Ultra-Rare — Kelajuan & Combo',
+    stages:[
+      {id:'voltigon_1',name:'Voltling',hp:55,atk:20},
+      {id:'voltigon_2',name:'Voltigon',hp:78,atk:30},
+      {id:'voltigon_3',name:'Voltigon Fury',hp:105,atk:42},
+      {id:'voltigon_4',name:'Storm Voltigon',hp:138,atk:56},
+      {id:'voltigon_5',name:'Voltigon Prime',hp:180,atk:72},
+    ]},
+  pyronyx:{name:'Pyronyx',elem:'🌋',eg:'linear-gradient(135deg,#EF4444,#450A0A)',g1:'#EF4444',g2:'#450A0A',iris:'#7F1D1D',role:'Ultra-Rare — Serangan Ultra Tinggi',
+    stages:[
+      {id:'pyronyx_1',name:'Pyrit',hp:60,atk:22},
+      {id:'pyronyx_2',name:'Pyronyx',hp:85,atk:32},
+      {id:'pyronyx_3',name:'Pyronyx Blaze',hp:112,atk:44},
+      {id:'pyronyx_4',name:'Molten Pyronyx',hp:145,atk:58},
+      {id:'pyronyx_5',name:'Pyronyx Prime',hp:185,atk:74},
+    ]},
+  terradon:{name:'Terradon',elem:'🌍',eg:'linear-gradient(135deg,#84CC16,#3F6212)',g1:'#84CC16',g2:'#3F6212',iris:'#1A2E05',role:'Ultra-Rare — Pertahanan & HP Tertinggi',
+    stages:[
+      {id:'terradon_1',name:'Territ',hp:85,atk:12},
+      {id:'terradon_2',name:'Terradon',hp:115,atk:18},
+      {id:'terradon_3',name:'Terradon Fang',hp:150,atk:26},
+      {id:'terradon_4',name:'Titan Terradon',hp:190,atk:36},
+      {id:'terradon_5',name:'Terradon Prime',hp:240,atk:48},
+    ]},
 };
-const FAMILY_IDS = Object.keys(FAMILIES).filter(f=>f!=='drakonum');
+const ULTRA_RARE_IDS = ['drakonum','elosius','voltigon','pyronyx','terradon'];
+const FAMILY_IDS = Object.keys(FAMILIES).filter(f=>!ULTRA_RARE_IDS.includes(f));
 const STARTER_IDS = ['flamy','addosaur','sumagon'];
 
 /* Skill pasif setiap monster - auto-trigger, tiada kawalan manual */
@@ -1685,8 +1718,8 @@ const SKILLS = {
   golden:{icon:'🏆',name:'Golden Touch',desc:'Menang battle dengan Golden aktif → gold bonus +50%.'},
 };
 const EVO = {toStage2:12,toStage3:30};
-// 🥚 MOD: EGG INCUBATOR - threshold kumulatif 5-tahap Drakonum (50/150/300/500), berasingan drpd EVO monster biasa
-const DRAK_EVO_CUM = [50,150,300,500];
+// 🥚 MOD: EGG INCUBATOR - threshold kumulatif 5-tahap semua ultra-rare (50/150/300/500), berasingan drpd EVO monster biasa
+const ULTRA_EVO_CUM = [50,150,300,500];
 
 const ENEMIES = {
   slime:{name:'Slime',hp:40,atk:8,g1:'#10B981',g2:'#059669',iris:'#065F46'},
@@ -2966,6 +2999,10 @@ function playElementAtk(elem){
     case '✨': beep(1000,.1,'sine',.08);setTimeout(()=>beep(1200,.15,'sine',.06),80);break;
     case '🌑': beep(200,.1,'triangle',.1);setTimeout(()=>beep(160,.15,'triangle',.08),80);break;
     case '🏆': beep(523,.08,'triangle',.1);setTimeout(()=>beep(659,.08,'triangle',.1),60);setTimeout(()=>beep(784,.15,'triangle',.12),120);break;
+    case '☀️': beep(900,.1,'sine',.09);setTimeout(()=>beep(1100,.12,'sine',.07),70);break;
+    case '⛈️': beep(150,.1,'sawtooth',.1);setTimeout(()=>beep(900,.05,'square',.1),40);break;
+    case '🌋': beep(120,.18,'sawtooth',.12);setTimeout(()=>beep(80,.2,'sawtooth',.1),100);break;
+    case '🌍': beep(100,.2,'square',.12);setTimeout(()=>beep(70,.22,'square',.1),120);break;
     default: beep(400,.1,'sine',.1);break;
   }
 }
@@ -2981,6 +3018,10 @@ function playElementHurt(elem){
     case '✨': beep(600,.12,'sine',.07);break;
     case '🌑': beep(130,.15,'triangle',.09);break;
     case '🏆': beep(300,.1,'triangle',.08);break;
+    case '☀️': beep(700,.12,'sine',.07);break;
+    case '⛈️': beep(400,.1,'square',.08);setTimeout(()=>beep(200,.1,'square',.07),50);break;
+    case '🌋': beep(90,.16,'sawtooth',.09);break;
+    case '🌍': beep(70,.18,'square',.09);break;
     default: beep(200,.12,'sine',.08);break;
   }
 }
@@ -3833,8 +3874,8 @@ function answer(idx){
       B.benchTick[f]=(B.benchTick[f]||0)+1;
       if(B.benchTick[f]>=3){B.benchTick[f]=0;state.collection[f].correct++;checkEvolve(f);}
     });
-    // 🥚 MOD: EGG INCUBATOR - Bonus Topik Lemah: jawapan betul dlm tier paling lemah (state.stats.byTier) bagi Drakonum 2x progress evolusi
-    if(fam==='drakonum'&&weakestIncubatorTier()===tierKey){state.collection.drakonum.correct++;showToast('🎯','Topik lemah! Evolusi 2x!');}
+    // 🥚 MOD: EGG INCUBATOR - Bonus Topik Lemah: jawapan betul dlm tier paling lemah (state.stats.byTier) bagi ultra-rare aktif 2x progress evolusi
+    if(ULTRA_RARE_IDS.includes(fam)&&weakestIncubatorTier()===tierKey){state.collection[fam].correct++;showToast('🎯','Topik lemah! Evolusi 2x!');}
     // 🥚 MOD: EGG INCUBATOR - jawapan betul dlm mana-mana battle (bukan cuma Egg Hunt) turut tambah warmth telur yg sedang dieram
     if(state.incubator?.status==='incubating'){
       state.incubator.warmth+=INC_CFG.WARMTH_PER_CORRECT;
@@ -3897,7 +3938,7 @@ function doDamageToEnemy(dmg,mult){
       const monEl=activeMon();
       const fam=monEl.fam||'flamy';
       const elem=FAMILIES[fam]?FAMILIES[fam].elem:'🔥';
-      const colors={'🔥':'#FBBF24','💧':'#60A5FA','⚡':'#BAE6FD','🌿':'#34D399','🪨':'#D6D3D1','🌪️':'#A78BFA','✨':'#FDE68A','🌑':'#818CF8','🏆':'#FDE68A'};
+      const colors={'🔥':'#FBBF24','💧':'#60A5FA','⚡':'#BAE6FD','🌿':'#34D399','🪨':'#D6D3D1','🌪️':'#A78BFA','✨':'#FDE68A','🌑':'#818CF8','🏆':'#FDE68A','☀️':'#7DD3FC','⛈️':'#A5B4FC','🌋':'#F87171','🌍':'#A3E635'};
       if(dmg>0){
         const arenaEl=document.getElementById('arena');
         if(arenaEl){
@@ -4019,10 +4060,10 @@ function doEvolve(fam,target){
 function checkEvolve(fam){
   if(document.getElementById('evoOverlay'))return;
   const c=state.collection[fam];if(!c)return;
-  // 🥚 MOD: EGG INCUBATOR - Drakonum guna threshold kumulatif 5-tahap sendiri (bukan EVO.toStage2/3 yg utk monster biasa)
-  if(fam==='drakonum'){
+  // 🥚 MOD: EGG INCUBATOR - Semua ultra-rare guna threshold kumulatif 5-tahap sendiri (bukan EVO.toStage2/3 yg utk monster biasa)
+  if(ULTRA_RARE_IDS.includes(fam)){
     let target=c.stage;
-    for(let i=0;i<DRAK_EVO_CUM.length;i++){if(c.correct>=DRAK_EVO_CUM[i])target=i+2;}
+    for(let i=0;i<ULTRA_EVO_CUM.length;i++){if(c.correct>=ULTRA_EVO_CUM[i])target=i+2;}
     target=clamp(target,c.stage,5);
     if(target>c.stage)doEvolve(fam,target);
     return;
@@ -4219,11 +4260,11 @@ function winStage(){
   // 💠 Evo Stone - ganjaran terhad, Boss sahaja
   let evoStoneDrop=false;
   if(isBoss&&Math.random()<0.25){state.evoStones=(state.evoStones||0)+1;evoStoneDrop=true;}
-  // 🥚 MOD: EGG INCUBATOR - drop telur (stage 10%/boss 25%, hanya kalau slot inkubator kosong & Drakonum belum dimiliki) + drop item (nutrient/vitamin/serum)
+  // 🥚 MOD: EGG INCUBATOR - drop telur (stage 10%/boss 25%, hanya kalau slot inkubator kosong & belum ada SEMUA 5 ultra-rare) + drop item (nutrient/vitamin/serum)
   let incEggDrop=false;
-  if(state.incubator.status==='empty'&&!state.collection?.drakonum?.owned&&Math.random()<(isBoss?INC_CFG.DROP_EGG_BOSS:INC_CFG.DROP_EGG_STAGE)){
-    state.incubator={status:'incubating',warmth:0,lastTick:Date.now(),notified:false};incEggDrop=true;
-  }else if(!state.collection?.drakonum?.owned&&state.eggStorage<state.storageUnlocked&&Math.random()<(isBoss?INC_CFG.DROP_EGG_BOSS:INC_CFG.DROP_EGG_STAGE)){
+  if(state.incubator.status==='empty'&&!allUltraRaresOwned()&&Math.random()<(isBoss?INC_CFG.DROP_EGG_BOSS:INC_CFG.DROP_EGG_STAGE)){
+    startIncubatingEgg();incEggDrop=true;
+  }else if(!allUltraRaresOwned()&&state.eggStorage<state.storageUnlocked&&Math.random()<(isBoss?INC_CFG.DROP_EGG_BOSS:INC_CFG.DROP_EGG_STAGE)){
     state.eggStorage++;incEggDrop=true;
   }
   const incItemDrops=[];
@@ -4358,7 +4399,7 @@ function cameraPunch(big){
 }
 // 🎨 Effect PNG sebenar (monster→musuh ikut elemen; musuh→monster generik).
 // Fallback ke spawnParticles() automatik kalau fail PNG tiada (img.onerror).
-const EFFECT_PNG={'🔥':'assets/effects/fire.png','💧':'assets/effects/water.png','⚡':'assets/effects/electric.png','🌿':'assets/effects/nature.png','🪨':'assets/effects/rock.png','🌪️':'assets/effects/wind.png','✨':'assets/effects/light.png','🌑':'assets/effects/dark.png','🏆':'assets/effects/golden.png'};
+const EFFECT_PNG={'🔥':'assets/effects/fire.png','💧':'assets/effects/water.png','⚡':'assets/effects/electric.png','🌿':'assets/effects/nature.png','🪨':'assets/effects/rock.png','🌪️':'assets/effects/wind.png','✨':'assets/effects/light.png','🌑':'assets/effects/dark.png','🏆':'assets/effects/golden.png','☀️':'assets/effects/holy.png','⛈️':'assets/effects/storm.png','🌋':'assets/effects/volcanic.png','🌍':'assets/effects/earth.png'};
 const HIT_IMPACT_PNG='assets/effects/hit_impact.png';
 function applyFxOverlay(hostSel,src,fallbackColor,big,onDone){
   const host=$(hostSel);
@@ -4554,8 +4595,8 @@ function toggleDeckSort(){
 }
 function getSortedOwned(){
   const owned=FAMILY_IDS.filter(f=>state?.collection?.[f]?.owned);
-  // 🥚 MOD: EGG INCUBATOR - Drakonum sengaja tak masuk FAMILY_IDS (elak Album/pack biasa), tapi kena boleh dipilih dlm Deck lepas menetas
-  if(state?.collection?.drakonum?.owned)owned.push('drakonum');
+  // 🥚 MOD: EGG INCUBATOR - Ultra-rare sengaja tak masuk FAMILY_IDS (elak Album/pack biasa), tapi kena boleh dipilih dlm Deck lepas menetas
+  ULTRA_RARE_IDS.forEach(id=>{if(state?.collection?.[id]?.owned)owned.push(id);});
   if(deckSort==='hp'){
     owned.sort((a,b)=>{const ma=getMonster(a),mb=getMonster(b);return(mb?mb.hp:0)-(ma?ma.hp:0);});
   }else if(deckSort==='element'){
@@ -4903,8 +4944,13 @@ const INC_CFG={
   FACTS:['Nombor genap boleh dibahagi 2 tanpa baki!','5+5=10 — pasangan nombor genap paling comel!','Tolak ialah songsang tambah!','Nombor 0 tak mengubah apa-apa bila ditambah!'],
 };
 function incNow(){return Date.now();}
-function incTraitOf(){return INC_CFG.TRAITS.find(t=>t.k===state.collection?.drakonum?.trait)||{atk:0,hp:0};}
+function incTraitOf(fam){return INC_CFG.TRAITS.find(t=>t.k===state.collection?.[fam]?.trait)||{atk:0,hp:0};}
 function weakestIncubatorTier(){let w=null,lo=101;[1,2,3].forEach(t=>{const b=state.stats.byTier[t];const n=(b?.c||0)+(b?.w||0);if(n>=3){const a=b.c/n*100;if(a<lo){lo=a;w=t;}}});return w;}
+// 🥚 MOD: EGG INCUBATOR - 5 spesies ultra-rare, dipilih rawak (drpd yg belum dimiliki) bila telur mula dieram
+function allUltraRaresOwned(){return ULTRA_RARE_IDS.every(id=>state.collection?.[id]?.owned);}
+function pickEggSpecies(){const avail=ULTRA_RARE_IDS.filter(id=>!state.collection?.[id]?.owned);return avail.length?pick(avail):ULTRA_RARE_IDS[0];}
+function startIncubatingEgg(){state.incubator={status:'incubating',warmth:0,lastTick:incNow(),notified:false,species:pickEggSpecies()};}
+function ultraRareInProgress(){return ULTRA_RARE_IDS.find(id=>state.collection?.[id]?.owned&&state.collection[id].stage<5)||null;}
 
 function accrueIncubatorWarmth(){
   const inc=state.incubator;if(!inc||inc.status!=='incubating')return;
@@ -5020,8 +5066,9 @@ function renderIncubator(){
     if(inc.status==='incubating')startIncHeartbeat(pct);else stopIncHeartbeat();
     const remain=INC_CFG.WARMTH_NEEDED-inc.warmth;
     const estMin=Math.max(0,remain*3);const eh=Math.floor(estMin/60),em=estMin%60;
-    const drak=state.collection?.drakonum;
-    const objective=inc.status==='incubating'?'warmth':(drak?.owned&&drak.stage<5?'evolusi':null);
+    const ownedUltras=ULTRA_RARE_IDS.filter(id=>state.collection?.[id]?.owned);
+    const evoTarget=ultraRareInProgress();
+    const objective=inc.status==='incubating'?'warmth':(evoTarget?'evolusi':null);
     if(!objective)incSelectedItem=null;
     if(incSelectedItem&&(state.incubatorItems[incSelectedItem]||0)<1)incSelectedItem=null;
 
@@ -5038,7 +5085,7 @@ function renderIncubator(){
         ${inc.status!=='empty'?`<div style="position:absolute;left:50%;bottom:36px;transform:translateX(-50%);width:70px;height:74px">${eggSVG(inc.status==='ready'?2:(pct>=80?1:0))}</div>`:''}
       </div>
       ${inc.status==='empty'?`<button class="btn btn-cta" style="margin-top:8px" onclick="MMA.startEggHunt()">🔍 CARI TELUR</button>`
-        :inc.status==='ready'?`<button class="btn btn-cta" style="margin-top:8px" onclick="MMA.hatchDrakonum()">🐣 TETAS!</button>`
+        :inc.status==='ready'?`<button class="btn btn-cta" style="margin-top:8px" onclick="MMA.hatchUltraRare()">🐣 TETAS!</button>`
         :`<p style="font-size:11px;color:var(--text-secondary);margin-top:6px">🔥 ${Math.min(inc.warmth,INC_CFG.WARMTH_NEEDED)}/${INC_CFG.WARMTH_NEEDED} · ⏱ ${eh}j${em}m</p>
         ${wobble?`<p style="font-size:11px;color:var(--gold);margin-top:4px;font-weight:700">✨ Sesuatu bergerak di dalam telur...</p>`:''}`}
     </div>
@@ -5066,18 +5113,21 @@ function renderIncubator(){
       <button class="btn btn-primary" style="margin-top:8px" ${(!objective||!incSelectedItem)?'disabled':''} onclick="MMA.injectSelectedIncubatorItem()">💉 SUNTIK</button>
     </div>
 
-    ${drak?.owned?`<div class="panel" style="margin-top:12px">
-      <div style="font-weight:700;font-size:13px;color:var(--gold);margin-bottom:8px">🐲 Monster Kamu</div>
-      <div style="display:flex;gap:12px;align-items:center">
-        <div style="width:84px;flex:0 0 auto">${cardHTML(stageData('drakonum',drak.stage-1),{})}</div>
+    ${ownedUltras.length?`<div class="panel" style="margin-top:12px">
+      <div style="font-weight:700;font-size:13px;color:var(--gold);margin-bottom:8px">🐲 Monster Ultra-Rare Kamu (${ownedUltras.length}/${ULTRA_RARE_IDS.length})</div>
+      ${ownedUltras.map(id=>{
+        const c=state.collection[id],fam=FAMILIES[id];
+        return`<div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--glass-border)">
+        <div style="width:64px;flex:0 0 auto">${cardHTML(stageData(id,c.stage-1),{})}</div>
         <div style="flex:1">
-          <div style="font-weight:700;color:var(--text);font-size:14px">${esc(FAMILIES.drakonum.stages[drak.stage-1].name)}</div>
-          <div style="font-size:11px;color:var(--text-secondary)">Tahap ${drak.stage} drpd 5${drak.stage===5?' · ✨ MYTHIC!':''}</div>
-          ${drak.stage<5?(()=>{const prev=DRAK_EVO_CUM[drak.stage-2]||0,nc=DRAK_EVO_CUM[drak.stage-1],cur=drak.correct-prev,need=nc-prev,p=clamp(cur/need*100,0,100);
-            return`<div style="font-size:10px;color:var(--text-muted);margin-top:4px">Jawab lagi utk membesar! ${cur}/${need}</div><div style="height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin-top:2px"><div style="height:100%;width:${p}%;background:linear-gradient(90deg,#7C6CFF,#F5D55E);border-radius:4px"></div></div>`;})()
-            :`<p style="font-size:11px;color:var(--text-secondary);margin-top:4px">Hebat! Sedia bertarung dlm pasukan kamu.</p>`}
+          <div style="font-weight:700;color:var(--text);font-size:13px">${esc(fam.stages[c.stage-1].name)}</div>
+          <div style="font-size:10px;color:var(--text-secondary)">Tahap ${c.stage} drpd 5${c.stage===5?' · ✨ MYTHIC!':''}</div>
+          ${c.stage<5?(()=>{const prev=ULTRA_EVO_CUM[c.stage-2]||0,nc=ULTRA_EVO_CUM[c.stage-1],cur=c.correct-prev,need=nc-prev,p=clamp(cur/need*100,0,100);
+            return`<div style="font-size:9px;color:var(--text-muted);margin-top:3px">Jawab lagi utk membesar! ${cur}/${need}</div><div style="height:6px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin-top:2px"><div style="height:100%;width:${p}%;background:linear-gradient(90deg,${fam.g1},${fam.g2});border-radius:4px"></div></div>`;})()
+            :`<p style="font-size:10px;color:var(--text-secondary);margin-top:3px">Hebat! Sedia bertarung dlm pasukan kamu.</p>`}
         </div>
-      </div>
+      </div>`;
+      }).join('')}
     </div>`:`<div class="panel" style="margin-top:12px"><div style="font-weight:700;font-size:13px;color:var(--gold);margin-bottom:4px">🐲 Monster Kamu</div><p style="font-size:11px;color:var(--text-secondary)">Belum ada monster istimewa lagi. Jaga telur di inkubator sehingga menetas!</p></div>`}
 
     <div class="panel" style="margin-top:12px">
@@ -5100,19 +5150,20 @@ function renderIncubator(){
 }
 function selectIncubatorItem(it){if((state.incubatorItems[it]||0)<1)return;incSelectedItem=incSelectedItem===it?null:it;renderIncubator();}
 
-function hatchDrakonum(){
+function hatchUltraRare(){
   try{
+    const species=state.incubator.species||'drakonum';
     state.incubator={status:'empty',warmth:0,lastTick:incNow(),notified:false};
-    state.collection.drakonum={owned:true,stage:1,correct:0,trait:null};
+    state.collection[species]={owned:true,stage:1,correct:0,trait:null};
     const tr=INC_CFG.TRAITS[rand(0,INC_CFG.TRAITS.length-1)];
-    state.collection.drakonum.trait=tr.k;
+    state.collection[species].trait=tr.k;
     const fact=INC_CFG.FACTS[rand(0,INC_CFG.FACTS.length-1)];
     state.journal.push({t:'hatch',txt:'Menetas! '+fact});
     save();
-    const st=FAMILIES.drakonum.stages[0];
+    const st=FAMILIES[species].stages[0];
     const ov=document.createElement('div');ov.className='overlay';ov.id='hatchOverlay';
     ov.innerHTML=`<div style="position:relative;z-index:2;color:#A78BFA;font-size:12px">Telur menetas…</div>
-      <div class="evo-stage"><div class="evo-mon" id="hatchMon" style="width:200px;height:200px">${cardHTML(stageData('drakonum',0),{})}</div></div>
+      <div class="evo-stage"><div class="evo-mon" id="hatchMon" style="width:200px;height:200px">${cardHTML(stageData(species,0),{})}</div></div>
       <h2 class="display" style="position:relative;z-index:2">🐣 ${esc(st.name)} telah menetas!</h2>
       <p style="position:relative;z-index:2;font-size:12px;color:var(--text-secondary)">Trait: <b style="color:var(--gold)">${tr.n}</b> (${tr.atk?'+'+tr.atk+' ATK':'+'+tr.hp+' HP'})<br>💡 ${esc(fact)}</p>
       <button class="btn btn-primary" style="position:relative;z-index:2;max-width:220px" onclick="MMA.closeHatchOverlay()">TERUSKAN</button>`;
@@ -5122,7 +5173,7 @@ function hatchDrakonum(){
       requestAnimationFrame(()=>{whiteFlashEv();hatchMon.style.opacity='1';hatchMon.style.transform='scale(1)';hatchMon.classList.add('settle-pulse');});}
     sfx.win();
     try{navigator.vibrate&&navigator.vibrate([40,30,80]);}catch(e){}
-  }catch(e){console.error('hatchDrakonum error:',e);}
+  }catch(e){console.error('hatchUltraRare error:',e);}
 }
 function closeHatchOverlay(){const o=document.getElementById('hatchOverlay');if(o)o.remove();renderIncubator();}
 
@@ -5210,7 +5261,7 @@ function pickEggChoice(i){
     document.querySelectorAll('[id^="eggPick"]').forEach((e,j)=>{if(j!==i)e.style.opacity='.35';});
     if(o==='egg'){
       el.innerHTML='<div style="width:60px;height:60px">'+eggSVG(0)+'</div>';sfx.win();
-      if(state.incubator.status==='empty'){state.incubator={status:'incubating',warmth:0,lastTick:incNow(),notified:false};showToast('🥚','Telur masuk inkubator!');}
+      if(state.incubator.status==='empty'){startIncubatingEgg();showToast('🥚','Telur masuk inkubator!');}
       else if(state.eggStorage<state.storageUnlocked){state.eggStorage++;showToast('📦','Slot penuh — telur masuk storan!');}
       else{showToast('📦','Storan penuh! Buka slot atau tetaskan dulu.');}
       save();setTimeout(()=>route('incubator'),1400);
@@ -5229,15 +5280,15 @@ function injectSelectedIncubatorItem(){
   try{
     if(!incSelectedItem){showToast('🧪','Pilih item dahulu!');return;}
     const it=incSelectedItem;
-    const drak=state.collection?.drakonum;
-    const objective=state.incubator.status==='incubating'?'warmth':(drak?.owned&&drak.stage<5?'evolusi':null);
+    const evoFam=ultraRareInProgress();
+    const objective=state.incubator.status==='incubating'?'warmth':(evoFam?'evolusi':null);
     if(!objective){showToast('🧪','Tiada telur/monster untuk disuntik!');return;}
     if((state.incubatorItems[it]||0)<1){showToast('🧪','Item tak cukup!');return;}
     const q=genQuestion(3,getWeakestTopic());
-    showIncubatorChallenge(q,it,objective);
+    showIncubatorChallenge(q,it,objective,evoFam);
   }catch(e){console.error('injectSelectedIncubatorItem error:',e);}
 }
-function showIncubatorChallenge(q,itemId,objective){
+function showIncubatorChallenge(q,itemId,objective,evoFam){
   const itemNames={nutrient:'Nutrien',vitamin:'Vitamin',serum:'Serum'};
   const ov=document.createElement('div');ov.className='overlay';ov.id='incChallengeOverlay';
   ov.innerHTML=`<h2 class="display" style="position:relative;z-index:2;font-size:15px">🧪 Selesaikan cabaran utk guna ${esc(itemNames[itemId])}</h2>
@@ -5245,11 +5296,11 @@ function showIncubatorChallenge(q,itemId,objective){
     <div class="choices" style="position:relative;z-index:2;max-width:300px">${q.choices.map((c,i)=>`<button class="choice" onclick="MMA.answerIncubatorChallenge(${i})">${c.label??c}</button>`).join('')}</div>
     <button class="btn btn-ghost" style="position:relative;z-index:2;max-width:160px;margin-top:8px" onclick="MMA.closeIncubatorChallenge()">Batal</button>`;
   document.body.appendChild(ov);
-  window._incChallenge={q,itemId,objective};
+  window._incChallenge={q,itemId,objective,evoFam};
 }
 function answerIncubatorChallenge(i){
   try{
-    const {q,itemId,objective}=window._incChallenge||{};if(!q)return;
+    const {q,itemId,objective,evoFam}=window._incChallenge||{};if(!q)return;
     const btns=document.querySelectorAll('#incChallengeOverlay .choice');
     const chosen=q.choices[i];const ans=chosen?.value??chosen;const ok=ans===q.answer;
     if(ok){
@@ -5259,11 +5310,10 @@ function answerIncubatorChallenge(i){
         state.incubator.warmth+=INC_CFG.ITEM_WARMTH[itemId];checkHatchReady();
         showToast('🔥','+'+INC_CFG.ITEM_WARMTH[itemId]+' warmth!');save();
         finishIncubatorChallenge();
-      }else{
-        const drak=state.collection.drakonum;const before=drak.stage;
-        drak.correct+=INC_CFG.ITEM_EVO[itemId];
+      }else if(evoFam&&state.collection[evoFam]){
+        state.collection[evoFam].correct+=INC_CFG.ITEM_EVO[itemId];
         showToast('📈','-'+INC_CFG.ITEM_EVO[itemId]+' soalan!');save();
-        checkEvolve('drakonum');
+        checkEvolve(evoFam);
         finishIncubatorChallenge();
       }
     }else{
@@ -5280,7 +5330,7 @@ function closeIncubatorChallenge(){const o=document.getElementById('incChallenge
 /* ---- Storan telur ---- */
 function takeEggFromStorage(){
   if(state.incubator.status!=='empty'||state.eggStorage<1)return;
-  state.eggStorage--;state.incubator={status:'incubating',warmth:0,lastTick:incNow(),notified:false};save();
+  state.eggStorage--;startIncubatingEgg();save();
   showToast('🥚','Telur diambil dari storan!');renderIncubator();
 }
 function unlockStorageSlot(){
@@ -5291,7 +5341,7 @@ function unlockStorageSlot(){
 }
 
 window.MMA={route,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
-  startEggHunt,answerEggHunt,quitEggHunt,pickEggChoice,selectIncubatorItem,injectSelectedIncubatorItem,answerIncubatorChallenge,closeIncubatorChallenge,hatchDrakonum,closeHatchOverlay,takeEggFromStorage,unlockStorageSlot,swapActiveMonster};
+  startEggHunt,answerEggHunt,quitEggHunt,pickEggChoice,selectIncubatorItem,injectSelectedIncubatorItem,answerIncubatorChallenge,closeIncubatorChallenge,hatchUltraRare,closeHatchOverlay,takeEggFromStorage,unlockStorageSlot,swapActiveMonster};
 
 // Ambient orbs
 const orb1=document.createElement('div');orb1.className='orb orb-1';document.body.appendChild(orb1);
