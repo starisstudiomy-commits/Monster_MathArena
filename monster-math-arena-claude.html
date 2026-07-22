@@ -1154,6 +1154,29 @@ body{
 .whiteflash.go{animation:white-flash-anim .18s ease-out forwards}
 @keyframes white-flash-anim{0%{opacity:.5}100%{opacity:0}}
 
+/* Elemental / impact effect overlay (bertindih atas #monArt / #enemyArt) */
+.effect-overlay{position:absolute;z-index:8;pointer-events:none;width:96px;height:96px;left:50%;top:50%;transform:translate(-50%,-50%) scale(.5);opacity:0;object-fit:contain;filter:drop-shadow(0 0 14px currentColor)}
+.effect-overlay.big{width:130px;height:130px}
+.effect-overlay.go{animation:effectPop .55s ease-out forwards}
+@keyframes effectPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-6deg)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(3deg)}70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.3) rotate(0)}}
+
+/* Deck bench (swap monster semasa battle) */
+.deck-bench{display:flex;gap:6px;justify-content:center;margin-top:8px}
+.bench-slot{
+  flex:1;max-width:90px;padding:5px 4px;border-radius:12px;text-align:center;cursor:pointer;
+  background:var(--glass);border:2px solid var(--glass-border);transition:all .2s ease;position:relative;
+}
+.bench-slot.active{border-color:var(--gold);box-shadow:0 0 14px rgba(212,175,55,.35);background:rgba(212,175,55,.14);cursor:default}
+.bench-slot.fainted{opacity:.35;cursor:not-allowed}
+.bench-slot:not(.active):not(.fainted):active{transform:scale(.94)}
+.bench-slot img,.bench-slot svg{width:34px;height:34px;margin:0 auto;display:block}
+.bench-hpbar{height:4px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;margin-top:3px}
+.bench-hpfill{height:100%;background:linear-gradient(90deg,var(--success),#34D399);border-radius:3px}
+.bench-hpfill.low{background:linear-gradient(90deg,var(--danger),#F87171)}
+.bench-tag{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-size:7px;background:var(--gold);color:#0A0A0A;padding:1px 5px;border-radius:8px;font-weight:800;letter-spacing:.5px}
+.bench-swap-in{animation:swapIn .35s cubic-bezier(.2,1.3,.4,1)}
+@keyframes swapIn{0%{opacity:0;transform:scale(.5) translateY(10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+
 /* Pack Reveal */
 .pack-scene{
   min-height:60vh;
@@ -3463,7 +3486,7 @@ function activeMon(){
   if(!mon)return{fam:state?.starter||'flamy',name:'Monster',id:(state?.starter||'flamy')+'_1',stage:1,hp:50,atk:10,correct:0,level:1,rarity:'common',color:'#D4AF37'};
   return mon;
 }
-// Refresh sprite/HP/nama bila monster aktif ditukar di luar penuh renderBattle() (cth: pengsan akibat susutan HP masa timer)
+// Refresh sprite/HP/nama bila monster aktif ditukar di luar penuh renderBattle() (cth: pengsan akibat susutan HP masa timer, atau swap manual)
 function refreshMonArt(){
   const fam=B.deck[B.activeIdx];const m=getMonster(fam);if(!m)return;
   const mhp=B.monHp[fam]??m.hp;
@@ -3471,7 +3494,35 @@ function refreshMonArt(){
   const nameEl=document.querySelector('.fighter:not(.enemy) .hpname span:first-child');if(nameEl)nameEl.textContent=m.name+' · Lv'+m.level;
   const mhpBar=$('#mhp');if(mhpBar){mhpBar.style.width=(mhp/m.hp*100)+'%';mhpBar.classList.toggle('low',mhp/m.hp<.3);}
   const mhptxt=$('#mhptxt');if(mhptxt)mhptxt.textContent=mhp+'/'+m.hp;
-  const subsEl=document.querySelector('.subs');if(subsEl)subsEl.innerHTML=B.deck.map((f,i)=>i===B.activeIdx?'🔵':(B.monHp[f]>0?'⚪':'💀')).join(' ');
+  const benchEl=document.getElementById('deckBench');if(benchEl)benchEl.innerHTML=benchHTML();
+}
+// 🔄 Deck bench (swap monster semasa battle) - percuma, bila-bila masa asalkan bukan semasa animasi (B.locked)
+function benchHTML(){
+  if(!B||!B.deck||B.deck.length<2)return'';
+  return B.deck.map((f,i)=>{
+    const mon=getMonster(f);if(!mon)return'';
+    const hp=B.monHp[f]??mon.hp;
+    const pct=clamp(hp/mon.hp*100,0,100);
+    const active=i===B.activeIdx,fainted=hp<=0;
+    const clickable=!active&&!fainted;
+    return `<div class="bench-slot ${active?'active':''} ${fainted?'fainted':''}" ${clickable?`onclick="MMA.swapActiveMonster(${i})"`:''}>
+      ${active?'<div class="bench-tag">AKTIF</div>':''}
+      <div style="width:34px;height:34px;margin:0 auto">${fainted?'💀':getArt(mon.id)}</div>
+      <div class="bench-hpbar"><div class="bench-hpfill ${pct<30?'low':''}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+function swapActiveMonster(idx){
+  try{
+    if(!B||B.locked)return;
+    if(idx===B.activeIdx)return;
+    const fam=B.deck[idx];if(!fam||B.monHp[fam]<=0)return;
+    B.activeIdx=idx;
+    refreshMonArt();
+    const monEl=document.getElementById('monArt');if(monEl){monEl.classList.remove('bench-swap-in');void monEl.offsetWidth;monEl.classList.add('bench-swap-in');}
+    const fb=$('#feedback');if(fb)fb.textContent=activeMon().name+' masuk bertarung! 🔄';
+    sfx.click();
+  }catch(e){console.error('swapActiveMonster error:',e);}
 }
 
 function renderBattle(){
@@ -3483,7 +3534,7 @@ function renderBattle(){
     const megaHasArt=megaData&&!!ART['mega_'+B.enemy.id];
     const enemyArtStyle=megaData?`position:relative;width:100px;height:100px;flex:0 0 auto;filter:${megaHasArt?'none':megaData.filter};transform:scale(${megaData.scale});transform-origin:center`:'position:relative;width:100px;height:100px;flex:0 0 auto';
     const enemyArtId=megaData?megaArtId(B.enemy.id):B.enemy.id;
-    app.innerHTML=`<div class="topbar"><button class="iconbtn" onclick="MMA.quitBattle()">✕</button><div class="pill">🪙 ${state?.gold||0}</div><div style="flex:1"></div><div class="pill" style="font-size:10px;color:${diff.color}">${diff.icon} ${diff.name}</div>${(state.items?.bomb||0)>0?`<button class="iconbtn" style="font-size:14px;background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);color:#EF4444;width:auto;padding:0 8px" onclick="MMA.useItem('bomb')" title="Quick Bomb">💣${state.items.bomb}</button>`:''}<div class="pill">${B.stage.name}</div>${B.masteryMode?'<div class="pill" style="color:#FBBF24;border-color:rgba(251,191,36,.4)">⭐ Mastery</div>':''}${B.megaMode?'<div class="pill" style="color:#FBBF24;border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.1)">👑 MEGA</div>':''}</div><div class="arena${B.stage.boss?' boss-mode':''}" id="arena" style="background:radial-gradient(ellipse at 50% 0%,${chColor}22,transparent 60%),linear-gradient(180deg,rgba(10,10,10,.9),rgba(20,20,20,.95))">${B.stage.boss?'<div class="boss-overlay"></div>':''}<div class="fighter enemy"><div id="enemyArt" style="${enemyArtStyle}">${getArt(enemyArtId)}</div><div class="hpwrap"><div class="hpname"><span>${B.enemy.name}</span><span>${B.enemy.hp}/${B.enemy.max}</span></div><div class="hpbar"><div class="hpfill enemy-hpfill" id="ehp" style="width:${ehpPct}%;background:linear-gradient(90deg,#F44336,#FF6B6B)"></div></div></div></div><div class="vs">⚔</div><div class="fighter"><div id="monArt" style="position:relative;width:100px;height:100px;flex:0 0 auto">${getArt(m.id)}</div><div class="hpwrap"><div class="hpname"><span>${m.name} · Lv${m.level}</span><span id="mhptxt">${mhp}/${mmax}</span></div><div class="hpbar"><div class="hpfill ${mhp/mmax<.3?'low':''}" id="mhp" style="width:${mhp/mmax*100}%;background:linear-gradient(90deg,${FAMILIES[m.fam]?.g2||'#D4AF37'},${FAMILIES[m.fam]?.g1||'#F5D55E'})"></div></div><div class="subs">${B.deck.map((f,i)=>i===B.activeIdx?'🔵':(B.monHp[f]>0?'⚪':'💀')).join(' ')}</div></div></div><div class="combowrap"><div class="combometer"><div class="combofill" id="combo"></div></div><div class="combotxt" id="combotxt"></div></div><div class="items-bar" style="display:flex;gap:4px;justify-content:center;margin:4px 0">${Object.entries(state.items||{}).filter(([id,qty])=>qty>0).map(([id,qty])=>{const item=ITEMS[id]||BONUS_ITEMS[id];if(!item)return'';const ic={freeze:'#3B82F6',potion:'#10B981',bomb:'#EF4444',shield:'#A78BFA',revive:'#F472B6',shield_token:'#A78BFA',double_dmg_token:'#FBBF24',gold_boost_token:'#F59E0B',rare_combo_token:'#FDE68A'};const iconHtml=ART[id]?`<img src="${ART[id]}" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle">`:item.icon;return`<button class="item-btn" data-item="${id}" onclick="MMA.useItem('${id}')" style="background:${ic[id]||'#888'}22;border:1px solid ${ic[id]||'#888'}44;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:${ic[id]||'#fff'};font-family:var(--font);display:inline-flex;align-items:center;gap:4px">${iconHtml} ${qty}</button>`;}).join('')}${(state.evoStones||0)>0?`<button class="item-btn" onclick="MMA.useEvoStone()" style="background:#22D3EE22;border:1px solid #22D3EE44;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:#22D3EE;font-family:var(--font)">💠 ${state.evoStones}</button>`:''}</div><div class="timerwrap"><div class="timerbar"><div class="timerfill" id="timerfill"></div></div><div class="timertxt" id="timertxt">⏳ 10s</div></div></div><div class="qbox"><div class="qtext" id="qtext">…</div></div><div class="choices" id="choices"></div><div class="feedback" id="feedback"></div>`;
+    app.innerHTML=`<div class="topbar"><button class="iconbtn" onclick="MMA.quitBattle()">✕</button><div class="pill">🪙 ${state?.gold||0}</div><div style="flex:1"></div><div class="pill" style="font-size:10px;color:${diff.color}">${diff.icon} ${diff.name}</div>${(state.items?.bomb||0)>0?`<button class="iconbtn" style="font-size:14px;background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);color:#EF4444;width:auto;padding:0 8px" onclick="MMA.useItem('bomb')" title="Quick Bomb">💣${state.items.bomb}</button>`:''}<div class="pill">${B.stage.name}</div>${B.masteryMode?'<div class="pill" style="color:#FBBF24;border-color:rgba(251,191,36,.4)">⭐ Mastery</div>':''}${B.megaMode?'<div class="pill" style="color:#FBBF24;border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.1)">👑 MEGA</div>':''}</div><div class="arena${B.stage.boss?' boss-mode':''}" id="arena" style="background:radial-gradient(ellipse at 50% 0%,${chColor}22,transparent 60%),linear-gradient(180deg,rgba(10,10,10,.9),rgba(20,20,20,.95))">${B.stage.boss?'<div class="boss-overlay"></div>':''}<div class="fighter enemy"><div id="enemyArt" style="${enemyArtStyle}">${getArt(enemyArtId)}</div><div class="hpwrap"><div class="hpname"><span>${B.enemy.name}</span><span>${B.enemy.hp}/${B.enemy.max}</span></div><div class="hpbar"><div class="hpfill enemy-hpfill" id="ehp" style="width:${ehpPct}%;background:linear-gradient(90deg,#F44336,#FF6B6B)"></div></div></div></div><div class="vs">⚔</div><div class="fighter"><div id="monArt" style="position:relative;width:100px;height:100px;flex:0 0 auto">${getArt(m.id)}</div><div class="hpwrap"><div class="hpname"><span>${m.name} · Lv${m.level}</span><span id="mhptxt">${mhp}/${mmax}</span></div><div class="hpbar"><div class="hpfill ${mhp/mmax<.3?'low':''}" id="mhp" style="width:${mhp/mmax*100}%;background:linear-gradient(90deg,${FAMILIES[m.fam]?.g2||'#D4AF37'},${FAMILIES[m.fam]?.g1||'#F5D55E'})"></div></div></div></div><div class="deck-bench" id="deckBench">${benchHTML()}</div><div class="combowrap"><div class="combometer"><div class="combofill" id="combo"></div></div><div class="combotxt" id="combotxt"></div></div><div class="items-bar" style="display:flex;gap:4px;justify-content:center;margin:4px 0">${Object.entries(state.items||{}).filter(([id,qty])=>qty>0).map(([id,qty])=>{const item=ITEMS[id]||BONUS_ITEMS[id];if(!item)return'';const ic={freeze:'#3B82F6',potion:'#10B981',bomb:'#EF4444',shield:'#A78BFA',revive:'#F472B6',shield_token:'#A78BFA',double_dmg_token:'#FBBF24',gold_boost_token:'#F59E0B',rare_combo_token:'#FDE68A'};const iconHtml=ART[id]?`<img src="${ART[id]}" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle">`:item.icon;return`<button class="item-btn" data-item="${id}" onclick="MMA.useItem('${id}')" style="background:${ic[id]||'#888'}22;border:1px solid ${ic[id]||'#888'}44;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:${ic[id]||'#fff'};font-family:var(--font);display:inline-flex;align-items:center;gap:4px">${iconHtml} ${qty}</button>`;}).join('')}${(state.evoStones||0)>0?`<button class="item-btn" onclick="MMA.useEvoStone()" style="background:#22D3EE22;border:1px solid #22D3EE44;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:#22D3EE;font-family:var(--font)">💠 ${state.evoStones}</button>`:''}</div><div class="timerwrap"><div class="timerbar"><div class="timerfill" id="timerfill"></div></div><div class="timertxt" id="timertxt">⏳ 10s</div></div></div><div class="qbox"><div class="qtext" id="qtext">…</div></div><div class="choices" id="choices"></div><div class="feedback" id="feedback"></div>`;
     updateCombo();
   }catch(e){console.error('renderBattle error:',e);route('home');}
 }
@@ -3825,7 +3876,7 @@ function answer(idx){
   updateCombo();save();
   setTimeout(()=>{if(document.getElementById('evoOverlay'))return;B.locked=false;
     if(B.vsMode){if(B.enemy.hp<=0){vsWinDuel();return;}if(allFainted()){vsLoseDuel();return;}renderBattle();nextQuestion();return;}
-    if(B.enemy.hp<=0){winStage();return;}if(allFainted()){loseStage();return;}renderBattle();nextQuestion();},correct?750:1050);
+    if(B.enemy.hp<=0){winStage();return;}if(allFainted()){loseStage();return;}renderBattle();nextQuestion();},correct?1900:1100);
   }catch(e){console.error('answer error:',e);if(B)B.locked=false;}
 }
 
@@ -3847,7 +3898,6 @@ function doDamageToEnemy(dmg,mult){
       const fam=monEl.fam||'flamy';
       const elem=FAMILIES[fam]?FAMILIES[fam].elem:'🔥';
       const colors={'🔥':'#FBBF24','💧':'#60A5FA','⚡':'#BAE6FD','🌿':'#34D399','🪨':'#D6D3D1','🌪️':'#A78BFA','✨':'#FDE68A','🌑':'#818CF8','🏆':'#FDE68A'};
-      spawnParticles(colors[elem]||'#FBBF24',big);
       if(dmg>0){
         const arenaEl=document.getElementById('arena');
         if(arenaEl){
@@ -3858,6 +3908,10 @@ function doDamageToEnemy(dmg,mult){
         }
       }
       const fb=$('#feedback');if(fb)fb.textContent=dmg<=0?'🛡️ Diblok!':big?'🔥 Serangan Ultimate!':'⚔ Attack!';
+      // Effect elemen mesti habis main DULU sebelum musuh sempat balas serang (light counter)
+      applyFxOverlay('#enemyArt',EFFECT_PNG[elem],colors[elem]||'#FBBF24',big,()=>{
+        if(B.enemy.hp>0&&!state?.settings?.practiceMode)enemyAttack(true);
+      });
     },hitStop);
     setTimeout(()=>retractLunge('#monArt'),hitStop+20);
   });
@@ -3884,38 +3938,61 @@ function doDamageToEnemy(dmg,mult){
   
   floatDmg(dmg<=0?'🛡️ BLOCKED!':(big?'ULTIMATE ':'')+'-'+dmg,dmg<=0?'enemy':big?'ult':'norm',26,20);
 }
-function enemyAttack(){
+// lightMode=true: counter-serang "lemah" lepas jawapan BETUL (dipanggil dari doDamageToEnemy).
+// lightMode falsy: serangan PENUH lepas jawapan SALAH (perilaku asal, cuma + animasi lunge & effect).
+function enemyAttack(lightMode){
   const fam=B.deck[B.activeIdx];
-  // 🛡️ Shield item - tahan 1 serangan musuh sepenuhnya
+  // 🛡️ Shield item - tahan 1 serangan musuh sepenuhnya (instant, tiada lunge)
   if(B.shielded){
     B.shielded=false;
     flash('#monArt');floatDmg('🛡️ Ditahan!','enemy',60,60);
     const fb=$('#feedback');if(fb)fb.textContent='🛡️ Perisai menahan serangan!';
     return;
   }
-  // 🌪️ Windy - Dodge Chance: 15% peluang elak sepenuhnya bila jawab salah
-  if(fam==='windy'&&!state?.settings?.practiceMode&&Math.random()<0.15){
+  // 🌪️ Windy - Dodge Chance: 15% peluang elak sepenuhnya bila jawab salah (bukan light-counter)
+  if(!lightMode&&fam==='windy'&&!state?.settings?.practiceMode&&Math.random()<0.15){
     flash('#monArt');floatDmg('💨 Elak!','enemy',60,60);
     const fb=$('#feedback');if(fb)fb.textContent='💨 Windy mengelak!';
     return;
   }
-  // 🪨 Rocky - Stone Wall: terima 30% kurang damage bila jawab salah
-  let atkDmg=fam==='rocky'?Math.round(B.enemy.atk*0.7):B.enemy.atk;
-  // ➕ Plus Titan - Double Up: lepas 1 pusingan amaran, pusingan seterusnya damage ×2 (sekali)
-  if(B.plusTitanPhase==='active'){
+  // 🪨 Rocky - Stone Wall: terima 30% kurang damage bila jawab salah (bukan light-counter)
+  let atkDmg=(!lightMode&&fam==='rocky')?Math.round(B.enemy.atk*0.7):B.enemy.atk;
+  // ➕ Plus Titan - Double Up: lepas 1 pusingan amaran, pusingan seterusnya damage ×2 (sekali, bukan light-counter)
+  if(!lightMode&&B.plusTitanPhase==='active'){
     atkDmg=Math.round(atkDmg*2);
     B.plusTitanPhase='idle';
     showToast('➕','Double Up! Serangan digandakan!');
   }
-  if(!state?.settings?.practiceMode){
-    B.monHp[fam]=clamp(B.monHp[fam]-atkDmg,0,999);
-  }
-  flash('#monArt');floatDmg(state?.settings?.practiceMode?'🛡️':'-'+atkDmg,'enemy',60,60);
-  playElementHurt(FAMILIES[fam]?.elem||'🔥');
-  const mhp=$('#mhp');if(mhp){const m=activeMon();mhp.style.width=(B.monHp[fam]/m.hp*100)+'%';if(B.monHp[fam]/m.hp<.3)mhp.classList.add('low');}
-  const t=$('#mhptxt');if(t)t.textContent=B.monHp[fam]+'/'+activeMon().hp;
-  trySecondWind(fam);
-  if(!state?.settings?.practiceMode&&B.monHp[fam]<=0){const next=B.deck.findIndex((f,i)=>i>B.activeIdx&&B.monHp[f]>0);if(next>=0){B.activeIdx=next;refreshMonArt();const fb=$('#feedback');if(fb)fb.textContent=activeMon().name+' masuk gelanggang!';}}
+  // 🔁 Musuh sentiasa balas serang lepas SETIAP soalan: damage kecil kalau jawapan BETUL
+  if(lightMode)atkDmg=Math.max(1,Math.round(atkDmg*0.35));
+
+  lunge('#enemyArt',()=>{
+    const hitStop=50;
+    setTimeout(()=>{
+      if(!state?.settings?.practiceMode){
+        B.monHp[fam]=clamp(B.monHp[fam]-atkDmg,0,999);
+      }
+      impactRecoil('#monArt');
+      floatDmg(state?.settings?.practiceMode?'🛡️':'-'+atkDmg,'enemy',60,60);
+      playElementHurt(FAMILIES[fam]?.elem||'🔥');
+      const mhp=$('#mhp');if(mhp){const m=activeMon();mhp.style.width=(B.monHp[fam]/m.hp*100)+'%';if(B.monHp[fam]/m.hp<.3)mhp.classList.add('low');}
+      const t=$('#mhptxt');if(t)t.textContent=B.monHp[fam]+'/'+activeMon().hp;
+      const fb=$('#feedback');if(fb)fb.textContent=lightMode?'🛡️ Musuh balas serangan lemah!':'💥 Musuh menyerang!';
+      if(atkDmg>0){
+        const arenaEl=document.getElementById('arena');
+        if(arenaEl){
+          arenaEl.classList.remove('shake-med');void arenaEl.offsetWidth;
+          arenaEl.classList.add('shake-med');
+          setTimeout(()=>arenaEl.classList.remove('shake-med'),400);
+        }
+      }
+      applyFxOverlay('#monArt',HIT_IMPACT_PNG,'#E5E7EB',false,()=>{
+        trySecondWind(fam);
+        if(!state?.settings?.practiceMode&&B.monHp[fam]<=0){const next=B.deck.findIndex((f,i)=>i>B.activeIdx&&B.monHp[f]>0);if(next>=0){B.activeIdx=next;refreshMonArt();const fb2=$('#feedback');if(fb2)fb2.textContent=activeMon().name+' masuk gelanggang!';}}
+      });
+    },hitStop);
+    setTimeout(()=>retractLunge('#enemyArt',-1),hitStop+20);
+  },-1);
 }
 // 💧 Sumagon - Second Wind: sekali setiap battle, bila HP < 25%, auto heal 20% HP
 function trySecondWind(fam){
@@ -4230,9 +4307,11 @@ function getLungeDist(){
   const mr=mon.getBoundingClientRect(),er=ene.getBoundingClientRect();
   return Math.max((er.left-mr.right)*0.92,65);
 }
-function lunge(sel,onImpact){
+// dir: 1 = monster→musuh (asal), -1 = musuh→monster (counter-lunge)
+function lunge(sel,onImpact,dir){
+  dir=dir||1;
   const e=$(sel);if(!e)return;
-  const dist=getLungeDist(),back=-dist*0.2;
+  const dist=getLungeDist()*dir,back=-dist*0.2;
   const start=performance.now(),antDur=80,strikeDur=100;
   function ant(now){
     const t=Math.min((now-start)/antDur,1),eased=1-Math.pow(1-t,2);
@@ -4250,12 +4329,14 @@ function lunge(sel,onImpact){
   }
   requestAnimationFrame(ant);
 }
-function retractLunge(sel){
+function retractLunge(sel,dir){
+  dir=dir||1;
   const e=$(sel);if(!e)return;
+  const dist=getLungeDist()*dir;
   const start=performance.now();
   function f(now){
     const t=Math.min((now-start)/220,1),eased=1-Math.pow(1-t,3);
-    e.style.transform=`translateX(${(1-eased)*getLungeDist()}px) scale(${1+0.22*(1-eased)})`;
+    e.style.transform=`translateX(${(1-eased)*dist}px) scale(${1+0.22*(1-eased)})`;
     if(t<1)requestAnimationFrame(f);else e.style.transform='';
   }
   requestAnimationFrame(f);
@@ -4274,6 +4355,20 @@ function cameraPunch(big){
   a.classList.add('punch');
   setTimeout(()=>a.classList.remove('punch'),big?320:200);
   a.classList.remove('aberrate');void a.offsetWidth;a.classList.add('aberrate');
+}
+// 🎨 Effect PNG sebenar (monster→musuh ikut elemen; musuh→monster generik).
+// Fallback ke spawnParticles() automatik kalau fail PNG tiada (img.onerror).
+const EFFECT_PNG={'🔥':'assets/effects/fire.png','💧':'assets/effects/water.png','⚡':'assets/effects/electric.png','🌿':'assets/effects/nature.png','🪨':'assets/effects/rock.png','🌪️':'assets/effects/wind.png','✨':'assets/effects/light.png','🌑':'assets/effects/dark.png','🏆':'assets/effects/golden.png'};
+const HIT_IMPACT_PNG='assets/effects/hit_impact.png';
+function applyFxOverlay(hostSel,src,fallbackColor,big,onDone){
+  const host=$(hostSel);
+  if(!host||!src){ spawnParticles(fallbackColor,big); if(onDone)setTimeout(onDone,600); return; }
+  const img=new Image();
+  img.className='effect-overlay'+(big?' big':'');
+  img.style.color=fallbackColor;
+  img.onload=()=>{ host.appendChild(img); requestAnimationFrame(()=>img.classList.add('go')); setTimeout(()=>{img.remove();if(onDone)onDone();},600); };
+  img.onerror=()=>{ img.remove(); spawnParticles(fallbackColor,big); if(onDone)setTimeout(onDone,600); };
+  img.src=src;
 }
 function spawnParticles(elemColor,big){
   const arena=document.getElementById('arena');if(!arena)return;
@@ -5196,7 +5291,7 @@ function unlockStorageSlot(){
 }
 
 window.MMA={route,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
-  startEggHunt,answerEggHunt,quitEggHunt,pickEggChoice,selectIncubatorItem,injectSelectedIncubatorItem,answerIncubatorChallenge,closeIncubatorChallenge,hatchDrakonum,closeHatchOverlay,takeEggFromStorage,unlockStorageSlot};
+  startEggHunt,answerEggHunt,quitEggHunt,pickEggChoice,selectIncubatorItem,injectSelectedIncubatorItem,answerIncubatorChallenge,closeIncubatorChallenge,hatchDrakonum,closeHatchOverlay,takeEggFromStorage,unlockStorageSlot,swapActiveMonster};
 
 // Ambient orbs
 const orb1=document.createElement('div');orb1.className='orb orb-1';document.body.appendChild(orb1);
