@@ -494,8 +494,25 @@ body{
   0%,100%{box-shadow:0 0 20px var(--card-glow), 0 0 40px rgba(212,175,55,.2)}
   50%{box-shadow:0 0 30px var(--card-glow), 0 0 60px rgba(212,175,55,.3)}
 }
+/* 🐛 FIX: .rar-mythic guna glow ungu sendiri (dulu pinjam legendary-glow yg hardcode bayang emas -
+   jadi kad mythic nampak keemasan bercampur, bukan ungu/pelangi tulen) */
+@keyframes mythic-glow{
+  0%,100%{box-shadow:0 0 20px var(--card-glow), 0 0 40px rgba(124,108,255,.25)}
+  50%{box-shadow:0 0 32px var(--card-glow), 0 0 64px rgba(124,108,255,.35)}
+}
 
-.tc.rar-legendary::after{content:"";position:absolute;inset:-2px;border-radius:17px;background:linear-gradient(120deg,#F5D55E,#D4AF37,#B8860B,#F5D55E);background-size:300% 100%;animation:shimmer 2s linear infinite;z-index:-1;opacity:.8}
+/* 🐛 FIX: ::after asal guna inset:-2px + z-index:-1 utk bentuk cincin border, tapi .tc ada
+   overflow:hidden yg clip terus lapisan ni (jadi shimmer tak pernah nampak, kad nampak gold biasa
+   je). Guna teknik mask-composite supaya cincin border kekal DALAM sempadan .tc (inset:0) tanpa
+   perlu overflow:visible pada parent. */
+.tc.rar-legendary::after,.tc.rar-mythic::after{
+  content:"";position:absolute;inset:0;border-radius:14px;padding:2px;
+  background-size:300% 100%;animation:shimmer 2s linear infinite;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  pointer-events:none;z-index:2;
+}
+.tc.rar-legendary::after{background:linear-gradient(120deg,#F5D55E,#D4AF37,#B8860B,#F5D55E);background-size:300% 100%}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* 🥚 MOD: EGG INCUBATOR - .tc.rar-mythic utk ultra-rare Tahap 3 (Prime, tahap akhir), satu tingkat lagi lebih menonjol drpd legendary (pelangi, bukan gold sahaja) */
@@ -503,9 +520,9 @@ body{
   --card-glow:rgba(124,108,255,.9);
   --card-border:rgba(124,108,255,1);
   background:linear-gradient(135deg,#241A3A,#150E28,#0A0A0A);
-  animation:legendary-glow 2.2s ease-in-out infinite;
+  animation:mythic-glow 2.2s ease-in-out infinite;
 }
-.tc.rar-mythic::after{content:"";position:absolute;inset:-2px;border-radius:17px;background:linear-gradient(120deg,#7C6CFF,#F5D55E,#4CC9F0,#F472B6,#7C6CFF);background-size:400% 100%;animation:shimmer 1.4s linear infinite;z-index:-1;opacity:.9}
+.tc.rar-mythic::after{background:linear-gradient(120deg,#7C6CFF,#F5D55E,#4CC9F0,#F472B6,#7C6CFF);background-size:400% 100%;animation:shimmer 1.4s linear infinite}
 
 @keyframes count-pop{0%{transform:scale(3);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes confetti-fall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(var(--r))}}
