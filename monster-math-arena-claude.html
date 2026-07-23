@@ -498,7 +498,7 @@ body{
 .tc.rar-legendary::after{content:"";position:absolute;inset:-2px;border-radius:17px;background:linear-gradient(120deg,#F5D55E,#D4AF37,#B8860B,#F5D55E);background-size:300% 100%;animation:shimmer 2s linear infinite;z-index:-1;opacity:.8}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-/* 🥚 MOD: EGG INCUBATOR - .tc.rar-mythic utk Drakonum Tahap 5, satu tingkat lagi lebih menonjol drpd legendary (pelangi, bukan gold sahaja) */
+/* 🥚 MOD: EGG INCUBATOR - .tc.rar-mythic utk ultra-rare Tahap 3 (Prime, tahap akhir), satu tingkat lagi lebih menonjol drpd legendary (pelangi, bukan gold sahaja) */
 .tc.rar-mythic{
   --card-glow:rgba(124,108,255,.9);
   --card-border:rgba(124,108,255,1);
@@ -1657,48 +1657,38 @@ const FAMILIES = {
     stages:[{id:'shadow_1',name:'Baby Shade',hp:42,atk:15},{id:'shadow_2',name:'Shadow',hp:58,atk:22},{id:'shadow_3',name:'Mega Shade',hp:75,atk:30}]},
   golden:{name:'Golden',elem:'🏆',eg:'linear-gradient(135deg,#F59E0B,#D97706)',g1:'#F59E0B',g2:'#D97706',iris:'#92400E',role:'Legendary',
     stages:[{id:'golden_1',name:'Baby Gold',hp:65,atk:15},{id:'golden_2',name:'Golden',hp:90,atk:22},{id:'golden_3',name:'Mega Gold',hp:120,atk:30}]},
-  // 🥚 MOD: EGG INCUBATOR — Drakonum ultra-rare 5-tahap. Sengaja TIDAK masuk FAMILY_IDS (lihat bawah) supaya tak muncul
+  // 🥚 MOD: EGG INCUBATOR — Drakonum ultra-rare 3-tahap. Sengaja TIDAK masuk FAMILY_IDS (lihat bawah) supaya tak muncul
   // dlm starter picker/Album/pack biasa — hanya boleh didapati via tetas telur. Guna state.collection.drakonum sama
   // macam monster biasa supaya doEvolve()/showEvolution()/cardHTML()/getMonster() boleh diguna semula tanpa ubah.
   drakonum:{name:'Drakonum',elem:'🐉',eg:'linear-gradient(135deg,#7C6CFF,#4C1D95)',g1:'#7fe6d8',g2:'#7C6CFF',iris:'#312E81',role:'Ultra-Rare — HP & ATK sangat tinggi',
     stages:[
       {id:'drakonum_1',name:'Draki',hp:65,atk:16},
       {id:'drakonum_2',name:'Drakonum',hp:90,atk:24},
-      {id:'drakonum_3',name:'Drako Rex',hp:120,atk:34},
-      {id:'drakonum_4',name:'Sky Drakonum',hp:155,atk:46},
-      {id:'drakonum_5',name:'Drakonum Prime',hp:200,atk:60},
+      {id:'drakonum_3',name:'Drakonum Prime',hp:200,atk:60},
     ]},
   elosius:{name:'Elosius',elem:'☀️',eg:'linear-gradient(135deg,#BAE6FD,#0EA5E9)',g1:'#BAE6FD',g2:'#0EA5E9',iris:'#075985',role:'Ultra-Rare — Penyembuhan & HP Tinggi',
     stages:[
       {id:'elosius_1',name:'Elolet',hp:70,atk:14},
       {id:'elosius_2',name:'Elosius',hp:95,atk:20},
-      {id:'elosius_3',name:'Elosius Radiant',hp:125,atk:28},
-      {id:'elosius_4',name:'Divine Elosius',hp:160,atk:38},
-      {id:'elosius_5',name:'Elosius Prime',hp:205,atk:50},
+      {id:'elosius_3',name:'Elosius Prime',hp:205,atk:50},
     ]},
   voltigon:{name:'Voltigon',elem:'⛈️',eg:'linear-gradient(135deg,#818CF8,#4338CA)',g1:'#818CF8',g2:'#4338CA',iris:'#312E81',role:'Ultra-Rare — Kelajuan & Combo',
     stages:[
       {id:'voltigon_1',name:'Voltling',hp:55,atk:20},
       {id:'voltigon_2',name:'Voltigon',hp:78,atk:30},
-      {id:'voltigon_3',name:'Voltigon Fury',hp:105,atk:42},
-      {id:'voltigon_4',name:'Storm Voltigon',hp:138,atk:56},
-      {id:'voltigon_5',name:'Voltigon Prime',hp:180,atk:72},
+      {id:'voltigon_3',name:'Voltigon Prime',hp:180,atk:72},
     ]},
   pyronyx:{name:'Pyronyx',elem:'🌋',eg:'linear-gradient(135deg,#EF4444,#450A0A)',g1:'#EF4444',g2:'#450A0A',iris:'#7F1D1D',role:'Ultra-Rare — Serangan Ultra Tinggi',
     stages:[
       {id:'pyronyx_1',name:'Pyrit',hp:60,atk:22},
       {id:'pyronyx_2',name:'Pyronyx',hp:85,atk:32},
-      {id:'pyronyx_3',name:'Pyronyx Blaze',hp:112,atk:44},
-      {id:'pyronyx_4',name:'Molten Pyronyx',hp:145,atk:58},
-      {id:'pyronyx_5',name:'Pyronyx Prime',hp:185,atk:74},
+      {id:'pyronyx_3',name:'Pyronyx Prime',hp:185,atk:74},
     ]},
   terradon:{name:'Terradon',elem:'🌍',eg:'linear-gradient(135deg,#84CC16,#3F6212)',g1:'#84CC16',g2:'#3F6212',iris:'#1A2E05',role:'Ultra-Rare — Pertahanan & HP Tertinggi',
     stages:[
       {id:'terradon_1',name:'Territ',hp:85,atk:12},
       {id:'terradon_2',name:'Terradon',hp:115,atk:18},
-      {id:'terradon_3',name:'Terradon Fang',hp:150,atk:26},
-      {id:'terradon_4',name:'Titan Terradon',hp:190,atk:36},
-      {id:'terradon_5',name:'Terradon Prime',hp:240,atk:48},
+      {id:'terradon_3',name:'Terradon Prime',hp:240,atk:48},
     ]},
 };
 const ULTRA_RARE_IDS = ['drakonum','elosius','voltigon','pyronyx','terradon'];
@@ -1718,8 +1708,8 @@ const SKILLS = {
   golden:{icon:'🏆',name:'Golden Touch',desc:'Menang battle dengan Golden aktif → gold bonus +50%.'},
 };
 const EVO = {toStage2:12,toStage3:30};
-// 🥚 MOD: EGG INCUBATOR - threshold kumulatif 5-tahap semua ultra-rare (50/150/300/500), berasingan drpd EVO monster biasa
-const ULTRA_EVO_CUM = [50,150,300,500];
+// 🥚 MOD: EGG INCUBATOR - threshold kumulatif 3-tahap semua ultra-rare (50/300), berasingan drpd EVO monster biasa
+const ULTRA_EVO_CUM = [50,300];
 
 const ENEMIES = {
   slime:{name:'Slime',hp:40,atk:8,g1:'#10B981',g2:'#059669',iris:'#065F46'},
@@ -2497,13 +2487,14 @@ function animeEye(cx,cy,rx,ry,iris){return`<ellipse cx="${cx}" cy="${cy}" rx="${
 
 function monsterSVG(fam,stage){
   const F=FAMILIES[fam],s=stage||1,uid=fam+s;
-  const b=`url(#b_${uid})`,sc=[0.86,0.95,1.04,1.12,1.2][s-1];
+  const b=`url(#b_${uid})`,sc=[0.9,1.05,1.22][s-1];
   // 🥚 MOD: EGG INCUBATOR — Drakonum guna bentuk naga leher panjang tersendiri (adaptasi dragonSVG demo), bukan blob generik
   if(fam==='drakonum'){
     const wings=s>=3?`<path d="M52 84 q-40 -18 -46 22 q30 -6 44 14 Z M148 84 q40 -18 46 22 q-30 -6 -44 14 Z" fill="${b}" opacity=".92" stroke="#1E293B" stroke-width="3"/>`:s>=2?`<path d="M58 86 q-22 -8 -26 14 q16 -2 26 8 Z M142 86 q22 -8 26 14 q-16 -2 -26 8 Z" fill="${b}" opacity=".85" stroke="#1E293B" stroke-width="3"/>`:'';
     const horns=s>=2?`<path d="M80 52 L74 30 L92 50 Z M120 50 L126 30 L120 52 Z" fill="#ffd23f" stroke="#1E293B" stroke-width="2.5"/>`:'';
-    const aura=s>=4?`<circle cx="100" cy="106" r="76" fill="none" stroke="#ffe98a" stroke-width="3" opacity=".5" stroke-dasharray="6 8"/>`:'';
-    const crown=s>=5?`<path d="M78 40 L86 22 L100 36 L114 22 L122 40 Z" fill="#ffd23f" stroke="#1E293B" stroke-width="2.5"/><circle cx="100" cy="30" r="3" fill="#7fe6d8"/>`:'';
+    // 🥚 MOD: EGG INCUBATOR - aura+crown kini digabung pada tahap 3 (Prime, tahap akhir) sejak evolusi dikurangkan drpd 5 ke 3
+    const aura=s>=3?`<circle cx="100" cy="106" r="76" fill="none" stroke="#ffe98a" stroke-width="3" opacity=".5" stroke-dasharray="6 8"/>`:'';
+    const crown=s>=3?`<path d="M78 40 L86 22 L100 36 L114 22 L122 40 Z" fill="#ffd23f" stroke="#1E293B" stroke-width="2.5"/><circle cx="100" cy="30" r="3" fill="#7fe6d8"/>`:'';
     const body=`<path d="M100 54 C68 78 62 104 62 124 a38 38 0 0 0 76 0 C138 104 132 78 100 54 Z" fill="${b}" stroke="#1E293B" stroke-width="4"/><ellipse cx="100" cy="132" rx="24" ry="26" fill="#eafcff" opacity=".85"/>`;
     return`<svg viewBox="0 0 200 200" style="width:100%;height:100%">${defsFor(uid,F.g1,F.g2,F.iris)}<g transform="translate(100 105) scale(${sc}) translate(-100 -105)">${aura}${wings}${body}${horns}${crown}${animeEye(84,100,13,16,'i_'+uid)}${animeEye(116,100,13,16,'i_'+uid)}<path d="M92 120 q8 6 16 0" stroke="#1E293B" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg>`;
   }
@@ -2555,7 +2546,11 @@ window._fallbackArt=function(id){if(ENEMIES[id])return enemySVG(id);const m=id.m
 
 function stageData(fam,si){
   try{const F=FAMILIES[fam];if(!F||!F.stages)return{fam:id+'_1',name:'Monster',hp:50,atk:10,rar:'common',stars:'★',elem:'❓',eg:'linear-gradient(135deg,#334155,#1E293B)'};
-  const st=F.stages[si]||F.stages[0];const rar=RARITY[si+1]||'common';return{fam,id:st.id,name:st.name,hp:st.hp,atk:st.atk,rar,stars:STARS[rar]||'★',elem:F.elem,eg:F.eg};}catch(e){return{fam,id:fam+'_1',name:'Monster',hp:50,atk:10,rar:'common',stars:'★',elem:'❓',eg:'linear-gradient(135deg,#334155,#1E293B)'};}
+  const st=F.stages[si]||F.stages[0];
+  // 🥚 MOD: EGG INCUBATOR - ultra-rare tahap akhir (Prime) kekal 'mythic' (border pelangi) walau cuma 3 tahap,
+  // supaya tetap nampak lebih istimewa drpd monster biasa yg maksimum 'epic' pada tahap sama
+  const rar=(ULTRA_RARE_IDS.includes(fam)&&si>=F.stages.length-1)?'mythic':(RARITY[si+1]||'common');
+  return{fam,id:st.id,name:st.name,hp:st.hp,atk:st.atk,rar,stars:STARS[rar]||'★',elem:F.elem,eg:F.eg};}catch(e){return{fam,id:fam+'_1',name:'Monster',hp:50,atk:10,rar:'common',stars:'★',elem:'❓',eg:'linear-gradient(135deg,#334155,#1E293B)'};}
 }
 
 function cardHTML(d,{locked=false,sel=false,tap=false,lv=null,showStats=true,role=null}={}){
@@ -4060,11 +4055,11 @@ function doEvolve(fam,target){
 function checkEvolve(fam){
   if(document.getElementById('evoOverlay'))return;
   const c=state.collection[fam];if(!c)return;
-  // 🥚 MOD: EGG INCUBATOR - Semua ultra-rare guna threshold kumulatif 5-tahap sendiri (bukan EVO.toStage2/3 yg utk monster biasa)
+  // 🥚 MOD: EGG INCUBATOR - Semua ultra-rare guna threshold kumulatif 3-tahap sendiri (bukan EVO.toStage2/3 yg utk monster biasa)
   if(ULTRA_RARE_IDS.includes(fam)){
     let target=c.stage;
     for(let i=0;i<ULTRA_EVO_CUM.length;i++){if(c.correct>=ULTRA_EVO_CUM[i])target=i+2;}
-    target=clamp(target,c.stage,5);
+    target=clamp(target,c.stage,3);
     if(target>c.stage)doEvolve(fam,target);
     return;
   }
@@ -4085,7 +4080,7 @@ function showEvolution(fam,oldName){
   const oldStage=F.stages.find(s=>s.id!==m.id)||F.stages[0];
   const oldHp=oldStage.hp,oldAtk=oldStage.atk;
   const accent=F.g1||'#F59E0B',accentGlow=accent+'99';
-  const rarityStars={common:1,rare:2,epic:3,legendary:4}[m.rarity]||2;
+  const rarityStars={common:1,rare:2,epic:3,legendary:4,mythic:5}[m.rarity]||2;
 
   const ov=document.createElement('div');
   ov.className='overlay';ov.id='evoOverlay';
@@ -4950,7 +4945,7 @@ function weakestIncubatorTier(){let w=null,lo=101;[1,2,3].forEach(t=>{const b=st
 function allUltraRaresOwned(){return ULTRA_RARE_IDS.every(id=>state.collection?.[id]?.owned);}
 function pickEggSpecies(){const avail=ULTRA_RARE_IDS.filter(id=>!state.collection?.[id]?.owned);return avail.length?pick(avail):ULTRA_RARE_IDS[0];}
 function startIncubatingEgg(){state.incubator={status:'incubating',warmth:0,lastTick:incNow(),notified:false,species:pickEggSpecies()};}
-function ultraRareInProgress(){return ULTRA_RARE_IDS.find(id=>state.collection?.[id]?.owned&&state.collection[id].stage<5)||null;}
+function ultraRareInProgress(){return ULTRA_RARE_IDS.find(id=>state.collection?.[id]?.owned&&state.collection[id].stage<3)||null;}
 
 function accrueIncubatorWarmth(){
   const inc=state.incubator;if(!inc||inc.status!=='incubating')return;
@@ -5121,8 +5116,8 @@ function renderIncubator(){
         <div style="width:64px;flex:0 0 auto">${cardHTML(stageData(id,c.stage-1),{})}</div>
         <div style="flex:1">
           <div style="font-weight:700;color:var(--text);font-size:13px">${esc(fam.stages[c.stage-1].name)}</div>
-          <div style="font-size:10px;color:var(--text-secondary)">Tahap ${c.stage} drpd 5${c.stage===5?' · ✨ MYTHIC!':''}</div>
-          ${c.stage<5?(()=>{const prev=ULTRA_EVO_CUM[c.stage-2]||0,nc=ULTRA_EVO_CUM[c.stage-1],cur=c.correct-prev,need=nc-prev,p=clamp(cur/need*100,0,100);
+          <div style="font-size:10px;color:var(--text-secondary)">Tahap ${c.stage} drpd 3${c.stage===3?' · ✨ MYTHIC!':''}</div>
+          ${c.stage<3?(()=>{const prev=ULTRA_EVO_CUM[c.stage-2]||0,nc=ULTRA_EVO_CUM[c.stage-1],cur=c.correct-prev,need=nc-prev,p=clamp(cur/need*100,0,100);
             return`<div style="font-size:9px;color:var(--text-muted);margin-top:3px">Jawab lagi utk membesar! ${cur}/${need}</div><div style="height:6px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin-top:2px"><div style="height:100%;width:${p}%;background:linear-gradient(90deg,${fam.g1},${fam.g2});border-radius:4px"></div></div>`;})()
             :`<p style="font-size:10px;color:var(--text-secondary);margin-top:3px">Hebat! Sedia bertarung dlm pasukan kamu.</p>`}
         </div>
