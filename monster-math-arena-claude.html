@@ -1602,6 +1602,12 @@ const ART = {
   lumina_1:'assets/monsters/lumina_1.png', lumina_2:'assets/monsters/lumina_2.png', lumina_3:'assets/monsters/lumina_3.png',
   shadow_1:'assets/monsters/shadow_1.png', shadow_2:'assets/monsters/shadow_2.png', shadow_3:'assets/monsters/shadow_3.png',
   golden_1:'assets/monsters/golden_1.png', golden_2:'assets/monsters/golden_2.png', golden_3:'assets/monsters/golden_3.png',
+  // 🥚 MOD: EGG INCUBATOR - Art PNG sebenar 5 monster ultra-rare
+  tigros_1:'assets/monsters/tigros_1.png', tigros_2:'assets/monsters/tigros_2.png', tigros_3:'assets/monsters/tigros_3.png',
+  monflare_1:'assets/monsters/monflare_1.png', monflare_2:'assets/monsters/monflare_2.png', monflare_3:'assets/monsters/monflare_3.png',
+  volyx_1:'assets/monsters/volyx_1.png', volyx_2:'assets/monsters/volyx_2.png', volyx_3:'assets/monsters/volyx_3.png',
+  bearmos_1:'assets/monsters/bearmos_1.png', bearmos_2:'assets/monsters/bearmos_2.png', bearmos_3:'assets/monsters/bearmos_3.png',
+  chibi_1:'assets/monsters/chibi_1.png', chibi_2:'assets/monsters/chibi_2.png', chibi_3:'assets/monsters/chibi_3.png',
   slime:'assets/enemies/slime.png', bloopy:'assets/enemies/bloopy.png', ghost:'assets/enemies/ghost.png',
   crystal:'assets/enemies/crystal.png', dark_knight:'assets/enemies/dark_knight.png',
   blocky:'assets/enemies/blocky.png', stacky:'assets/enemies/stacky.png', shrinky:'assets/enemies/shrinky.png',
@@ -1674,41 +1680,42 @@ const FAMILIES = {
     stages:[{id:'shadow_1',name:'Baby Shade',hp:42,atk:15},{id:'shadow_2',name:'Shadow',hp:58,atk:22},{id:'shadow_3',name:'Mega Shade',hp:75,atk:30}]},
   golden:{name:'Golden',elem:'🏆',eg:'linear-gradient(135deg,#F59E0B,#D97706)',g1:'#F59E0B',g2:'#D97706',iris:'#92400E',role:'Legendary',
     stages:[{id:'golden_1',name:'Baby Gold',hp:65,atk:15},{id:'golden_2',name:'Golden',hp:90,atk:22},{id:'golden_3',name:'Mega Gold',hp:120,atk:30}]},
-  // 🥚 MOD: EGG INCUBATOR — Drakonum ultra-rare 3-tahap. Sengaja TIDAK masuk FAMILY_IDS (lihat bawah) supaya tak muncul
-  // dlm starter picker/Album/pack biasa — hanya boleh didapati via tetas telur. Guna state.collection.drakonum sama
-  // macam monster biasa supaya doEvolve()/showEvolution()/cardHTML()/getMonster() boleh diguna semula tanpa ubah.
-  drakonum:{name:'Drakonum',elem:'🐉',eg:'linear-gradient(135deg,#7C6CFF,#4C1D95)',g1:'#7fe6d8',g2:'#7C6CFF',iris:'#312E81',role:'Ultra-Rare — HP & ATK sangat tinggi',
+  // 🥚 MOD: EGG INCUBATOR — 5 monster ultra-rare 3-tahap (Tigros/Monflare/Volyx/Bearmos/Chibi). Sengaja TIDAK masuk
+  // FAMILY_IDS (lihat bawah) supaya tak muncul dlm starter picker/Album/pack biasa — hanya boleh didapati via tetas
+  // telur. Guna state.collection[fam] sama macam monster biasa supaya doEvolve()/showEvolution()/cardHTML()/
+  // getMonster() boleh diguna semula tanpa ubah.
+  tigros:{name:'Tigros',elem:'⚡',eg:'linear-gradient(135deg,#FDE047,#1E1B0F)',g1:'#FDE047',g2:'#1E1B0F',iris:'#78350F',role:'Ultra-Rare — Kelajuan & Combo',
     stages:[
-      {id:'drakonum_1',name:'Draki',hp:65,atk:16},
-      {id:'drakonum_2',name:'Drakonum',hp:90,atk:24},
-      {id:'drakonum_3',name:'Drakonum Prime',hp:200,atk:60},
+      {id:'tigros_1',name:'Tigret',hp:55,atk:20},
+      {id:'tigros_2',name:'Tigros',hp:78,atk:30},
+      {id:'tigros_3',name:'Tigros Prime',hp:180,atk:72},
     ]},
-  elosius:{name:'Elosius',elem:'☀️',eg:'linear-gradient(135deg,#BAE6FD,#0EA5E9)',g1:'#BAE6FD',g2:'#0EA5E9',iris:'#075985',role:'Ultra-Rare — Penyembuhan & HP Tinggi',
+  monflare:{name:'Monflare',elem:'🔥',eg:'linear-gradient(135deg,#FDBA74,#7C2D12)',g1:'#FDBA74',g2:'#7C2D12',iris:'#7C2D12',role:'Ultra-Rare — Serangan Ultra Tinggi',
     stages:[
-      {id:'elosius_1',name:'Elolet',hp:70,atk:14},
-      {id:'elosius_2',name:'Elosius',hp:95,atk:20},
-      {id:'elosius_3',name:'Elosius Prime',hp:205,atk:50},
+      {id:'monflare_1',name:'Monlet',hp:60,atk:22},
+      {id:'monflare_2',name:'Monflare',hp:85,atk:32},
+      {id:'monflare_3',name:'Monflare Prime',hp:185,atk:74},
     ]},
-  voltigon:{name:'Voltigon',elem:'⛈️',eg:'linear-gradient(135deg,#818CF8,#4338CA)',g1:'#818CF8',g2:'#4338CA',iris:'#312E81',role:'Ultra-Rare — Kelajuan & Combo',
+  volyx:{name:'Volyx',elem:'🌋',eg:'linear-gradient(135deg,#FB923C,#1C1917)',g1:'#FB923C',g2:'#1C1917',iris:'#7C2D12',role:'Ultra-Rare — Pertahanan & HP Tertinggi',
     stages:[
-      {id:'voltigon_1',name:'Voltling',hp:55,atk:20},
-      {id:'voltigon_2',name:'Voltigon',hp:78,atk:30},
-      {id:'voltigon_3',name:'Voltigon Prime',hp:180,atk:72},
+      {id:'volyx_1',name:'Volyxit',hp:85,atk:12},
+      {id:'volyx_2',name:'Volyx',hp:115,atk:18},
+      {id:'volyx_3',name:'Volyx Prime',hp:240,atk:48},
     ]},
-  pyronyx:{name:'Pyronyx',elem:'🌋',eg:'linear-gradient(135deg,#EF4444,#450A0A)',g1:'#EF4444',g2:'#450A0A',iris:'#7F1D1D',role:'Ultra-Rare — Serangan Ultra Tinggi',
+  bearmos:{name:'Bearmos',elem:'🌑',eg:'linear-gradient(135deg,#C4B5FD,#4C1D95)',g1:'#C4B5FD',g2:'#4C1D95',iris:'#312E81',role:'Ultra-Rare — Kuasa Gelap & Kritikal',
     stages:[
-      {id:'pyronyx_1',name:'Pyrit',hp:60,atk:22},
-      {id:'pyronyx_2',name:'Pyronyx',hp:85,atk:32},
-      {id:'pyronyx_3',name:'Pyronyx Prime',hp:185,atk:74},
+      {id:'bearmos_1',name:'Bearlet',hp:65,atk:16},
+      {id:'bearmos_2',name:'Bearmos',hp:90,atk:24},
+      {id:'bearmos_3',name:'Bearmos Prime',hp:200,atk:60},
     ]},
-  terradon:{name:'Terradon',elem:'🌍',eg:'linear-gradient(135deg,#84CC16,#3F6212)',g1:'#84CC16',g2:'#3F6212',iris:'#1A2E05',role:'Ultra-Rare — Pertahanan & HP Tertinggi',
+  chibi:{name:'Chibi',elem:'👊',eg:'linear-gradient(135deg,#FCA5A5,#7F1D1D)',g1:'#FCA5A5',g2:'#7F1D1D',iris:'#7F1D1D',role:'Ultra-Rare — Ketangkasan & Serangan Pantas',
     stages:[
-      {id:'terradon_1',name:'Territ',hp:85,atk:12},
-      {id:'terradon_2',name:'Terradon',hp:115,atk:18},
-      {id:'terradon_3',name:'Terradon Prime',hp:240,atk:48},
+      {id:'chibi_1',name:'Chibit',hp:60,atk:20},
+      {id:'chibi_2',name:'Chibi',hp:85,atk:29},
+      {id:'chibi_3',name:'Chibi Prime',hp:190,atk:68},
     ]},
 };
-const ULTRA_RARE_IDS = ['drakonum','elosius','voltigon','pyronyx','terradon'];
+const ULTRA_RARE_IDS = ['tigros','monflare','volyx','bearmos','chibi'];
 const FAMILY_IDS = Object.keys(FAMILIES).filter(f=>!ULTRA_RARE_IDS.includes(f));
 const STARTER_IDS = ['flamy','addosaur','sumagon'];
 
@@ -2505,16 +2512,6 @@ function animeEye(cx,cy,rx,ry,iris){return`<ellipse cx="${cx}" cy="${cy}" rx="${
 function monsterSVG(fam,stage){
   const F=FAMILIES[fam],s=stage||1,uid=fam+s;
   const b=`url(#b_${uid})`,sc=[0.9,1.05,1.22][s-1];
-  // 🥚 MOD: EGG INCUBATOR — Drakonum guna bentuk naga leher panjang tersendiri (adaptasi dragonSVG demo), bukan blob generik
-  if(fam==='drakonum'){
-    const wings=s>=3?`<path d="M52 84 q-40 -18 -46 22 q30 -6 44 14 Z M148 84 q40 -18 46 22 q-30 -6 -44 14 Z" fill="${b}" opacity=".92" stroke="#1E293B" stroke-width="3"/>`:s>=2?`<path d="M58 86 q-22 -8 -26 14 q16 -2 26 8 Z M142 86 q22 -8 26 14 q-16 -2 -26 8 Z" fill="${b}" opacity=".85" stroke="#1E293B" stroke-width="3"/>`:'';
-    const horns=s>=2?`<path d="M80 52 L74 30 L92 50 Z M120 50 L126 30 L120 52 Z" fill="#ffd23f" stroke="#1E293B" stroke-width="2.5"/>`:'';
-    // 🥚 MOD: EGG INCUBATOR - aura+crown kini digabung pada tahap 3 (Prime, tahap akhir) sejak evolusi dikurangkan drpd 5 ke 3
-    const aura=s>=3?`<circle cx="100" cy="106" r="76" fill="none" stroke="#ffe98a" stroke-width="3" opacity=".5" stroke-dasharray="6 8"/>`:'';
-    const crown=s>=3?`<path d="M78 40 L86 22 L100 36 L114 22 L122 40 Z" fill="#ffd23f" stroke="#1E293B" stroke-width="2.5"/><circle cx="100" cy="30" r="3" fill="#7fe6d8"/>`:'';
-    const body=`<path d="M100 54 C68 78 62 104 62 124 a38 38 0 0 0 76 0 C138 104 132 78 100 54 Z" fill="${b}" stroke="#1E293B" stroke-width="4"/><ellipse cx="100" cy="132" rx="24" ry="26" fill="#eafcff" opacity=".85"/>`;
-    return`<svg viewBox="0 0 200 200" style="width:100%;height:100%">${defsFor(uid,F.g1,F.g2,F.iris)}<g transform="translate(100 105) scale(${sc}) translate(-100 -105)">${aura}${wings}${body}${horns}${crown}${animeEye(84,100,13,16,'i_'+uid)}${animeEye(116,100,13,16,'i_'+uid)}<path d="M92 120 q8 6 16 0" stroke="#1E293B" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg>`;
-  }
   const wings=s>=3?`<path d="M34 92 q-34 -6 -34 30 q30 -4 40 10 Z M166 92 q34 -6 34 30 q-30 -4 -40 10 Z" fill="${F.g1}" opacity=".8" stroke="#1E293B" stroke-width="2"/>`:'';
   const horns=s>=2?`<path d="M66 46 L58 16 L84 44 Z M116 44 L142 16 L134 46 Z" fill="${b}" stroke="#1E293B" stroke-width="2"/>`:'';
   let body='';
@@ -3011,10 +3008,8 @@ function playElementAtk(elem){
     case '✨': beep(1000,.1,'sine',.08);setTimeout(()=>beep(1200,.15,'sine',.06),80);break;
     case '🌑': beep(200,.1,'triangle',.1);setTimeout(()=>beep(160,.15,'triangle',.08),80);break;
     case '🏆': beep(523,.08,'triangle',.1);setTimeout(()=>beep(659,.08,'triangle',.1),60);setTimeout(()=>beep(784,.15,'triangle',.12),120);break;
-    case '☀️': beep(900,.1,'sine',.09);setTimeout(()=>beep(1100,.12,'sine',.07),70);break;
-    case '⛈️': beep(150,.1,'sawtooth',.1);setTimeout(()=>beep(900,.05,'square',.1),40);break;
     case '🌋': beep(120,.18,'sawtooth',.12);setTimeout(()=>beep(80,.2,'sawtooth',.1),100);break;
-    case '🌍': beep(100,.2,'square',.12);setTimeout(()=>beep(70,.22,'square',.1),120);break;
+    case '👊': beep(180,.05,'square',.14);setTimeout(()=>beep(90,.08,'square',.12),40);break;
     default: beep(400,.1,'sine',.1);break;
   }
 }
@@ -3030,10 +3025,8 @@ function playElementHurt(elem){
     case '✨': beep(600,.12,'sine',.07);break;
     case '🌑': beep(130,.15,'triangle',.09);break;
     case '🏆': beep(300,.1,'triangle',.08);break;
-    case '☀️': beep(700,.12,'sine',.07);break;
-    case '⛈️': beep(400,.1,'square',.08);setTimeout(()=>beep(200,.1,'square',.07),50);break;
     case '🌋': beep(90,.16,'sawtooth',.09);break;
-    case '🌍': beep(70,.18,'square',.09);break;
+    case '👊': beep(140,.08,'square',.1);break;
     default: beep(200,.12,'sine',.08);break;
   }
 }
@@ -3950,7 +3943,7 @@ function doDamageToEnemy(dmg,mult){
       const monEl=activeMon();
       const fam=monEl.fam||'flamy';
       const elem=FAMILIES[fam]?FAMILIES[fam].elem:'🔥';
-      const colors={'🔥':'#FBBF24','💧':'#60A5FA','⚡':'#BAE6FD','🌿':'#34D399','🪨':'#D6D3D1','🌪️':'#A78BFA','✨':'#FDE68A','🌑':'#818CF8','🏆':'#FDE68A','☀️':'#7DD3FC','⛈️':'#A5B4FC','🌋':'#F87171','🌍':'#A3E635'};
+      const colors={'🔥':'#FBBF24','💧':'#60A5FA','⚡':'#BAE6FD','🌿':'#34D399','🪨':'#D6D3D1','🌪️':'#A78BFA','✨':'#FDE68A','🌑':'#818CF8','🏆':'#FDE68A','🌋':'#F87171','👊':'#FCA5A5'};
       if(dmg>0){
         const arenaEl=document.getElementById('arena');
         if(arenaEl){
@@ -4411,7 +4404,7 @@ function cameraPunch(big){
 }
 // 🎨 Effect PNG sebenar (monster→musuh ikut elemen; musuh→monster generik).
 // Fallback ke spawnParticles() automatik kalau fail PNG tiada (img.onerror).
-const EFFECT_PNG={'🔥':'assets/effects/fire.png','💧':'assets/effects/water.png','⚡':'assets/effects/electric.png','🌿':'assets/effects/nature.png','🪨':'assets/effects/rock.png','🌪️':'assets/effects/wind.png','✨':'assets/effects/light.png','🌑':'assets/effects/dark.png','🏆':'assets/effects/golden.png','☀️':'assets/effects/holy.png','⛈️':'assets/effects/storm.png','🌋':'assets/effects/volcanic.png','🌍':'assets/effects/earth.png'};
+const EFFECT_PNG={'🔥':'assets/effects/fire.png','💧':'assets/effects/water.png','⚡':'assets/effects/electric.png','🌿':'assets/effects/nature.png','🪨':'assets/effects/rock.png','🌪️':'assets/effects/wind.png','✨':'assets/effects/light.png','🌑':'assets/effects/dark.png','🏆':'assets/effects/golden.png','🌋':'assets/effects/volcanic.png','👊':'assets/effects/fighting.png'};
 const HIT_IMPACT_PNG='assets/effects/hit_impact.png';
 function applyFxOverlay(hostSel,src,fallbackColor,big,onDone){
   const host=$(hostSel);
@@ -5164,7 +5157,7 @@ function selectIncubatorItem(it){if((state.incubatorItems[it]||0)<1)return;incSe
 
 function hatchUltraRare(){
   try{
-    const species=state.incubator.species||'drakonum';
+    const species=state.incubator.species||ULTRA_RARE_IDS[0];
     state.incubator={status:'empty',warmth:0,lastTick:incNow(),notified:false};
     state.collection[species]={owned:true,stage:1,correct:0,trait:null};
     const tr=INC_CFG.TRAITS[rand(0,INC_CFG.TRAITS.length-1)];
