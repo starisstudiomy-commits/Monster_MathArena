@@ -40,6 +40,7 @@ function ensureProgress(planetId) {
 }
 function getShip() { return SHIPS.find(s => s.id === state.shipId) || SHIPS[0]; }
 function getRobot() { return ROBOTS.find(r => r.id === state.robotId) || ROBOTS[0]; }
+function hasProgress() { return Object.values(state.planetProgress).some(p => p.attempts > 0); }
 
 function route(screen, params) {
   window.scrollTo(0, 0);
@@ -176,7 +177,7 @@ function renderMenu() {
       </div>
     </div>
 
-    <button class="start-cta" id="btn-start">🚀 START ADVENTURE</button>
+    <button class="start-cta" id="btn-start">${hasProgress() ? '▶ TERUSKAN' : '🚀 MULAKAN MISI'}</button>
     <div class="reset-link" id="btn-reset">♻ Reset Progress</div>
   `;
 
@@ -195,7 +196,7 @@ function renderMenu() {
   document.getElementById('btn-ency').onclick = () => route('encyclopedia');
   document.getElementById('btn-achieve').onclick = () => route('achievements');
   document.getElementById('btn-parent').onclick = () => route('parent');
-  document.getElementById('btn-start').onclick = () => route('galaxy');
+  document.getElementById('btn-start').onclick = () => route(hasProgress() ? 'planetmap' : 'briefing');
   document.getElementById('btn-reset').onclick = () => {
     if (confirm('Reset semua kemajuan? Tindakan ini tidak boleh dibuat asal.')) {
       state = freshState();
@@ -280,12 +281,56 @@ function renderRobot() {
   });
 }
 
+/* ---------------- MISSION BRIEFING ---------------- */
+function renderBriefing() {
+  const robot = getRobot();
+  const ship = getShip();
+  const lines = [
+    `Explorer ${state.explorer.name.toUpperCase()}...`,
+    `${robot.name} berjaya disambungkan.`,
+    `Spaceship ${ship.name} berada dalam keadaan optimum.`,
+    `Misi baharu telah diterima.`,
+    `Bersedia untuk berlepas.`,
+  ];
+  app.innerHTML = `
+    <button class="skip-btn" id="btn-skip-brief">LEWATI ▶▶</button>
+    <div class="panel cine-panel briefing-scene">
+      <div class="landing-crew"><span class="crew-emoji">🧑‍🚀</span><span class="crew-emoji">${robot.icon}</span></div>
+      <div class="dialog-box">
+        <div class="dialog-who">COMMAND AI</div>
+        <div class="dialog-line" id="brief-line"></div>
+      </div>
+    </div>
+    <div class="btn gold" id="btn-brief-next" style="display:none">➡ TERUSKAN</div>
+  `;
+  document.getElementById('btn-skip-brief').onclick = () => route('galaxy');
+  const lineEl = document.getElementById('brief-line');
+  const nextBtn = document.getElementById('btn-brief-next');
+  let li = 0, ci = 0, typer = null;
+  function typeLine() {
+    lineEl.textContent = '';
+    nextBtn.style.display = 'none';
+    ci = 0;
+    typer = setInterval(() => {
+      ci++;
+      lineEl.textContent = lines[li].slice(0, ci);
+      if (ci >= lines[li].length) { clearInterval(typer); nextBtn.style.display = 'block'; }
+    }, 22);
+  }
+  nextBtn.onclick = () => {
+    li++;
+    if (li >= lines.length) { route('galaxy'); return; }
+    typeLine();
+  };
+  typeLine();
+}
+
 /* ---------------- GALAXY MAP ---------------- */
 function renderGalaxy() {
   app.innerHTML = `
     <div class="back-link" id="back">← Kembali</div>
     <div class="title">Pilih Galaxy</div>
-    <div class="subtitle">Tahun 2 &amp; 3, serta Galaxy Sains dan English akan datang.</div>
+    <div class="robot-quote">🤖 "Explorer, sila pilih galaxy untuk diterokai."</div>
     <div class="planet-node" data-g="math">
       <div class="icon" style="background:#6366F1">🔢</div>
       <div class="info"><div class="name">Galaxy Matematik</div><div class="meta">Tahun 1 tersedia</div></div>
@@ -308,7 +353,7 @@ function renderYear() {
   app.innerHTML = `
     <div class="back-link" id="back">← Kembali</div>
     <div class="title">Galaxy Matematik</div>
-    <div class="subtitle">Pilih tahun.</div>
+    <div class="robot-quote">🤖 "Pilih tahap latihan."</div>
     <div class="planet-node" data-y="1">
       <div class="icon" style="background:#6366F1">⭐</div>
       <div class="info"><div class="name">Tahun 1</div><div class="meta">10 planet tersedia</div></div>
@@ -367,21 +412,97 @@ function resourceBar() {
   </div>`;
 }
 
-/* ---------------- PLANET INTRO ---------------- */
+/* ---------------- PLANET INTRO CINEMATIC ----------------
+   Mission Loading -> Planet Entry -> Landing -> Mission Start -> player control.
+   Each beat auto-advances quickly; a Skip button is always visible so replays stay under
+   a few seconds for players who've seen it before. ---------------------------------- */
+function skipBtn(planet) {
+  return `<button class="skip-btn" id="btn-skip-intro">LEWATI ▶▶</button>`;
+}
+function bindSkip(planet) {
+  const b = document.getElementById('btn-skip-intro');
+  if (b) b.onclick = () => startPlanetRun(planet);
+}
+
 function renderPlanetIntro(params) {
-  const planet = PLANETS.find(p => p.id === params.planetId);
+  renderMissionLoading(PLANETS.find(p => p.id === params.planetId));
+}
+
+function renderMissionLoading(planet) {
+  const miningQ = ZONE_PLAN.filter(z => z.type === 'mining').reduce((a, z) => a + z.questions, 0);
+  const battleQ = ZONE_PLAN.filter(z => z.type === 'battle').reduce((a, z) => a + z.questions, 0);
   app.innerHTML = `
     <div class="back-link" id="back">← Kembali</div>
-    <div class="panel" style="text-align:center;border-color:${planet.color}">
-      <div style="font-size:10px;letter-spacing:3px;color:${planet.color};font-weight:800">BAB ${planet.num}</div>
-      <h2 style="color:${planet.color}">${planet.name}</h2>
-      <img class="enemy-art" src="${ALIEN_ART[planet.boss]}" alt="${planet.bossName}">
-      <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px">Kamu akan hadapi <b style="color:${planet.color}">${planet.bossName}</b> di Boss Area!</div>
-      <div class="badge">Fokus: ${planet.weakness}</div>
+    ${skipBtn(planet)}
+    <div class="panel cine-panel" style="border-color:${planet.color}">
+      <div class="hud-title" style="color:${planet.color}">MISSION</div>
+      <h2 style="color:${planet.color};margin-bottom:10px">${planet.name}</h2>
+      <div class="hud-grid">
+        <div class="hud-stat"><span>Difficulty</span><span>⭐⭐${planet.num >= 8 ? '⭐' : ''}</span></div>
+        <div class="hud-stat"><span>Alien Species</span><span>${planet.bossName}</span></div>
+        <div class="hud-stat"><span>Mineral</span><span>🪨 x${miningQ + battleQ}</span></div>
+        <div class="hud-stat"><span>Reward</span><span>🌟 Knowledge Stars</span></div>
+      </div>
+      <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+      <div class="loading-pct" id="loading-pct">0%</div>
     </div>
-    <div class="btn gold" id="btn-go">🚀 Mula Eksplorasi</div>
   `;
   document.getElementById('back').onclick = () => route('planetmap');
+  bindSkip(planet);
+  const bar = document.getElementById('loading-bar');
+  const pct = document.getElementById('loading-pct');
+  let p = 0;
+  const timer = setInterval(() => {
+    p += 8 + Math.random() * 10;
+    if (p >= 100) { p = 100; clearInterval(timer); setTimeout(() => renderPlanetEntry(planet), 250); }
+    if (bar) { bar.style.width = p + '%'; pct.textContent = Math.round(p) + '%'; }
+  }, 110);
+}
+
+function renderPlanetEntry(planet) {
+  app.innerHTML = `
+    ${skipBtn(planet)}
+    <div class="panel cine-panel entry-scene" style="border-color:${planet.color}">
+      <div class="entry-ship">🚀</div>
+      <div class="entry-flames">🔥🔥🔥</div>
+      <div class="cine-caption">Memasuki atmosfera ${planet.name}...</div>
+    </div>
+  `;
+  bindSkip(planet);
+  setTimeout(() => renderLanding(planet), 1000);
+}
+
+function renderLanding(planet) {
+  app.innerHTML = `
+    ${skipBtn(planet)}
+    <div class="panel cine-panel landing-scene" style="border-color:${planet.color}">
+      <div class="landing-dust">💨💨💨</div>
+      <div class="landing-ship">🚀</div>
+      <div class="cine-caption">Landing gear diaktifkan... mendarat dengan selamat.</div>
+    </div>
+  `;
+  bindSkip(planet);
+  setTimeout(() => renderMissionStart(planet), 1000);
+}
+
+function renderMissionStart(planet) {
+  const miningQ = ZONE_PLAN.filter(z => z.type === 'mining').reduce((a, z) => a + z.questions, 0);
+  const battleQ = ZONE_PLAN.filter(z => z.type === 'battle').reduce((a, z) => a + z.questions, 0);
+  const robot = getRobot();
+  app.innerHTML = `
+    <div class="panel cine-panel" style="border-color:${planet.color}">
+      <div class="landing-crew"><span class="crew-emoji">🧑‍🚀</span><span class="crew-emoji">${robot.icon}</span></div>
+      <div class="dialog-box">
+        <div class="dialog-who" style="color:${planet.color}">${robot.name}</div>
+        <div class="dialog-line">"Selamat datang ke ${planet.name}. Mari mulakan misi!"</div>
+      </div>
+      <div class="field-label" style="margin-top:10px">OBJECTIVES</div>
+      <div class="objective-item">🟢 Cari ${miningQ} Energy Crystal</div>
+      <div class="objective-item">🟢 Kalahkan ${battleQ} Alien</div>
+      <div class="objective-item">🟢 Kalahkan Boss ${planet.bossName}</div>
+    </div>
+    <div class="btn gold" id="btn-go">🚀 Mula Misi</div>
+  `;
   document.getElementById('btn-go').onclick = () => startPlanetRun(planet);
 }
 
@@ -411,16 +532,6 @@ function currentZone() { return run.zones[run.zoneIndex]; }
 
 function renderZone() {
   const zone = currentZone();
-  if (zone.type === 'landing') {
-    app.innerHTML = zoneHeader(zone) + `
-      <div class="panel" style="text-align:center">
-        <div style="font-size:40px">🛬</div>
-        <div style="margin:8px 0;color:var(--text-dim);font-size:13px">Kadet mendarat di ${run.planet.name}. Bersedia untuk meneroka!</div>
-        <div class="btn gold" id="btn-continue">Teruskan</div>
-      </div>`;
-    document.getElementById('btn-continue').onclick = () => advanceZone();
-    return;
-  }
   if (zone.type === 'boss') {
     const boss = run.planet.boss;
     if (run.enemyHpMax === 0) { run.enemyHpMax = 100; run.enemyHp = 100; }
@@ -634,6 +745,7 @@ const SCREENS = {
   hangar: renderHangar,
   robot: renderRobot,
   achievements: renderAchievements,
+  briefing: renderBriefing,
   galaxy: renderGalaxy,
   year: renderYear,
   planetmap: renderPlanetMap,

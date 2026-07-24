@@ -87,8 +87,8 @@ const ROBOTS = [
 ];
 
 // Zones inside a planet run; question counts must total 20 (matches per-chapter bank size).
+// Landing narrative now lives in the cinematic Mission Loading/Entry/Landing sequence before the run starts.
 const ZONE_PLAN = [
-  { type: 'landing', name: 'Landing Zone', icon: '🛬' },
   { type: 'mining', name: 'Forest', icon: '🌲', questions: 3 },
   { type: 'mining', name: 'Crystal Cave', icon: '💎', questions: 3 },
   { type: 'battle', name: 'Ancient Lab', icon: '⚡', label: 'Ancient Machine', questions: 3 },
