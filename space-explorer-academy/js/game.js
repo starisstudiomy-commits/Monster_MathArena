@@ -490,6 +490,7 @@ function renderMissionStart(planet) {
   const battleQ = ZONE_PLAN.filter(z => z.type === 'battle').reduce((a, z) => a + z.questions, 0);
   const robot = getRobot();
   app.innerHTML = `
+    ${skipBtn(planet)}
     <div class="panel cine-panel" style="border-color:${planet.color}">
       <div class="landing-crew"><span class="crew-emoji">🧑‍🚀</span><span class="crew-emoji">${robot.icon}</span></div>
       <div class="dialog-box">
@@ -503,6 +504,7 @@ function renderMissionStart(planet) {
     </div>
     <div class="btn gold" id="btn-go">🚀 Mula Misi</div>
   `;
+  bindSkip(planet);
   document.getElementById('btn-go').onclick = () => startPlanetRun(planet);
 }
 
