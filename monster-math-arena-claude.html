@@ -4,7 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MathArena">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Monster Math Arena</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" href="assets/icons/icon-192.png">
 <link rel="preload" as="image" href="assets/splashscreen.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5358,6 +5365,13 @@ window.addEventListener('beforeunload',save);
 
 try{load();if(!state)state=defaultState();if(!state.progress)state.progress={chapter:0,stage:0};if(!state.stats)state.stats=defaultState().stats;if(!state.collection)state.collection={};if(!state.deck)state.deck=[];if(!state.difficulty)state.difficulty='medium';
 preloadAllAssets(()=>route('splash'));
+
+// PWA: daftar service worker (cache-first + runtime caching) supaya boleh main offline
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(e=>console.error('SW register error:',e));
+  });
+}
 }catch(e){console.error('Boot error:',e);state=defaultState();save();route('welcome');}
 
 document.addEventListener('click',function startBGM(){try{if(state?.settings?.music)startBGM();}catch(e){}document.removeEventListener('click',startBGM);},{once:true});
