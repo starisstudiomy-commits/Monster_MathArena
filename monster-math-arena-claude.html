@@ -4260,7 +4260,7 @@ function showEvolution(fam,oldName){
     ov.style.cursor='pointer';
   },2100);
 
-  setTimeout(()=>{const o=$('#evoOverlay');if(o){o.remove();B.locked=false;renderBattle();nextQuestion();}},4800);
+  setTimeout(()=>{const o=$('#evoOverlay');if(o){o.remove();if(B&&B.enemy){B.locked=false;renderBattle();nextQuestion();}else{route(current);}}},8000);
 }
 
 let evoEnergyInterval=null;
