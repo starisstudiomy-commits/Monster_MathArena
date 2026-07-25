@@ -63,6 +63,11 @@
     <div class="txt"><b>Boss</b><span>Epic & dramatik, ada bass berat — untuk pertarungan boss</span></div>
     <div class="eq"><i></i><i></i><i></i></div>
   </button>
+  <button class="theme-btn" data-theme="battle_fast" onclick="playTheme('battle_fast')">
+    <div class="ico">🥁</div>
+    <div class="txt"><b>Battle (Beat Laju)</b><span>Tempo lebih laju + ada kick/hi-hat, rasa lebih "beat"</span></div>
+    <div class="eq"><i></i><i></i><i></i></div>
+  </button>
 </div>
 
 <button class="stopbtn" onclick="stopTheme()">⏹ Stop</button>
@@ -98,10 +103,47 @@ const THEMES = {
            [261,330],[261,330],[233,294],[220,277],[196,247],[220,277],[233,294],[196,247]],
     wave1:'sawtooth', wave2:'square', gain1:0.22, gain2:0.11, decay1:0.55, decay2:0.4, bass:true,
     bassFreq:[65.4,65.4,61.7,65.4,49,49,65.4,61.7]
+  },
+  battle_fast:{
+    tempo: 280,
+    notes:[[329,440],[392,523],[440,659],[523,784],[392,523],[440,659],[523,784],[659,1047],
+           [329,440],[392,523],[440,659],[523,784],[392,523],[440,659],[659,1047],[523,784]],
+    wave1:'sine', wave2:'triangle', gain1:0.26, gain2:0.13, decay1:0.24, decay2:0.2, bass:false,
+    drums:true, beatPattern:['kick','hat','snare','hat']
   }
 };
 
-let current=null, interval=null, masterGain=null, noteIdx=0, bassIdx=0;
+let current=null, interval=null, masterGain=null, noteIdx=0, bassIdx=0, beatIdx=0;
+
+function playKick(ctx, dest, time){
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.type='sine'; o.frequency.setValueAtTime(150, time); o.frequency.exponentialRampToValueAtTime(45, time+0.12);
+  o.connect(g); g.connect(dest);
+  g.gain.setValueAtTime(0.55, time); g.gain.exponentialRampToValueAtTime(0.001, time+0.18);
+  o.start(time); o.stop(time+0.2);
+}
+function noiseBurst(ctx, dest, time, dur, freqHz, gainVal){
+  const bufSize = ctx.sampleRate * dur;
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for(let i=0;i<bufSize;i++) data[i] = (Math.random()*2-1) * (1 - i/bufSize);
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const filt = ctx.createBiquadFilter(); filt.type='highpass'; filt.frequency.value=freqHz;
+  const g = ctx.createGain(); g.gain.setValueAtTime(gainVal, time); g.gain.exponentialRampToValueAtTime(0.001, time+dur);
+  src.connect(filt); filt.connect(g); g.connect(dest);
+  src.start(time); src.stop(time+dur);
+}
+function playHat(ctx, dest, time){ noiseBurst(ctx, dest, time, 0.06, 7000, 0.18); }
+function playSnare(ctx, dest, time){ noiseBurst(ctx, dest, time, 0.12, 1800, 0.3); }
+function scheduleBeat(theme){
+  if(!theme.drums) return;
+  const ctx = getCtx(); const now = ctx.currentTime;
+  const hit = theme.beatPattern[beatIdx % theme.beatPattern.length];
+  if(hit==='kick') playKick(ctx, masterGain, now);
+  else if(hit==='hat') playHat(ctx, masterGain, now);
+  else if(hit==='snare') playSnare(ctx, masterGain, now);
+  beatIdx++;
+}
 
 function setVol(v){
   const vol = v/100;
@@ -132,6 +174,7 @@ function playNote(theme){
     ob.start(now); ob.stop(now+theme.tempo/1000*1.9);
     bassIdx++;
   }
+  scheduleBeat(theme);
   noteIdx++;
 }
 
@@ -155,7 +198,7 @@ function playTheme(key){
   masterGain.gain.setTargetAtTime(window._demoVol ?? 0.18, ctx.currentTime, 0.3);
   masterGain.connect(ctx.destination);
 
-  current = key; noteIdx=0; bassIdx=0;
+  current = key; noteIdx=0; bassIdx=0; beatIdx=0;
   playNote(theme);
   interval = setInterval(()=>playNote(theme), theme.tempo);
 }
