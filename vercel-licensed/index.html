@@ -2523,9 +2523,13 @@ function sfxSplashSting(){
 let bgmPlaying=false,musicMasterGain=null,musicActiveSource=null,musicActiveGain=null,currentMusicTheme='home';
 const MUSIC_SRC={home:'assets/music/home.mp3',battle:'assets/music/battle.mp3',boss:'assets/music/boss.mp3'};
 const musicBuffers={};
+const musicLoadPromises={};
 function loadMusicBuffer(key){
   if(musicBuffers[key])return Promise.resolve(musicBuffers[key]);
-  return fetch(MUSIC_SRC[key]).then(r=>r.arrayBuffer()).then(arr=>getAudioCtx().decodeAudioData(arr)).then(buf=>{musicBuffers[key]=buf;return buf;}).catch(e=>{console.error('music load error',key,e);return null;});
+  if(musicLoadPromises[key])return musicLoadPromises[key];
+  const p=fetch(MUSIC_SRC[key]).then(r=>r.arrayBuffer()).then(arr=>getAudioCtx().decodeAudioData(arr)).then(buf=>{musicBuffers[key]=buf;delete musicLoadPromises[key];return buf;}).catch(e=>{console.error('music load error',key,e);delete musicLoadPromises[key];return null;});
+  musicLoadPromises[key]=p;
+  return p;
 }
 function preloadMusic(){Object.keys(MUSIC_SRC).forEach(k=>loadMusicBuffer(k));}
 function applyMusicTheme(key){
