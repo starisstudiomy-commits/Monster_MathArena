@@ -2,7 +2,7 @@
 // Cache-first + runtime caching: precache "app shell" (HTML/manifest/splash/icons),
 // lepas tu setiap asset (monster/effect/enemy PNG dll.) di-cache automatik bila
 // pertama kali di-fetch semasa main. Selepas itu, semua boleh dimuatkan offline.
-const CACHE_NAME = 'mma-cache-v2';
+const CACHE_NAME = 'mma-cache-v3';
 const CORE_ASSETS = [
   './monster-math-arena-claude.html',
   './manifest.json',
@@ -11,6 +11,9 @@ const CORE_ASSETS = [
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/apple-touch-icon.png',
+  './assets/music/home.mp3',
+  './assets/music/battle.mp3',
+  './assets/music/boss.mp3',
 ];
 
 self.addEventListener('install', (e) => {

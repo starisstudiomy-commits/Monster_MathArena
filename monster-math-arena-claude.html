@@ -1635,6 +1635,7 @@ const ART = {
 function megaArtId(bossId){return ART['mega_'+bossId]?('mega_'+bossId):bossId;}
 
 function preloadAllAssets(cb){
+  if(typeof preloadMusic==='function')preloadMusic();
   const urls=[...new Set(['assets/splashscreen.png','assets/logo_matharena.png','assets/gem.png',...Object.values(ART)])];
   const total=urls.length;
   const ov=document.createElement('div');
@@ -2515,10 +2516,47 @@ function sfxSplashSting(){
   }catch(e){}
 }
 
-let bgmPlaying=false,bgmInterval=null,bgmGain=null;
-const BGM_NOTES=[[261,392],[329,440],[392,523],[440,659],[523,784],[392,523],[329,440],[261,392],[329,440],[392,523],[440,659],[523,784],[659,1047],[523,784],[392,523],[329,440],[261,392],[329,440],[392,523],[261,392]];
-function startBGM(){if(!state?.settings?.music||bgmPlaying)return;try{actx=getAudioCtx();bgmGain=actx.createGain();bgmGain.gain.setValueAtTime(state?.settings?.bgmVolume??0.08,actx.currentTime);bgmGain.connect(actx.destination);let noteIdx=0;bgmPlaying=true;function playNote(){if(!bgmPlaying)return;try{const[f1,f2]=BGM_NOTES[noteIdx%BGM_NOTES.length];const now=actx.currentTime;const o1=actx.createOscillator();const g1=actx.createGain();o1.type='sine';o1.frequency.value=f1;o1.connect(g1);g1.connect(bgmGain);g1.gain.setValueAtTime(0.3,now);g1.gain.exponentialRampToValueAtTime(0.01,now+0.8);o1.start(now);o1.stop(now+0.9);const o2=actx.createOscillator();const g2=actx.createGain();o2.type='triangle';o2.frequency.value=f2;o2.connect(g2);g2.connect(bgmGain);g2.gain.setValueAtTime(0.15,now);g2.gain.exponentialRampToValueAtTime(0.01,now+0.6);o2.start(now);o2.stop(now+0.7);}catch(e){}noteIdx++;}playNote();bgmInterval=setInterval(playNote,900);}catch(e){}}
-function stopBGM(){bgmPlaying=false;if(bgmInterval){clearInterval(bgmInterval);bgmInterval=null;}if(bgmGain){bgmGain.gain.setValueAtTime(0,actx.currentTime);bgmGain=null;}}
+/* 🎵 Muzik latar sebenar (Pixabay), tema ikut skrin: home/battle/boss.
+   Loop sample-accurate guna AudioBufferSourceNode (elak klik di titik loop
+   yang biasa berlaku dgn <audio loop>). Crossfade lembut bila tema bertukar. */
+let bgmPlaying=false,musicMasterGain=null,musicActiveSource=null,musicActiveGain=null,currentMusicTheme='home';
+const MUSIC_SRC={home:'assets/music/home.mp3',battle:'assets/music/battle.mp3',boss:'assets/music/boss.mp3'};
+const musicBuffers={};
+function loadMusicBuffer(key){
+  if(musicBuffers[key])return Promise.resolve(musicBuffers[key]);
+  return fetch(MUSIC_SRC[key]).then(r=>r.arrayBuffer()).then(arr=>getAudioCtx().decodeAudioData(arr)).then(buf=>{musicBuffers[key]=buf;return buf;}).catch(e=>{console.error('music load error',key,e);return null;});
+}
+function preloadMusic(){Object.keys(MUSIC_SRC).forEach(k=>loadMusicBuffer(k));}
+function applyMusicTheme(key){
+  if(currentMusicTheme===key&&musicActiveSource)return;
+  currentMusicTheme=key;
+  if(state?.settings?.music)startBGM();
+}
+function startBGM(){
+  if(!state?.settings?.music)return;
+  const key=currentMusicTheme;
+  loadMusicBuffer(key).then(buf=>{
+    if(!buf||!state?.settings?.music)return;
+    if(musicActiveSource&&musicActiveSource._themeKey===key)return;
+    try{
+      const ctx=getAudioCtx();
+      if(!musicMasterGain){musicMasterGain=ctx.createGain();musicMasterGain.gain.setValueAtTime(state?.settings?.bgmVolume??0.18,ctx.currentTime);musicMasterGain.connect(ctx.destination);}
+      const oldSource=musicActiveSource,oldGain=musicActiveGain;
+      if(oldGain){oldGain.gain.setTargetAtTime(0,ctx.currentTime,0.35);setTimeout(()=>{try{oldSource.stop();}catch(e){}},900);}
+      const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;src._themeKey=key;
+      const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.setTargetAtTime(1,ctx.currentTime,0.35);
+      src.connect(g);g.connect(musicMasterGain);src.start(0);
+      musicActiveSource=src;musicActiveGain=g;bgmPlaying=true;
+    }catch(e){console.error('startBGM error:',e);}
+  });
+}
+function stopBGM(){
+  bgmPlaying=false;
+  if(musicActiveGain){
+    try{const ctx=getAudioCtx();musicActiveGain.gain.setTargetAtTime(0,ctx.currentTime,0.3);const s=musicActiveSource;setTimeout(()=>{try{s.stop();}catch(e){}},800);}catch(e){}
+    musicActiveSource=null;musicActiveGain=null;
+  }
+}
 function toggleBGM(){if(bgmPlaying){stopBGM();state.settings.music=false;}else{state.settings.music=true;startBGM();}save();}
 
 /* ============================================================
@@ -2610,7 +2648,7 @@ function nextTutorial(){tutorialStep++;if(tutorialStep>=5){state.tutorialDone=tr
    12) ROUTER + SCREENS
    ============================================================ */
 let current='welcome';
-function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);({splash:renderSplash,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
+function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);if(name!=='splash')applyMusicTheme('home');({splash:renderSplash,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
 
 function isPro(){ return state?.license && validateKey(state.license); }
 
@@ -3057,7 +3095,7 @@ function renderSettings(){
     '<div class="statline"><span>👤 Nama Pemain</span><input type="text" id="player-name-input" value="'+esc(state.playerName||'Aydan')+'" maxlength="14" style="width:120px;background:var(--surface-light);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;font-family:var(--font);font-size:12px;color:var(--text);text-align:center;outline:none" onchange="MMA.setPlayerName(this.value)"></div>'+
     '<div class="statline"><span>🎯 Tahap Kesukaran</span><button class="btn btn-sm" style="width:auto;padding:8px 16px;background:'+DIFFICULTIES[state?.difficulty||'medium'].color+'" onclick="MMA.route(\'difficulty\')">'+DIFFICULTIES[state?.difficulty||'medium'].icon+' '+DIFFICULTIES[state?.difficulty||'medium'].name+'</button></div>'+
     '<div class="statline"><span>🎵 Muzik latar</span><button class="btn '+(state?.settings?.music?'btn-primary':'btn-ghost')+' btn-sm" style="width:auto;padding:8px 16px" onclick="MMA.toggle(\'music\')">'+(state?.settings?.music?'ON':'OFF')+'</button></div>'+
-    '<div class="statline"><span>🔉 Volum Muzik</span><div style="display:flex;align-items:center;gap:8px;width:120px"><input type="range" min="0" max="100" value="'+((state?.settings?.bgmVolume||0.08)*100).toFixed(0)+'" style="flex:1;height:6px;appearance:none;background:var(--glass-border);border-radius:3px;outline:none;accent-color:var(--gold)" oninput="MMA.setBgmVolume(this.value)"><span id="bgm-label" style="font-size:10px;color:var(--text-muted);min-width:24px">'+((state?.settings?.bgmVolume||0.08)*100).toFixed(0)+'%</span></div></div>'+
+    '<div class="statline"><span>🔉 Volum Muzik</span><div style="display:flex;align-items:center;gap:8px;width:120px"><input type="range" min="0" max="100" value="'+((state?.settings?.bgmVolume||0.18)*100).toFixed(0)+'" style="flex:1;height:6px;appearance:none;background:var(--glass-border);border-radius:3px;outline:none;accent-color:var(--gold)" oninput="MMA.setBgmVolume(this.value)"><span id="bgm-label" style="font-size:10px;color:var(--text-muted);min-width:24px">'+((state?.settings?.bgmVolume||0.18)*100).toFixed(0)+'%</span></div></div>'+
     '<div class="statline"><span>🔊 Kesan bunyi</span><button class="btn '+(state?.settings?.sound?'btn-primary':'btn-ghost')+' btn-sm" style="width:auto;padding:8px 16px" onclick="MMA.toggle(\'sound\')">'+(state?.settings?.sound?'ON':'OFF')+'</button></div>'+
     '<div class="statline"><span>🔊 Volum Kesan Bunyi</span><div style="display:flex;align-items:center;gap:8px;width:120px"><input type="range" min="0" max="100" value="'+((state?.settings?.sfxVolume??1)*100).toFixed(0)+'" style="flex:1;height:6px;appearance:none;background:var(--glass-border);border-radius:3px;outline:none;accent-color:var(--gold)" oninput="MMA.setSfxVolume(this.value)"><span id="sfx-label" style="font-size:10px;color:var(--text-muted);min-width:24px">'+((state?.settings?.sfxVolume??1)*100).toFixed(0)+'%</span></div></div>'+
     '<div class="statline"><span>🎨 Tema</span><div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:180px">'+
@@ -3120,7 +3158,7 @@ function setBgmVolume(v){
   state.settings = state.settings || {};
   state.settings.music = true;
   state.settings.bgmVolume = vol;
-  if(bgmGain && actx) bgmGain.gain.setValueAtTime(vol, actx.currentTime);
+  if(musicMasterGain) musicMasterGain.gain.setTargetAtTime(vol, getAudioCtx().currentTime, 0.05);
   if(!bgmPlaying && vol>0) startBGM();
   save();
   const label = document.querySelector('#bgm-label');
@@ -3321,9 +3359,11 @@ function startStage(i, mastery){
     B.deck.forEach(f=>{const mon=getMonster(f);B.monHp[f]=mon?mon.hp:50;});
     showToast(isMastery?'⭐':'📖', isMastery?'Mastery Mode! Enemy lebih kuat, ganjaran lebih baik!':getChapterStory((CHAPTERS[B.chapter]||CHAPTERS[0]).topic));
     if(stage.boss){
+      applyMusicTheme('boss');
       showBossIntro(stage.enemy,()=>{showCountdown(()=>{renderBattle();nextQuestion();});});
       return;
     }
+    applyMusicTheme('battle');
     showCountdown(()=>{renderBattle();nextQuestion();});
   }catch(e){console.error('startStage error:',e);route('home');}
 }
@@ -3505,6 +3545,7 @@ function startMegaBoss(chId){
       flamyBurn:false,addoCorrectCount:0,addoAtkBonus:0,sumagonSecondWindUsed:false,questionCount:0};
     if(B.deck.length===0)B.deck=[state?.starter||'flamy'];
     B.deck.forEach(f=>{const mon=getMonster(f);B.monHp[f]=mon?mon.hp:50;});
+    applyMusicTheme('boss');
     showBossIntro(megaArtId(bossId),()=>{showCountdown(()=>{renderBattle();nextQuestion();});},mega.name,'Evolusi '+esc(e?.name||'')+' — jauh lebih kuat!',mega.scale);
   }catch(err){console.error('startMegaBoss error:',err);route('megabossarena');}
 }
@@ -4357,6 +4398,7 @@ function resumeBattle(){
     B.enemy.hp = s.enemyHp;
     B.enemy.max = s.enemyMax;
     localStorage.removeItem('mma_saved_battle');
+    applyMusicTheme(B.stage.boss?'boss':'battle');
     showScreen('battle');
     renderBattle();
     nextQuestion();
@@ -4720,6 +4762,7 @@ function startRandomStage(){
   B={i:idx,stage:{...st,enemy:st.enemy,name:st.name||e.name,sub:st.sub||''},chapter:CHAPTERS.findIndex(ch=>ch.id===st.chapterId)||0,tier:st.baseTier||1,enemy:{...e,id:st.enemy,hp:ehp,max:ehp,atk:eatk},deck:(state.deck||[]).slice(),activeIdx:0,monHp:{},streak:0,bestStreak:0,correctInStage:0,wrongInStage:0,recentWrong:0,recentCorrect:0,bossPhase:false,locked:false,diff:state?.difficulty||'medium',randomMode:true};
   if(B.deck.length===0)B.deck=[state?.starter||'flamy'];
   B.deck.forEach(f=>{const mon=getMonster(f);B.monHp[f]=mon?mon.hp:50;});
+  applyMusicTheme(B.stage.boss?'boss':'battle');
   showCountdown(()=>{renderBattle();nextQuestion();});
 }
 
@@ -4763,6 +4806,7 @@ function startVsDuel(){
     vsMode:true,flamyBurn:false,addoCorrectCount:0,addoAtkBonus:0,sumagonSecondWindUsed:false,questionCount:0};
   const mon=getMonster(fam);B.monHp[fam]=mon?mon.hp:50;
   showToast('⚔️','Duel '+(vs.round+1)+' bermula!');
+  applyMusicTheme('battle');
   showCountdown(()=>{renderBattle();nextQuestion();});
 }
 function vsWinDuel(){
@@ -5390,7 +5434,7 @@ if('serviceWorker' in navigator){
 }
 }catch(e){console.error('Boot error:',e);state=defaultState();save();route('welcome');}
 
-document.addEventListener('click',function startBGM(){try{if(state?.settings?.music)startBGM();}catch(e){}document.removeEventListener('click',startBGM);},{once:true});
+document.addEventListener('click',function firstClickStartBGM(){try{if(state?.settings?.music)startBGM();}catch(e){}document.removeEventListener('click',firstClickStartBGM);},{once:true});
 document.addEventListener('click',function(e){try{if(e.target.closest('.btn')||e.target.closest('.choice')||e.target.closest('.tc.tap'))sfx.click();}catch(e){}});
 </script>
 </body>
