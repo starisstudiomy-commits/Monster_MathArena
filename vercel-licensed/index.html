@@ -10,6 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <!-- 🔐 VERSI VERCEL (perlu kod lesen) — assets di-host terus dalam projek ni (bukan bergantung CDN luar). -->
 <title>Monster Math Arena</title>
+<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="icon" href="assets/icons/icon-192.png">
 <link rel="preload" as="image" href="assets/splashscreen.png">
@@ -5430,7 +5431,13 @@ if(localStorage.getItem('mma_license_valid')!=='true'){
 }else{
   preloadAllAssets(()=>route('splash'));
 }
-// 🔐 Versi Vercel (license-gated) tak daftar service worker - elak konflik dgn flow lesen.
+
+// PWA: daftar service worker (assets kini same-origin, jadi selamat) supaya boleh install & main offline
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(e=>console.error('SW register error:',e));
+  });
+}
 }catch(e){console.error('Boot error:',e);state=defaultState();save();route('welcome');}
 
 document.addEventListener('click',function firstClickStartBGM(){try{if(state?.settings?.music)startBGM();}catch(e){}document.removeEventListener('click',firstClickStartBGM);},{once:true});
