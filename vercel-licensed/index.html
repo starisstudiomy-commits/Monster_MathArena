@@ -55,7 +55,7 @@
   --shadow-glow:0 0 40px rgba(212,175,55,.2);
 }
 
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;touch-action:manipulation}
 html,body{height:100%;overflow-x:hidden}
 
 body{
@@ -1637,7 +1637,18 @@ function megaArtId(bossId){return ART['mega_'+bossId]?('mega_'+bossId):bossId;}
 
 function preloadAllAssets(cb){
   if(typeof preloadMusic==='function')preloadMusic();
-  const urls=[...new Set(['assets/splashscreen.png','assets/logo_matharena.png','assets/gem.png',...Object.values(ART)])];
+  // 🧠 Preload SKOP TERHAD sahaja (bukan ~90 imej ART semua sekali) - elak memori
+  // keterlaluan di peranti macam iPad (setiap PNG 1024x1024 ~4MB decoded, x90 boleh
+  // sebabkan Safari/WebKit "restart" tab bila memori habis). Baki imej (monster belum
+  // dimiliki, musuh bab lain, dll.) tetap load normal secara automatik bila pertama
+  // kali dipaparkan - cuma tak dapat progress bar khas.
+  const essential=['assets/splashscreen.png','assets/logo_matharena.png','assets/gem.png'];
+  const effectsItems=[...Object.values(typeof EFFECT_PNG!=='undefined'?EFFECT_PNG:{}),typeof HIT_IMPACT_PNG!=='undefined'?HIT_IMPACT_PNG:null].filter(Boolean);
+  const starterArt=STARTER_IDS.map(f=>ART[f+'_1']).filter(Boolean);
+  const ownedArt=Object.keys(state?.collection||{}).filter(f=>state.collection[f]?.owned).map(f=>ART[f+'_'+(state.collection[f].stage||1)]).filter(Boolean);
+  const curChapter=CHAPTERS[state?.progress?.chapter||0];
+  const chapterEnemyArt=(curChapter?.stages||[]).map(s=>ART[s.enemy]).filter(Boolean);
+  const urls=[...new Set([...essential,...effectsItems,...starterArt,...ownedArt,...chapterEnemyArt])];
   const total=urls.length;
   const ov=document.createElement('div');
   ov.id='preloadScreen';
