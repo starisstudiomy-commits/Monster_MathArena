@@ -5241,7 +5241,7 @@ function renderIncubator(){
       ${ownedUltras.map(id=>{
         const c=state.collection[id],fam=FAMILIES[id];
         return`<div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--glass-border)">
-        <div style="width:64px;flex:0 0 auto">${cardHTML(stageData(id,c.stage-1),{})}</div>
+        <div style="width:104px;flex:0 0 auto">${cardHTML(stageData(id,c.stage-1),{})}</div>
         <div style="flex:1">
           <div style="font-weight:700;color:var(--text);font-size:13px">${esc(fam.stages[c.stage-1].name)}</div>
           <div style="font-size:10px;color:var(--text-secondary)">Tahap ${c.stage} drpd 3${c.stage===3?' · ✨ MYTHIC!':''}</div>
@@ -5295,18 +5295,65 @@ function hatchUltraRare(){
     state.journal.push({t:'hatch',txt:'Menetas! '+fact});
     save();
     const st=FAMILIES[species].stages[0];
+    const accent=FAMILIES[species]?.g1||'#A78BFA';const accentGlow=accent+'99';
+
     const ov=document.createElement('div');ov.className='overlay';ov.id='hatchOverlay';
-    ov.innerHTML=`<div style="position:relative;z-index:2;color:#A78BFA;font-size:12px">Telur menetas…</div>
-      <div class="evo-stage"><div class="evo-mon" id="hatchMon" style="width:200px;height:200px">${cardHTML(stageData(species,0),{})}</div></div>
-      <h2 class="display" style="position:relative;z-index:2">🐣 ${esc(st.name)} telah menetas!</h2>
-      <p style="position:relative;z-index:2;font-size:12px;color:var(--text-secondary)">Trait: <b style="color:var(--gold)">${tr.n}</b> (${tr.atk?'+'+tr.atk+' ATK':'+'+tr.hp+' HP'})<br>💡 ${esc(fact)}</p>
-      <button class="btn btn-primary" style="position:relative;z-index:2;max-width:220px" onclick="MMA.closeHatchOverlay()">TERUSKAN</button>`;
+    ov.style.setProperty('--ambient',accent+'28');
+    ov.style.setProperty('--ambient-reveal',accent+'28');
+    ov.style.setProperty('--accent-glow',accentGlow);
+    ov.innerHTML=`
+      <div class="evo-vignette" id="hatchVignette"></div>
+      <div class="evo-evolving-text" id="hatchEvolvingText">Telur sedang <span class="hl">MENETAS</span><span class="evo-loading-dots"><span></span><span></span><span></span></span></div>
+      <div class="evo-stage"><div class="evo-mon" id="hatchMon">${getArt(st.id)}</div></div>
+      <div class="evo-bottom-info" id="hatchBottomInfo">
+        <div class="evo-label-wrap" style="opacity:0;animation:none"><div class="evo-label reveal">🐣 MENETAS!</div></div>
+        <div class="evo-names-row" style="opacity:0;animation:none"><span class="evo-to">${esc(st.name)}</span></div>
+        <p id="hatchTraitTxt" style="position:relative;z-index:2;font-size:12px;color:var(--text-secondary);text-align:center;opacity:0;margin-top:6px">Trait: <b style="color:var(--gold)">${tr.n}</b> (${tr.atk?'+'+tr.atk+' ATK':'+'+tr.hp+' HP'})<br>💡 ${esc(fact)}</p>
+        <button class="evo-btn" onclick="event.stopPropagation();MMA.closeHatchOverlay()" style="z-index:9999;position:relative;pointer-events:auto;opacity:0;animation:none;transform:none;margin-top:10px">TERUSKAN</button>
+      </div>`;
     document.body.appendChild(ov);
-    const hatchMon=document.getElementById('hatchMon');
-    if(hatchMon){hatchMon.style.transition='opacity .3s ease, transform .3s ease';hatchMon.style.opacity='0';hatchMon.style.transform='scale(.6)';
-      requestAnimationFrame(()=>{whiteFlashEv();hatchMon.style.opacity='1';hatchMon.style.transform='scale(1)';hatchMon.classList.add('settle-pulse');});}
+
+    const mon=document.getElementById('hatchMon');
+    const vignette=document.getElementById('hatchVignette');
+    const evolvingText=document.getElementById('hatchEvolvingText');
+    const bottomInfo=document.getElementById('hatchBottomInfo');
+    const traitTxt=document.getElementById('hatchTraitTxt');
+    const btn=ov.querySelector('.evo-btn');
+
+    // FASA A (0-1.3s): siluet putih + vignette + particle tenaga naik + riser bunyi
+    vignette.classList.add('on');
+    mon.classList.add('silhouette');
+    evolvingText.classList.add('on');
+    startEvoEnergyParticles(ov);
+    try{evoPlayRiser(0);}catch(e){}
+
+    // FASA B (~1300ms): flash + reveal penuh warna + shake + sparkle + impact bunyi
+    setTimeout(()=>{
+      whiteFlashEv();
+      vignette.classList.remove('on');
+      evolvingText.classList.remove('on');
+      stopEvoEnergyParticles();
+      mon.classList.remove('silhouette');
+      mon.classList.add('reveal-shake');
+      ov.classList.remove('screenshake');void ov.offsetWidth;ov.classList.add('screenshake');
+      ov.classList.add('reveal-bg');
+      spawnEvoSparks(accent,28);
+      try{evoPlayImpact(0);evoPlaySparkleArp(.05);}catch(e){}
+      try{navigator.vibrate&&navigator.vibrate([40,30,80]);}catch(e){}
+    },1300);
+    setTimeout(()=>spawnEvoSparks(accent,18),1550);
+
+    // FASA C (~1900ms): settle pulse + reveal nama/trait/fact/butang
+    setTimeout(()=>{
+      mon.classList.remove('reveal-shake');
+      mon.classList.add('settle-pulse');
+      bottomInfo.querySelector('.evo-label-wrap').style.animation='';
+      bottomInfo.querySelector('.evo-names-row').style.animation='';
+      traitTxt.style.transition='opacity .4s ease';traitTxt.style.opacity='1';
+      btn.style.opacity='';btn.style.animation='';
+    },1900);
+
     sfx.win();
-    try{navigator.vibrate&&navigator.vibrate([40,30,80]);}catch(e){}
   }catch(e){console.error('hatchUltraRare error:',e);}
 }
 function closeHatchOverlay(){const o=document.getElementById('hatchOverlay');if(o)o.remove();renderIncubator();}
@@ -5425,9 +5472,9 @@ function showIncubatorChallenge(q,itemId,objective,evoFam){
   const itemNames={nutrient:'Nutrien',vitamin:'Vitamin',serum:'Serum'};
   const ov=document.createElement('div');ov.className='overlay';ov.id='incChallengeOverlay';
   ov.innerHTML=`<h2 class="display" style="position:relative;z-index:2;font-size:15px">🧪 Selesaikan cabaran utk guna ${esc(itemNames[itemId])}</h2>
-    <div class="qbox" style="position:relative;z-index:2;min-width:220px"><div class="qtext">${q.prompt}</div></div>
-    <div class="choices" style="position:relative;z-index:2;max-width:300px">${q.choices.map((c,i)=>`<button class="choice" onclick="MMA.answerIncubatorChallenge(${i})">${c.label??c}</button>`).join('')}</div>
-    <button class="btn btn-ghost" style="position:relative;z-index:2;max-width:160px;margin-top:8px" onclick="MMA.closeIncubatorChallenge()">Batal</button>`;
+    <div class="qbox" style="position:relative;z-index:2;width:100%;max-width:400px"><div class="qtext">${q.prompt}</div></div>
+    <div class="choices" style="position:relative;z-index:2;width:100%;max-width:400px">${q.choices.map((c,i)=>`<button class="choice" onclick="MMA.answerIncubatorChallenge(${i})">${c.label??c}</button>`).join('')}</div>
+    <button class="btn btn-ghost" style="position:relative;z-index:2;max-width:200px;margin-top:12px" onclick="MMA.closeIncubatorChallenge()">Batal</button>`;
   document.body.appendChild(ov);
   window._incChallenge={q,itemId,objective,evoFam};
 }
