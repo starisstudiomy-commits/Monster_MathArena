@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monster MathArena — Demo Sound Theme</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse at 50% 20%,#1a1240 0%,#0a0618 55%,#050309 100%);
+    min-height:100vh;color:#fff;font-family:'Segoe UI',Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;padding:32px 16px;
+  }
+  h1{font-size:22px;margin-bottom:4px;text-align:center;}
+  p.sub{color:#a8a2c8;font-size:13px;margin-bottom:28px;text-align:center;max-width:420px;}
+  .themes{display:flex;flex-direction:column;gap:14px;width:100%;max-width:420px;}
+  .theme-btn{
+    display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;
+    border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);
+    cursor:pointer;transition:.2s;text-align:left;color:#fff;font-family:inherit;
+  }
+  .theme-btn:hover{background:rgba(255,255,255,.09);}
+  .theme-btn.active{border-color:#FFD34D;background:rgba(255,211,77,.12);box-shadow:0 0 24px rgba(255,211,77,.25);}
+  .theme-btn .ico{font-size:32px;width:44px;text-align:center;flex-shrink:0;}
+  .theme-btn .txt{flex:1;}
+  .theme-btn .txt b{display:block;font-size:15px;margin-bottom:2px;}
+  .theme-btn .txt span{display:block;font-size:11.5px;color:#a8a2c8;}
+  .theme-btn .eq{display:flex;gap:2px;align-items:flex-end;height:18px;width:18px;flex-shrink:0;}
+  .theme-btn .eq i{width:3px;background:#FFD34D;border-radius:2px;opacity:.25;}
+  .theme-btn.active .eq i{opacity:1;animation:eq 0.9s ease-in-out infinite;}
+  .theme-btn.active .eq i:nth-child(1){animation-delay:0s;}
+  .theme-btn.active .eq i:nth-child(2){animation-delay:.15s;}
+  .theme-btn.active .eq i:nth-child(3){animation-delay:.3s;}
+  @keyframes eq{0%,100%{height:4px;}50%{height:18px;}}
+  .stopbtn{
+    margin-top:18px;padding:10px 28px;border-radius:30px;border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.05);color:#ccc;cursor:pointer;font-size:13px;font-family:inherit;
+  }
+  .stopbtn:hover{background:rgba(255,255,255,.1);}
+  .vol{display:flex;align-items:center;gap:10px;margin-top:24px;width:100%;max-width:420px;}
+  .vol span{font-size:12px;color:#a8a2c8;white-space:nowrap;}
+  .vol input{flex:1;accent-color:#FFD34D;}
+  .note{margin-top:28px;font-size:11.5px;color:#7a7398;text-align:center;max-width:420px;line-height:1.6;}
+</style>
+</head>
+<body>
+<h1>🎵 Demo Sound Theme</h1>
+<p class="sub">Setiap skrin dalam game akan main tema muzik latar berlainan. Cuba klik satu-satu untuk dengar — pertukaran ada crossfade lembut (bukan cut terus).</p>
+
+<div class="themes">
+  <button class="theme-btn" data-theme="home" onclick="playTheme('home')">
+    <div class="ico">🏠</div>
+    <div class="txt"><b>Home / Menu</b><span>Tenang, ceria, tempo perlahan — untuk skrin utama & koleksi</span></div>
+    <div class="eq"><i></i><i></i><i></i></div>
+  </button>
+  <button class="theme-btn" data-theme="battle" onclick="playTheme('battle')">
+    <div class="ico">⚔️</div>
+    <div class="txt"><b>Battle</b><span>Lebih tegang & bertenaga — untuk pertarungan biasa</span></div>
+    <div class="eq"><i></i><i></i><i></i></div>
+  </button>
+  <button class="theme-btn" data-theme="boss" onclick="playTheme('boss')">
+    <div class="ico">👑</div>
+    <div class="txt"><b>Boss</b><span>Epic & dramatik, ada bass berat — untuk pertarungan boss</span></div>
+    <div class="eq"><i></i><i></i><i></i></div>
+  </button>
+</div>
+
+<button class="stopbtn" onclick="stopTheme()">⏹ Stop</button>
+
+<div class="vol">
+  <span>🔉 Volume</span>
+  <input type="range" min="0" max="100" value="18" oninput="setVol(this.value)">
+</div>
+
+<p class="note">Nota: semua muzik ni dijana terus dalam browser guna WebAudio (oscillator), bukan fail audio — sama macam SFX game sekarang. Tiada fail perlu dimuat turun.</p>
+
+<script>
+let actx = null;
+function getCtx(){ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); return actx; }
+
+// [melodyFreq, harmonyFreq]
+const THEMES = {
+  home:{
+    tempo: 1100,
+    notes:[[261,329],[293,349],[329,392],[349,440],[392,494],[349,440],[329,392],[293,349],
+           [261,329],[293,349],[329,392],[392,494],[440,523],[392,494],[329,392],[261,329]],
+    wave1:'sine', wave2:'sine', gain1:0.26, gain2:0.13, decay1:1.4, decay2:1.1, bass:false
+  },
+  battle:{
+    tempo: 780,
+    notes:[[261,392],[329,440],[392,523],[440,659],[523,784],[392,523],[329,440],[261,392],
+           [329,440],[392,523],[440,659],[523,784],[659,1047],[523,784],[392,523],[329,440]],
+    wave1:'sine', wave2:'triangle', gain1:0.30, gain2:0.16, decay1:0.75, decay2:0.6, bass:false
+  },
+  boss:{
+    tempo: 520,
+    notes:[[220,277],[220,277],[233,294],[220,277],[196,247],[196,247],[220,277],[233,294],
+           [261,330],[261,330],[233,294],[220,277],[196,247],[220,277],[233,294],[196,247]],
+    wave1:'sawtooth', wave2:'square', gain1:0.22, gain2:0.11, decay1:0.55, decay2:0.4, bass:true,
+    bassFreq:[65.4,65.4,61.7,65.4,49,49,65.4,61.7]
+  }
+};
+
+let current=null, interval=null, masterGain=null, noteIdx=0, bassIdx=0;
+
+function setVol(v){
+  const vol = v/100;
+  if(masterGain) masterGain.gain.setTargetAtTime(vol, getCtx().currentTime, 0.05);
+  window._demoVol = vol;
+}
+
+function playNote(theme){
+  const ctx = getCtx();
+  const now = ctx.currentTime;
+  const [f1,f2] = theme.notes[noteIdx % theme.notes.length];
+
+  const o1=ctx.createOscillator(), g1=ctx.createGain();
+  o1.type=theme.wave1; o1.frequency.value=f1; o1.connect(g1); g1.connect(masterGain);
+  g1.gain.setValueAtTime(theme.gain1, now); g1.gain.exponentialRampToValueAtTime(0.001, now+theme.decay1);
+  o1.start(now); o1.stop(now+theme.decay1+0.05);
+
+  const o2=ctx.createOscillator(), g2=ctx.createGain();
+  o2.type=theme.wave2; o2.frequency.value=f2; o2.connect(g2); g2.connect(masterGain);
+  g2.gain.setValueAtTime(theme.gain2, now); g2.gain.exponentialRampToValueAtTime(0.001, now+theme.decay2);
+  o2.start(now); o2.stop(now+theme.decay2+0.05);
+
+  if(theme.bass){
+    const bf = theme.bassFreq[bassIdx % theme.bassFreq.length];
+    const ob=ctx.createOscillator(), gb=ctx.createGain();
+    ob.type='triangle'; ob.frequency.value=bf; ob.connect(gb); gb.connect(masterGain);
+    gb.gain.setValueAtTime(0.28, now); gb.gain.exponentialRampToValueAtTime(0.001, now+theme.tempo/1000*1.8);
+    ob.start(now); ob.stop(now+theme.tempo/1000*1.9);
+    bassIdx++;
+  }
+  noteIdx++;
+}
+
+function playTheme(key){
+  const ctx = getCtx();
+  if(ctx.state==='suspended') ctx.resume();
+  const theme = THEMES[key];
+
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('active', b.dataset.theme===key));
+
+  // crossfade: fade out old master gain, then swap
+  const oldGain = masterGain;
+  if(oldGain){
+    oldGain.gain.setTargetAtTime(0, ctx.currentTime, 0.25);
+    setTimeout(()=>{ try{oldGain.disconnect();}catch(e){} }, 900);
+  }
+  if(interval) clearInterval(interval);
+
+  masterGain = ctx.createGain();
+  masterGain.gain.setValueAtTime(0, ctx.currentTime);
+  masterGain.gain.setTargetAtTime(window._demoVol ?? 0.18, ctx.currentTime, 0.3);
+  masterGain.connect(ctx.destination);
+
+  current = key; noteIdx=0; bassIdx=0;
+  playNote(theme);
+  interval = setInterval(()=>playNote(theme), theme.tempo);
+}
+
+function stopTheme(){
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+  if(interval){ clearInterval(interval); interval=null; }
+  if(masterGain){
+    const ctx=getCtx();
+    masterGain.gain.setTargetAtTime(0, ctx.currentTime, 0.25);
+    const g=masterGain;
+    setTimeout(()=>{ try{g.disconnect();}catch(e){} }, 900);
+    masterGain=null;
+  }
+  current=null;
+}
+</script>
+</body>
+</html>
