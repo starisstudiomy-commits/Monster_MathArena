@@ -2654,7 +2654,7 @@ function nextTutorial(){tutorialStep++;if(tutorialStep>=5){state.tutorialDone=tr
 let current='welcome';
 function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);if(name!=='splash')applyMusicTheme('home');({splash:renderSplash,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
 
-function isPro(){ return state?.license && validateKey(state.license); }
+function isPro(){ return (typeof localStorage!=='undefined'&&localStorage.getItem('mma_license_valid')==='true') || (state?.license && validateKey(state.license)); }
 
 function renderSplash(){
   app.innerHTML=`<div id="splash"><div class="bg"></div><button class="splash-enter" onclick="MMA.enterGame()">MULAKAN</button><div class="splash-version">v1.0.0</div></div>`;
@@ -3111,7 +3111,9 @@ function renderSettings(){
     }).join('')+'</div></div>'+
     (state?.settings?.theme==='custom'?'<div class="statline"><span>🖌️ Warna Kamu</span><input type="color" value="'+(state?.settings?.customColor||'#8B5CF6')+'" oninput="MMA.setCustomColor(this.value)" style="width:44px;height:28px;border-radius:6px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;padding:2px"></div>':'')+
     '<div class="statline"><span>🖼️ Avatar</span><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:140px;justify-content:flex-end">'+['🦁','🐱','🐶','🐼','🦊','🐸','🦄','🐲','🦅','🐙','🦋','🐢'].map(a=>`<button style="width:28px;height:28px;border-radius:6px;border:${(state?.avatar||'🦁')===a?'2px solid var(--gold)':'1px solid var(--glass-border)'};background:${(state?.avatar||'🦁')===a?'var(--glass-heavy)':'transparent'};font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="MMA.setAvatar('${a}')">${a}</button>`).join('')+'</div></div>'+
-    '<div class="statline"><span>'+(isPro()?'👑 PRO':'🔒 FREE')+'</span><button class="btn btn-sm" style="width:auto;padding:6px 12px;background:var(--gold);color:#000" onclick="MMA.activateLicense()">'+(isPro()?'✔ Diaktifkan':'Aktifkan PRO')+'</button></div>'+
+    (localStorage.getItem('mma_license_valid')==='true'
+      ? '<div class="statline"><span>👑 PRO</span><span style="color:var(--gold);font-weight:700;font-size:12px">✔ Disahkan (Lesen)</span></div>'
+      : '<div class="statline"><span>'+(isPro()?'👑 PRO':'🔒 FREE')+'</span><button class="btn btn-sm" style="width:auto;padding:6px 12px;background:var(--gold);color:#000" onclick="MMA.activateLicense()">'+(isPro()?'✔ Diaktifkan':'Aktifkan PRO')+'</button></div>')+
     '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--glass-border)">'+
     '<h3 class="display" style="font-size:14px;margin-bottom:8px;color:var(--gold)">👨‍👩‍👧 Kawalan Ibu Bapa</h3>'+
     '<p style="color:var(--text-secondary);font-size:11px;margin-bottom:12px">Tetapkan bilangan soalan dan kesukaran setiap bab</p>'+
@@ -4204,10 +4206,10 @@ function showEvolution(fam,oldName){
     mon.classList.add('reveal-shake');
     ov.classList.remove('screenshake');void ov.offsetWidth;ov.classList.add('screenshake');
     ov.classList.add('reveal-bg');
-    spawnEvoSparks(accent,55);
+    spawnEvoSparks(accent,28);
     try{evoPlayImpact(0);evoPlaySparkleArp(.05);}catch(e){}
   },1500);
-  setTimeout(()=>spawnEvoSparks(accent,45),1750);
+  setTimeout(()=>spawnEvoSparks(accent,22),1750);
 
   // FASA C (~2100ms): shake reda, monster settle dengan PULSATING glow dramatik + info muncul (nama/bintang/stats/butang)
   setTimeout(()=>{
@@ -4241,25 +4243,27 @@ function showEvolution(fam,oldName){
     if(sw){for(let i=0;i<5;i++){const s=document.createElement('span');s.className='evo-star';s.textContent='★';sw.appendChild(s);}
       sw.querySelectorAll('.evo-star').forEach((s,i)=>setTimeout(()=>{if(i<rarityStars)s.classList.add('lit');},i*90));
     }
+
+    // Lepas info penuh terpapar, benarkan tap mana-mana pada skrin utk skip awal (bukan cuma butang)
+    ov.onclick=()=>MMA.closeEvo();
+    ov.style.cursor='pointer';
   },2100);
 
-  setTimeout(()=>{const o=$('#evoOverlay');if(o){o.remove();B.locked=false;renderBattle();nextQuestion();}},8000);
+  setTimeout(()=>{const o=$('#evoOverlay');if(o){o.remove();B.locked=false;renderBattle();nextQuestion();}},4800);
 }
 
 let evoEnergyInterval=null;
 function startEvoEnergyParticles(ov){
   stopEvoEnergyParticles();
   evoEnergyInterval=setInterval(()=>{
-    for(let k=0;k<2;k++){
-      const p=document.createElement('div');
-      const sz=3+Math.random()*7;
-      const leftPos=36+Math.random()*28;
-      p.className='evo-energy-p';
-      p.style.cssText=`width:${sz}px;height:${sz}px;left:${leftPos}%;box-shadow:0 0 7px #FDE68A;animation-delay:${Math.random()*.1}s`;
-      ov.appendChild(p);
-      setTimeout(()=>p.remove(),1400);
-    }
-  },55);
+    const p=document.createElement('div');
+    const sz=3+Math.random()*7;
+    const leftPos=36+Math.random()*28;
+    p.className='evo-energy-p';
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${leftPos}%;box-shadow:0 0 7px #FDE68A;animation-delay:${Math.random()*.1}s`;
+    ov.appendChild(p);
+    setTimeout(()=>p.remove(),1400);
+  },70);
 }
 function stopEvoEnergyParticles(){if(evoEnergyInterval){clearInterval(evoEnergyInterval);evoEnergyInterval=null;}}
 
