@@ -2,12 +2,16 @@
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
-<!-- 🔐 VERSI VERCEL (perlu kod lesen) — assets dimuat dari GitHub (elak duplikasi ~88MB dlm repo Vercel ni).
-     TUKAR "claude/new-session-93ai7c" di bawah kepada "main" (atau branch produksi) bila dah merge. -->
-<base href="https://raw.githack.com/starisstudiomy-commits/Monster_MathArena/claude/new-session-93ai7c/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MathArena">
 <meta name="theme-color" content="#0A0A0A">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- 🔐 VERSI VERCEL (perlu kod lesen) — assets di-host terus dalam projek ni (bukan bergantung CDN luar). -->
 <title>Monster Math Arena</title>
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" href="assets/icons/icon-192.png">
 <link rel="preload" as="image" href="assets/splashscreen.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1631,6 +1635,7 @@ const ART = {
 function megaArtId(bossId){return ART['mega_'+bossId]?('mega_'+bossId):bossId;}
 
 function preloadAllAssets(cb){
+  if(typeof preloadMusic==='function')preloadMusic();
   const urls=[...new Set(['assets/splashscreen.png','assets/logo_matharena.png','assets/gem.png',...Object.values(ART)])];
   const total=urls.length;
   const ov=document.createElement('div');
@@ -2189,9 +2194,9 @@ function genUkuran(maxNum, numChoices, tier){
     ['Zirafah 🦒','Arnab 🐇'], ['Tembikai 🍉','Anggur 🍇'],
     ['Paus 🐋','Ikan 🐟'], ['Gunung ⛰️','Bukit 🏔️'],
     ['Kapal 🚢','Bot kecil 🛶'], ['Piano 🎹','Seruling 🎶'],
-    ['Badak sumbu 🦏','Kucing 🐱'], ['Besi 🔩','Span 🧽'],
+    ['Badak sumbu 🦏','Kucing 🐱'], ['Almari 🗄️','Span 🧽'],
     ['Meja besar 📦','Pensel ✏️'], ['Kolam renang 🏊','Gelas air 🥛'],
-    ['Beg pasir 🏋️','Belon 🎈'],
+    ['Traktor 🚜','Belon 🎈'],
   ];
   const isipadu = [
     ['Gelas penuh 🥛','Gelas kosong 🥛'],
@@ -2201,10 +2206,11 @@ function genUkuran(maxNum, numChoices, tier){
     ['Akuarium 🐠','Mangkuk kecil 🥣'],
   ];
   const panjang = [
-    ['Pensel panjang','Pensel pendek'], ['Tali skipping','Gelang getah'],
-    ['Jalan raya 🛣️','Lorong kecil 🏘️'], ['Pembaris 📏'],
+    ['Pensel panjang ✏️','Pensel pendek ✏️'], ['Tali skipping 🪢','Gelang getah 🟤'],
+    ['Jalan raya 🛣️','Lorong kecil 🏘️'], ['Ular sawa 🐍','Cacing 🪱'],
+    ['Keretapi 🚂','Basikal 🚲'],
   ];
-  
+
   // Tier 3: isipadu
   if(tier===3 && Math.random() < 0.3){
     const p = isipadu[Math.floor(Math.random() * isipadu.length)];
@@ -2214,7 +2220,17 @@ function genUkuran(maxNum, numChoices, tier){
     const choices = shuffle([p[0], p[1]]).map(v => ({label: v, value: v}));
     return {prompt, answer, choices, two: true, topic: 'ukuran'};
   }
-  
+
+  // Tier 1-3: panjang comparison
+  if(Math.random() < 0.2){
+    const p = panjang[Math.floor(Math.random() * panjang.length)];
+    const askLong = Math.random() < 0.5;
+    const answer = askLong ? p[0] : p[1];
+    const prompt = askLong ? 'Manakah yang lebih panjang?' : 'Manakah yang lebih pendek?';
+    const choices = shuffle([p[0], p[1]]).map(v => ({label: v, value: v}));
+    return {prompt, answer, choices, two: true, topic: 'ukuran'};
+  }
+
   // Tier 2-3: 3 pairs comparison
   if(tier>=2 && Math.random() < 0.35){
     const shuffled = shuffle([...pairs]).slice(0, 3);
@@ -2500,10 +2516,47 @@ function sfxSplashSting(){
   }catch(e){}
 }
 
-let bgmPlaying=false,bgmInterval=null,bgmGain=null;
-const BGM_NOTES=[[261,392],[329,440],[392,523],[440,659],[523,784],[392,523],[329,440],[261,392],[329,440],[392,523],[440,659],[523,784],[659,1047],[523,784],[392,523],[329,440],[261,392],[329,440],[392,523],[261,392]];
-function startBGM(){if(!state?.settings?.music||bgmPlaying)return;try{actx=getAudioCtx();bgmGain=actx.createGain();bgmGain.gain.setValueAtTime(state?.settings?.bgmVolume??0.08,actx.currentTime);bgmGain.connect(actx.destination);let noteIdx=0;bgmPlaying=true;function playNote(){if(!bgmPlaying)return;try{const[f1,f2]=BGM_NOTES[noteIdx%BGM_NOTES.length];const now=actx.currentTime;const o1=actx.createOscillator();const g1=actx.createGain();o1.type='sine';o1.frequency.value=f1;o1.connect(g1);g1.connect(bgmGain);g1.gain.setValueAtTime(0.3,now);g1.gain.exponentialRampToValueAtTime(0.01,now+0.8);o1.start(now);o1.stop(now+0.9);const o2=actx.createOscillator();const g2=actx.createGain();o2.type='triangle';o2.frequency.value=f2;o2.connect(g2);g2.connect(bgmGain);g2.gain.setValueAtTime(0.15,now);g2.gain.exponentialRampToValueAtTime(0.01,now+0.6);o2.start(now);o2.stop(now+0.7);}catch(e){}noteIdx++;}playNote();bgmInterval=setInterval(playNote,900);}catch(e){}}
-function stopBGM(){bgmPlaying=false;if(bgmInterval){clearInterval(bgmInterval);bgmInterval=null;}if(bgmGain){bgmGain.gain.setValueAtTime(0,actx.currentTime);bgmGain=null;}}
+/* 🎵 Muzik latar sebenar (Pixabay), tema ikut skrin: home/battle/boss.
+   Loop sample-accurate guna AudioBufferSourceNode (elak klik di titik loop
+   yang biasa berlaku dgn <audio loop>). Crossfade lembut bila tema bertukar. */
+let bgmPlaying=false,musicMasterGain=null,musicActiveSource=null,musicActiveGain=null,currentMusicTheme='home';
+const MUSIC_SRC={home:'assets/music/home.mp3',battle:'assets/music/battle.mp3',boss:'assets/music/boss.mp3'};
+const musicBuffers={};
+function loadMusicBuffer(key){
+  if(musicBuffers[key])return Promise.resolve(musicBuffers[key]);
+  return fetch(MUSIC_SRC[key]).then(r=>r.arrayBuffer()).then(arr=>getAudioCtx().decodeAudioData(arr)).then(buf=>{musicBuffers[key]=buf;return buf;}).catch(e=>{console.error('music load error',key,e);return null;});
+}
+function preloadMusic(){Object.keys(MUSIC_SRC).forEach(k=>loadMusicBuffer(k));}
+function applyMusicTheme(key){
+  if(currentMusicTheme===key&&musicActiveSource)return;
+  currentMusicTheme=key;
+  if(state?.settings?.music)startBGM();
+}
+function startBGM(){
+  if(!state?.settings?.music)return;
+  const key=currentMusicTheme;
+  loadMusicBuffer(key).then(buf=>{
+    if(!buf||!state?.settings?.music)return;
+    if(musicActiveSource&&musicActiveSource._themeKey===key)return;
+    try{
+      const ctx=getAudioCtx();
+      if(!musicMasterGain){musicMasterGain=ctx.createGain();musicMasterGain.gain.setValueAtTime(state?.settings?.bgmVolume??0.18,ctx.currentTime);musicMasterGain.connect(ctx.destination);}
+      const oldSource=musicActiveSource,oldGain=musicActiveGain;
+      if(oldGain){oldGain.gain.setTargetAtTime(0,ctx.currentTime,0.35);setTimeout(()=>{try{oldSource.stop();}catch(e){}},900);}
+      const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;src._themeKey=key;
+      const g=ctx.createGain();g.gain.setValueAtTime(0,ctx.currentTime);g.gain.setTargetAtTime(1,ctx.currentTime,0.35);
+      src.connect(g);g.connect(musicMasterGain);src.start(0);
+      musicActiveSource=src;musicActiveGain=g;bgmPlaying=true;
+    }catch(e){console.error('startBGM error:',e);}
+  });
+}
+function stopBGM(){
+  bgmPlaying=false;
+  if(musicActiveGain){
+    try{const ctx=getAudioCtx();musicActiveGain.gain.setTargetAtTime(0,ctx.currentTime,0.3);const s=musicActiveSource;setTimeout(()=>{try{s.stop();}catch(e){}},800);}catch(e){}
+    musicActiveSource=null;musicActiveGain=null;
+  }
+}
 function toggleBGM(){if(bgmPlaying){stopBGM();state.settings.music=false;}else{state.settings.music=true;startBGM();}save();}
 
 /* ============================================================
@@ -2595,7 +2648,7 @@ function nextTutorial(){tutorialStep++;if(tutorialStep>=5){state.tutorialDone=tr
    12) ROUTER + SCREENS
    ============================================================ */
 let current='welcome';
-function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);({splash:renderSplash,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
+function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);if(name!=='splash')applyMusicTheme('home');({splash:renderSplash,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
 
 function isPro(){ return state?.license && validateKey(state.license); }
 
@@ -2925,7 +2978,7 @@ function renderDeck(){
     <span style="font-size:9px;color:var(--text-muted);align-self:center">|</span>
     <button onclick="MMA.route('fusion')" style="font-family:var(--font);font-size:9px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--gold);background:rgba(212,175,55,.1);color:var(--gold);cursor:pointer;letter-spacing:.5px">⚗️ Fusion</button>
   </div>
-  <div class="cardgrid">${owned.map(f=>{const m=getMonster(f);if(!m)return'';const d=stageData(f,m.stage-1);const inDeck=state.deck.includes(f);const role=FAMILIES[f]?.role||'';const curHp=inBattle&&B.monHp[f]!==undefined?B.monHp[f]:null;const dShow=curHp!==null?{...d,hp:Math.max(0,curHp)}:d;return`<div onclick="MMA.toggleDeck('${f}')" style="position:relative">${cardHTML(dShow,{tap:true,sel:inDeck,lv:m.level,role})}<button style="position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:6px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5" onclick="event.stopPropagation();MMA.showCardPreview('${f}')">🔍</button><div class="cardcap">${inDeck?'✔ Dalam deck':''}${curHp!==null&&curHp<=0?' 💀 <span style=color:var(--danger)>Pengsan</span>':curHp!==null&&curHp<d.hp?` ❤ <span style=color:var(--danger)>${curHp}/${d.hp}</span>`:''}</div></div>`;}).join('')}</div><button class="btn btn-primary" style="margin-top:12px" onclick="MMA.route('home')">Siap</button></div>`;
+  <div class="cardgrid">${owned.map(f=>{const m=getMonster(f);if(!m)return'';const d=stageData(f,m.stage-1);const inDeck=state.deck.includes(f);const role=FAMILIES[f]?.role||'';const curHp=inBattle&&B.monHp[f]!==undefined?B.monHp[f]:null;const dShow=curHp!==null?{...d,hp:Math.max(0,curHp)}:d;return`<div onclick="MMA.toggleDeck('${f}')" style="position:relative">${cardHTML(dShow,{tap:true,sel:inDeck,lv:m.level,role})}<button style="position:absolute;top:34px;right:6px;width:22px;height:22px;border-radius:6px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:6" onclick="event.stopPropagation();MMA.showCardPreview('${f}')">🔍</button><div class="cardcap">${inDeck?'✔ Dalam deck':''}${curHp!==null&&curHp<=0?' 💀 <span style=color:var(--danger)>Pengsan</span>':curHp!==null&&curHp<d.hp?` ❤ <span style=color:var(--danger)>${curHp}/${d.hp}</span>`:''}</div></div>`;}).join('')}</div><button class="btn btn-primary" style="margin-top:12px" onclick="MMA.route('home')">Siap</button></div>`;
 }
 function toggleDeck(f){const i=state.deck.indexOf(f);if(i>=0){if(state.deck.length>1)state.deck.splice(i,1);}else if(state.deck.length<3)state.deck.push(f);save();renderDeck();}
 
@@ -3042,7 +3095,7 @@ function renderSettings(){
     '<div class="statline"><span>👤 Nama Pemain</span><input type="text" id="player-name-input" value="'+esc(state.playerName||'Aydan')+'" maxlength="14" style="width:120px;background:var(--surface-light);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;font-family:var(--font);font-size:12px;color:var(--text);text-align:center;outline:none" onchange="MMA.setPlayerName(this.value)"></div>'+
     '<div class="statline"><span>🎯 Tahap Kesukaran</span><button class="btn btn-sm" style="width:auto;padding:8px 16px;background:'+DIFFICULTIES[state?.difficulty||'medium'].color+'" onclick="MMA.route(\'difficulty\')">'+DIFFICULTIES[state?.difficulty||'medium'].icon+' '+DIFFICULTIES[state?.difficulty||'medium'].name+'</button></div>'+
     '<div class="statline"><span>🎵 Muzik latar</span><button class="btn '+(state?.settings?.music?'btn-primary':'btn-ghost')+' btn-sm" style="width:auto;padding:8px 16px" onclick="MMA.toggle(\'music\')">'+(state?.settings?.music?'ON':'OFF')+'</button></div>'+
-    '<div class="statline"><span>🔉 Volum Muzik</span><div style="display:flex;align-items:center;gap:8px;width:120px"><input type="range" min="0" max="100" value="'+((state?.settings?.bgmVolume||0.08)*100).toFixed(0)+'" style="flex:1;height:6px;appearance:none;background:var(--glass-border);border-radius:3px;outline:none;accent-color:var(--gold)" oninput="MMA.setBgmVolume(this.value)"><span id="bgm-label" style="font-size:10px;color:var(--text-muted);min-width:24px">'+((state?.settings?.bgmVolume||0.08)*100).toFixed(0)+'%</span></div></div>'+
+    '<div class="statline"><span>🔉 Volum Muzik</span><div style="display:flex;align-items:center;gap:8px;width:120px"><input type="range" min="0" max="100" value="'+((state?.settings?.bgmVolume||0.18)*100).toFixed(0)+'" style="flex:1;height:6px;appearance:none;background:var(--glass-border);border-radius:3px;outline:none;accent-color:var(--gold)" oninput="MMA.setBgmVolume(this.value)"><span id="bgm-label" style="font-size:10px;color:var(--text-muted);min-width:24px">'+((state?.settings?.bgmVolume||0.18)*100).toFixed(0)+'%</span></div></div>'+
     '<div class="statline"><span>🔊 Kesan bunyi</span><button class="btn '+(state?.settings?.sound?'btn-primary':'btn-ghost')+' btn-sm" style="width:auto;padding:8px 16px" onclick="MMA.toggle(\'sound\')">'+(state?.settings?.sound?'ON':'OFF')+'</button></div>'+
     '<div class="statline"><span>🔊 Volum Kesan Bunyi</span><div style="display:flex;align-items:center;gap:8px;width:120px"><input type="range" min="0" max="100" value="'+((state?.settings?.sfxVolume??1)*100).toFixed(0)+'" style="flex:1;height:6px;appearance:none;background:var(--glass-border);border-radius:3px;outline:none;accent-color:var(--gold)" oninput="MMA.setSfxVolume(this.value)"><span id="sfx-label" style="font-size:10px;color:var(--text-muted);min-width:24px">'+((state?.settings?.sfxVolume??1)*100).toFixed(0)+'%</span></div></div>'+
     '<div class="statline"><span>🎨 Tema</span><div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:180px">'+
@@ -3105,7 +3158,7 @@ function setBgmVolume(v){
   state.settings = state.settings || {};
   state.settings.music = true;
   state.settings.bgmVolume = vol;
-  if(bgmGain && actx) bgmGain.gain.setValueAtTime(vol, actx.currentTime);
+  if(musicMasterGain) musicMasterGain.gain.setTargetAtTime(vol, getAudioCtx().currentTime, 0.05);
   if(!bgmPlaying && vol>0) startBGM();
   save();
   const label = document.querySelector('#bgm-label');
@@ -3306,9 +3359,11 @@ function startStage(i, mastery){
     B.deck.forEach(f=>{const mon=getMonster(f);B.monHp[f]=mon?mon.hp:50;});
     showToast(isMastery?'⭐':'📖', isMastery?'Mastery Mode! Enemy lebih kuat, ganjaran lebih baik!':getChapterStory((CHAPTERS[B.chapter]||CHAPTERS[0]).topic));
     if(stage.boss){
+      applyMusicTheme('boss');
       showBossIntro(stage.enemy,()=>{showCountdown(()=>{renderBattle();nextQuestion();});});
       return;
     }
+    applyMusicTheme('battle');
     showCountdown(()=>{renderBattle();nextQuestion();});
   }catch(e){console.error('startStage error:',e);route('home');}
 }
@@ -3490,6 +3545,7 @@ function startMegaBoss(chId){
       flamyBurn:false,addoCorrectCount:0,addoAtkBonus:0,sumagonSecondWindUsed:false,questionCount:0};
     if(B.deck.length===0)B.deck=[state?.starter||'flamy'];
     B.deck.forEach(f=>{const mon=getMonster(f);B.monHp[f]=mon?mon.hp:50;});
+    applyMusicTheme('boss');
     showBossIntro(megaArtId(bossId),()=>{showCountdown(()=>{renderBattle();nextQuestion();});},mega.name,'Evolusi '+esc(e?.name||'')+' — jauh lebih kuat!',mega.scale);
   }catch(err){console.error('startMegaBoss error:',err);route('megabossarena');}
 }
@@ -4342,6 +4398,7 @@ function resumeBattle(){
     B.enemy.hp = s.enemyHp;
     B.enemy.max = s.enemyMax;
     localStorage.removeItem('mma_saved_battle');
+    applyMusicTheme(B.stage.boss?'boss':'battle');
     showScreen('battle');
     renderBattle();
     nextQuestion();
@@ -4705,6 +4762,7 @@ function startRandomStage(){
   B={i:idx,stage:{...st,enemy:st.enemy,name:st.name||e.name,sub:st.sub||''},chapter:CHAPTERS.findIndex(ch=>ch.id===st.chapterId)||0,tier:st.baseTier||1,enemy:{...e,id:st.enemy,hp:ehp,max:ehp,atk:eatk},deck:(state.deck||[]).slice(),activeIdx:0,monHp:{},streak:0,bestStreak:0,correctInStage:0,wrongInStage:0,recentWrong:0,recentCorrect:0,bossPhase:false,locked:false,diff:state?.difficulty||'medium',randomMode:true};
   if(B.deck.length===0)B.deck=[state?.starter||'flamy'];
   B.deck.forEach(f=>{const mon=getMonster(f);B.monHp[f]=mon?mon.hp:50;});
+  applyMusicTheme(B.stage.boss?'boss':'battle');
   showCountdown(()=>{renderBattle();nextQuestion();});
 }
 
@@ -4748,6 +4806,7 @@ function startVsDuel(){
     vsMode:true,flamyBurn:false,addoCorrectCount:0,addoAtkBonus:0,sumagonSecondWindUsed:false,questionCount:0};
   const mon=getMonster(fam);B.monHp[fam]=mon?mon.hp:50;
   showToast('⚔️','Duel '+(vs.round+1)+' bermula!');
+  applyMusicTheme('battle');
   showCountdown(()=>{renderBattle();nextQuestion();});
 }
 function vsWinDuel(){
@@ -4942,7 +5001,8 @@ function importSave(){
    ============================================================ */
 const INC_CFG={
   WARMTH_NEEDED:200, WARMTH_PER_CORRECT:2, WARMTH_TICK_MS:180000,
-  EGG_HUNT_Q:20, EGG_CHANCE:{egg:0.15,retry:0.25},
+  EGG_HUNT_Q:15, EGG_CHANCE:{egg:0.15},
+  EGG_ITEM_WEIGHTS:{nutrient:0.70,vitamin:0.25,serum:0.05},
   DROP_EGG_STAGE:0.10, DROP_EGG_BOSS:0.25,
   DROP_ITEM:{nutrient:0.08,vitamin:0.03,serum:0.01},
   ITEM_WARMTH:{nutrient:20,vitamin:60,serum:150}, ITEM_EVO:{nutrient:5,vitamin:15,serum:40},
@@ -4952,6 +5012,11 @@ const INC_CFG={
   FACTS:['Nombor genap boleh dibahagi 2 tanpa baki!','5+5=10 — pasangan nombor genap paling comel!','Tolak ialah songsang tambah!','Nombor 0 tak mengubah apa-apa bila ditambah!'],
 };
 function incNow(){return Date.now();}
+function pickWeightedEggItem(){
+  const w=INC_CFG.EGG_ITEM_WEIGHTS;const r=Math.random();let acc=0;
+  for(const k in w){acc+=w[k];if(r<acc)return k;}
+  return 'nutrient';
+}
 function incTraitOf(fam){return INC_CFG.TRAITS.find(t=>t.k===state.collection?.[fam]?.trait)||{atk:0,hp:0};}
 function weakestIncubatorTier(){let w=null,lo=101;[1,2,3].forEach(t=>{const b=state.stats.byTier[t];const n=(b?.c||0)+(b?.w||0);if(n>=3){const a=b.c/n*100;if(a<lo){lo=a;w=t;}}});return w;}
 // 🥚 MOD: EGG INCUBATOR - 5 spesies ultra-rare, dipilih rawak (drpd yg belum dimiliki) bila telur mula dieram
@@ -5244,9 +5309,8 @@ function quitEggHunt(){if(confirm('Keluar dari Egg Hunt? Kemajuan soalan tak dis
 function finishEggHunt(){
   try{
     EH=null;
-    state.gold+=50;state.incubatorItems.nutrient=(state.incubatorItems.nutrient||0)+1;
     save();
-    const outcomes=[];for(let k=0;k<3;k++){const r=Math.random();outcomes.push(r<INC_CFG.EGG_CHANCE.egg?'egg':r<INC_CFG.EGG_CHANCE.egg+INC_CFG.EGG_CHANCE.retry?'retry':'empty');}
+    const outcomes=[];for(let k=0;k<3;k++){outcomes.push(Math.random()<INC_CFG.EGG_CHANCE.egg?'egg':pickWeightedEggItem());}
     window._eggOutcomes=outcomes;
     renderEggChoice();
   }catch(e){console.error('finishEggHunt error:',e);route('incubator');}
@@ -5256,7 +5320,7 @@ function renderEggChoice(){
   app.innerHTML=`<div class="topbar"><div style="flex:1"></div><div class="pill">🪙 ${state?.gold||0}</div></div>
   <div class="panel" style="text-align:center;margin-top:8px">
     <h2 class="display" style="font-size:16px;margin-bottom:4px">Pilih Satu Telur</h2>
-    <p style="font-size:11px;color:var(--text-secondary);margin-bottom:14px">+50 🪙 +1 🧪 Nutrien dah diterima</p>
+    <p style="font-size:11px;color:var(--text-secondary);margin-bottom:14px">Setiap telur mesti ada sesuatu di dalamnya!</p>
     <div style="display:flex;gap:12px;justify-content:center">
       ${outcomes.map((o,i)=>`<div id="eggPick${i}" onclick="MMA.pickEggChoice(${i})" style="width:80px;height:90px;border-radius:14px;background:var(--glass);border:2px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer">❓</div>`).join('')}
     </div>
@@ -5273,12 +5337,12 @@ function pickEggChoice(i){
       else if(state.eggStorage<state.storageUnlocked){state.eggStorage++;showToast('📦','Slot penuh — telur masuk storan!');}
       else{showToast('📦','Storan penuh! Buka slot atau tetaskan dulu.');}
       save();setTimeout(()=>route('incubator'),1400);
-    }else if(o==='retry'){
-      el.textContent='🔄';sfx.correct();showToast('🔄','Cuba lagi — percuma!');
-      setTimeout(()=>{const outcomes2=[];for(let k=0;k<3;k++){const r=Math.random();outcomes2.push(r<INC_CFG.EGG_CHANCE.egg?'egg':r<INC_CFG.EGG_CHANCE.egg+INC_CFG.EGG_CHANCE.retry?'retry':'empty');}window._eggOutcomes=outcomes2;renderEggChoice();},1100);
     }else{
-      el.textContent='⬜';sfx.wrong();showToast('😊','Kosong… hadiah pujukan dah diterima!');
-      setTimeout(()=>route('incubator'),1400);
+      const itemIcons={nutrient:'🧪',vitamin:'💊',serum:'💉'};const itemNames={nutrient:'Nutrien',vitamin:'Vitamin',serum:'Serum'};
+      el.textContent=itemIcons[o];sfx.correct();
+      state.incubatorItems[o]=(state.incubatorItems[o]||0)+1;
+      showToast(itemIcons[o],'+1 '+itemNames[o]+' diterima!');
+      save();setTimeout(()=>route('incubator'),1400);
     }
   }catch(e){console.error('pickEggChoice error:',e);route('incubator');}
 }
@@ -5366,12 +5430,10 @@ if(localStorage.getItem('mma_license_valid')!=='true'){
 }else{
   preloadAllAssets(()=>route('splash'));
 }
-
-// 🔐 Versi Vercel (license-gated) tak daftar service worker - base href cross-origin
-// (SW kena same-origin dgn dokumen, akan gagal kalau cuba daftar di sini).
+// 🔐 Versi Vercel (license-gated) tak daftar service worker - elak konflik dgn flow lesen.
 }catch(e){console.error('Boot error:',e);state=defaultState();save();route('welcome');}
 
-document.addEventListener('click',function startBGM(){try{if(state?.settings?.music)startBGM();}catch(e){}document.removeEventListener('click',startBGM);},{once:true});
+document.addEventListener('click',function firstClickStartBGM(){try{if(state?.settings?.music)startBGM();}catch(e){}document.removeEventListener('click',firstClickStartBGM);},{once:true});
 document.addEventListener('click',function(e){try{if(e.target.closest('.btn')||e.target.closest('.choice')||e.target.closest('.tc.tap'))sfx.click();}catch(e){}});
 </script>
 </body>
