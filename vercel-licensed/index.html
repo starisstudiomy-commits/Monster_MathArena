@@ -3019,11 +3019,22 @@ function renderAlbum(){
   app.innerHTML=topbar()+`<div class="panel"><h2 class="display" style="font-size:18px;margin-bottom:12px">📖 Album Monster</h2>${FAMILY_IDS.map(f=>{const c=state?.collection?.[f];const reached=c?.owned?c.stage:0;return`<div style="margin-bottom:12px"><div style="font-weight:600;font-size:13px;color:var(--purple-light);margin-bottom:8px">${FAMILIES[f].name}</div><div class="cardgrid">${FAMILIES[f].stages.map((st,si)=>{no++;const unlocked=reached>=si+1;const d=stageData(f,si);return`<div>${cardHTML(d,{locked:!unlocked})}<div class="cardcap">No.${String(no).padStart(3,'0')}${unlocked&&si+1===reached?` · ✔${c?.correct||0}`:''}</div></div>`;}).join('')}</div></div>`;}).join('')}<button class="btn btn-primary" onclick="MMA.route('home')">Kembali</button></div>`;
 }
 
+const EVO_STONE_GEM_COST=50;
 function renderShop(){
-  app.innerHTML=topbar()+`<div class="panel"><h2 class="display" style="font-size:18px;margin-bottom:12px">🛒 Kedai</h2><div class="statline"><span>🎁 Booster Pack (3 kad)</span><b>100 🪙</b></div><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="MMA.buyPack()" ${state?.gold<100?'disabled':''}>Beli Pack</button><div class="statline" style="margin-top:12px"><span><img src="assets/gem.png" style="width:14px;height:14px;vertical-align:middle;margin-right:2px"> Rare Pack (≥1 Rare)</span><b>250 🪙</b></div><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="MMA.buyRarePack()" ${state?.gold<250?'disabled':''}>Beli Rare Pack</button><p style="color:var(--text-muted);font-size:12px;margin-top:12px">Kumpul emas dengan menjawab betul (+10 setiap jawapan)</p><button class="btn btn-ghost" style="margin-top:12px" onclick="MMA.route('home')">Kembali</button></div>`;
+  app.innerHTML=topbar()+`<div class="panel"><h2 class="display" style="font-size:18px;margin-bottom:12px">🛒 Kedai</h2><div class="statline"><span>🎁 Booster Pack (3 kad)</span><b>100 🪙</b></div><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="MMA.buyPack()" ${state?.gold<100?'disabled':''}>Beli Pack</button><div class="statline" style="margin-top:12px"><span><img src="assets/gem.png" style="width:14px;height:14px;vertical-align:middle;margin-right:2px"> Rare Pack (≥1 Rare)</span><b>250 🪙</b></div><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="MMA.buyRarePack()" ${state?.gold<250?'disabled':''}>Beli Rare Pack</button>
+  <div class="statline" style="margin-top:12px"><span>💠 Evo Stone (auto-evolusi monster aktif)</span><b><img src="assets/gem.png" style="width:14px;height:14px;vertical-align:middle;margin-right:2px">${EVO_STONE_GEM_COST}</b></div><p style="color:var(--text-muted);font-size:10px;margin-top:2px">Kamu ada: 💠${state?.evoStones||0} ${!isPro()?'· Perlu PRO untuk guna':''}</p><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="MMA.buyEvoStone()" ${(state?.gems||0)<EVO_STONE_GEM_COST?'disabled':''}>Beli Evo Stone</button>
+  <p style="color:var(--text-muted);font-size:12px;margin-top:12px">Kumpul emas dengan menjawab betul (+10 setiap jawapan)</p><button class="btn btn-ghost" style="margin-top:12px" onclick="MMA.route('home')">Kembali</button></div>`;
 }
 function buyPack(){if(state.gold<100)return;state.gold-=100;save();openPack(drawCards(3,false),'shop');}
 function buyRarePack(){if(state.gold<250)return;state.gold-=250;save();openPack(drawCards(3,true),'shop');}
+function buyEvoStone(){
+  if((state.gems||0)<EVO_STONE_GEM_COST){showToast('💎','Gem tak cukup!');return;}
+  state.gems-=EVO_STONE_GEM_COST;
+  state.evoStones=(state.evoStones||0)+1;
+  save();
+  showToast('💠','+1 Evo Stone dibeli!');
+  renderShop();
+}
 
 function showToast(icon,text){
   let t = document.getElementById('toast');
@@ -5213,6 +5224,18 @@ function renderIncubator(){
       <button class="btn btn-primary" style="margin-top:8px" ${(!objective||!incSelectedItem)?'disabled':''} onclick="MMA.injectSelectedIncubatorItem()">💉 SUNTIK</button>
     </div>
 
+    <div class="panel" style="margin-top:12px">
+      <div style="font-weight:700;font-size:13px;color:var(--gold);margin-bottom:8px">🛒 Beli Item Inkubator</div>
+      ${['nutrient','vitamin','serum'].map(it=>{
+        const cost=INC_CFG.SHOP_COST[it];const curIcon=cost.cur==='gems'?'💎':'🪙';const bal=cost.cur==='gems'?(state.gems||0):(state.gold||0);const afford=bal>=cost.amt;
+        return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--glass-border)">
+          <div style="font-size:22px">${itemIcons[it]}</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--text)">${itemNames[it]}</div><div style="font-size:9px;color:var(--text-muted)">Kamu ada: ×${state.incubatorItems[it]||0}</div></div>
+          <button class="btn btn-sm" style="width:auto;padding:6px 12px;background:var(--gold);color:#000;font-size:11px" onclick="MMA.buyIncubatorItem('${it}')" ${afford?'':'disabled'}>${curIcon}${cost.amt}</button>
+        </div>`;
+      }).join('')}
+    </div>
+
     ${ownedUltras.length?`<div class="panel" style="margin-top:12px">
       <div style="font-weight:700;font-size:13px;color:var(--gold);margin-bottom:8px">🐲 Monster Ultra-Rare Kamu (${ownedUltras.length}/${ULTRA_RARE_IDS.length})</div>
       ${ownedUltras.map(id=>{
@@ -5249,6 +5272,17 @@ function renderIncubator(){
   }catch(e){console.error('renderIncubator error:',e);route('home');}
 }
 function selectIncubatorItem(it){if((state.incubatorItems[it]||0)<1)return;incSelectedItem=incSelectedItem===it?null:it;renderIncubator();}
+function buyIncubatorItem(it){
+  const cost=INC_CFG.SHOP_COST[it];if(!cost)return;
+  const bal=cost.cur==='gems'?(state.gems||0):(state.gold||0);
+  if(bal<cost.amt){showToast(cost.cur==='gems'?'💎':'🪙',(cost.cur==='gems'?'Gem':'Gold')+' tak cukup!');return;}
+  if(cost.cur==='gems')state.gems-=cost.amt;else state.gold-=cost.amt;
+  state.incubatorItems[it]=(state.incubatorItems[it]||0)+1;
+  save();
+  const itemNames={nutrient:'Nutrien',vitamin:'Vitamin',serum:'Serum'};
+  showToast('✅','+1 '+itemNames[it]+' dibeli!');
+  renderIncubator();
+}
 
 function hatchUltraRare(){
   try{
@@ -5439,7 +5473,7 @@ function unlockStorageSlot(){
   showToast('🔓','Slot storan dibuka!');renderIncubator();
 }
 
-window.MMA={route,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
+window.MMA={route,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
   startEggHunt,answerEggHunt,quitEggHunt,pickEggChoice,selectIncubatorItem,injectSelectedIncubatorItem,answerIncubatorChallenge,closeIncubatorChallenge,hatchUltraRare,closeHatchOverlay,takeEggFromStorage,unlockStorageSlot,swapActiveMonster};
 
 // Ambient orbs
