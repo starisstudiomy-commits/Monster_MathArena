@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monster MathArena — Demo Sound Theme</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse at 50% 20%,#1a1240 0%,#0a0618 55%,#050309 100%);
+    min-height:100vh;color:#fff;font-family:'Segoe UI',Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;padding:32px 16px;
+  }
+  h1{font-size:22px;margin-bottom:4px;text-align:center;}
+  p.sub{color:#a8a2c8;font-size:13px;margin-bottom:28px;text-align:center;max-width:420px;}
+  .themes{display:flex;flex-direction:column;gap:14px;width:100%;max-width:420px;}
+  .theme-btn{
+    display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;
+    border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);
+    cursor:pointer;transition:.2s;text-align:left;color:#fff;font-family:inherit;
+  }
+  .theme-btn:hover{background:rgba(255,255,255,.09);}
+  .theme-btn.active{border-color:#FFD34D;background:rgba(255,211,77,.12);box-shadow:0 0 24px rgba(255,211,77,.25);}
+  .theme-btn.loading{opacity:.55;pointer-events:none;}
+  .theme-btn .ico{font-size:32px;width:44px;text-align:center;flex-shrink:0;}
+  .theme-btn .txt{flex:1;}
+  .theme-btn .txt b{display:block;font-size:15px;margin-bottom:2px;}
+  .theme-btn .txt span{display:block;font-size:11.5px;color:#a8a2c8;}
+  .theme-btn .eq{display:flex;gap:2px;align-items:flex-end;height:18px;width:18px;flex-shrink:0;}
+  .theme-btn .eq i{width:3px;background:#FFD34D;border-radius:2px;opacity:.25;}
+  .theme-btn.active .eq i{opacity:1;animation:eq 0.9s ease-in-out infinite;}
+  .theme-btn.active .eq i:nth-child(1){animation-delay:0s;}
+  .theme-btn.active .eq i:nth-child(2){animation-delay:.15s;}
+  .theme-btn.active .eq i:nth-child(3){animation-delay:.3s;}
+  @keyframes eq{0%,100%{height:4px;}50%{height:18px;}}
+  .stopbtn{
+    margin-top:18px;padding:10px 28px;border-radius:30px;border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.05);color:#ccc;cursor:pointer;font-size:13px;font-family:inherit;
+  }
+  .stopbtn:hover{background:rgba(255,255,255,.1);}
+  .vol{display:flex;align-items:center;gap:10px;margin-top:24px;width:100%;max-width:420px;}
+  .vol span{font-size:12px;color:#a8a2c8;white-space:nowrap;}
+  .vol input{flex:1;accent-color:#FFD34D;}
+  .note{margin-top:28px;font-size:11.5px;color:#7a7398;text-align:center;max-width:420px;line-height:1.6;}
+  .status{margin-top:10px;font-size:11px;color:#FFD34D;min-height:14px;text-align:center;}
+</style>
+</head>
+<body>
+<h1>🎵 Demo Sound Theme</h1>
+<p class="sub">Guna muzik sebenar (Pixabay) sekarang, dimainkan loop lancar guna Web Audio (bukan &lt;audio loop&gt; biasa — elak klik/gap di titik loop).</p>
+
+<div class="themes">
+  <button class="theme-btn" data-theme="home" onclick="playTheme('home')">
+    <div class="ico">🏠</div>
+    <div class="txt"><b>Home / Menu</b><span>sound_theme.mp3</span></div>
+    <div class="eq"><i></i><i></i><i></i></div>
+  </button>
+  <button class="theme-btn" data-theme="battle" onclick="playTheme('battle')">
+    <div class="ico">⚔️</div>
+    <div class="txt"><b>Battle</b><span>enemies_battle.mp3</span></div>
+    <div class="eq"><i></i><i></i><i></i></div>
+  </button>
+  <button class="theme-btn" data-theme="boss" onclick="playTheme('boss')">
+    <div class="ico">👑</div>
+    <div class="txt"><b>Boss</b><span>boss_and_megaboss_battle.mp3</span></div>
+    <div class="eq"><i></i><i></i><i></i></div>
+  </button>
+</div>
+
+<button class="stopbtn" onclick="stopTheme()">⏹ Stop</button>
+<div class="status" id="status"></div>
+
+<div class="vol">
+  <span>🔉 Volume</span>
+  <input type="range" min="0" max="100" value="35" oninput="setVol(this.value)">
+</div>
+
+<p class="note">Loop sample-accurate guna AudioBufferSourceNode — tiada klik/gap bila lagu ulang semula. Pertukaran tema ada crossfade ~700ms.</p>
+
+<script>
+let actx = null;
+function getCtx(){ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); return actx; }
+
+const SRC = { home:'assets/music/home.mp3', battle:'assets/music/battle.mp3', boss:'assets/music/boss.mp3' };
+const buffers = {}; // decoded AudioBuffer cache
+let activeSource = null, activeGain = null, masterGain = null;
+
+function setStatus(t){ document.getElementById('status').textContent = t; }
+
+async function loadBuffer(key){
+  if(buffers[key]) return buffers[key];
+  const btn = document.querySelector('[data-theme="'+key+'"]');
+  if(btn) btn.classList.add('loading');
+  setStatus('Memuatkan ' + key + '...');
+  const res = await fetch(SRC[key]);
+  const arr = await res.arrayBuffer();
+  const buf = await getCtx().decodeAudioData(arr);
+  buffers[key] = buf;
+  if(btn) btn.classList.remove('loading');
+  setStatus('');
+  return buf;
+}
+
+function setVol(v){
+  window._demoVol = v/100;
+  if(masterGain) masterGain.gain.setTargetAtTime(window._demoVol, getCtx().currentTime, 0.05);
+}
+
+async function playTheme(key){
+  const ctx = getCtx();
+  if(ctx.state==='suspended') await ctx.resume();
+
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('active', b.dataset.theme===key));
+
+  const buf = await loadBuffer(key);
+
+  if(!masterGain){
+    masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(window._demoVol ?? 0.35, ctx.currentTime);
+    masterGain.connect(ctx.destination);
+  }
+
+  // fade out + stop previous source
+  const oldSource = activeSource, oldGain = activeGain;
+  if(oldGain){
+    oldGain.gain.setTargetAtTime(0, ctx.currentTime, 0.35);
+    setTimeout(()=>{ try{oldSource.stop();}catch(e){} }, 900);
+  }
+
+  const src = ctx.createBufferSource();
+  src.buffer = buf; src.loop = true;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0, ctx.currentTime);
+  g.gain.setTargetAtTime(1, ctx.currentTime, 0.35);
+  src.connect(g); g.connect(masterGain);
+  src.start(0);
+
+  activeSource = src; activeGain = g;
+}
+
+function stopTheme(){
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+  if(activeGain){
+    const ctx = getCtx();
+    activeGain.gain.setTargetAtTime(0, ctx.currentTime, 0.35);
+    const s = activeSource;
+    setTimeout(()=>{ try{s.stop();}catch(e){} }, 900);
+  }
+  activeSource = null; activeGain = null;
+}
+</script>
+</body>
+</html>
