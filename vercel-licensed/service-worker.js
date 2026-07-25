@@ -2,7 +2,7 @@
 // Sama strategi macam versi percuma: cache-first + runtime caching.
 // Selamat cache index.html sebab gate lesen disemak secara client-side (localStorage)
 // setiap kali app dibuka, bukan bergantung pada respons rangkaian.
-const CACHE_NAME = 'mma-licensed-cache-v7';
+const CACHE_NAME = 'mma-licensed-cache-v8';
 const CORE_ASSETS = [
   './index.html',
   './license.html',
