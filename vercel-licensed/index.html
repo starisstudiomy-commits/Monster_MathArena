@@ -4489,11 +4489,18 @@ const HIT_IMPACT_PNG='assets/effects/hit_impact.png';
 function applyFxOverlay(hostSel,src,fallbackColor,big,onDone){
   const host=$(hostSel);
   if(!host||!src){ spawnParticles(fallbackColor,big); if(onDone)setTimeout(onDone,600); return; }
+  // ⏱️ onDone MESTI jadi walau apa pun berlaku (img.onload/onerror kadang tak fire
+  // dgn stabil di sesetengah WebKit/iOS - kalau tergantung, enemy tak akan counter-attack
+  // langsung sebab flow ni bergantung sepenuhnya pada callback ni). Safety timeout jamin
+  // ia jadi dlm masa terhad tak kira apa.
+  let fired=false;
+  const fireOnce=()=>{ if(fired)return; fired=true; if(onDone)onDone(); };
+  const safety=setTimeout(fireOnce,1000);
   const img=new Image();
   img.className='effect-overlay'+(big?' big':'');
   img.style.color=fallbackColor;
-  img.onload=()=>{ host.appendChild(img); requestAnimationFrame(()=>img.classList.add('go')); setTimeout(()=>{img.remove();if(onDone)onDone();},600); };
-  img.onerror=()=>{ img.remove(); spawnParticles(fallbackColor,big); if(onDone)setTimeout(onDone,600); };
+  img.onload=()=>{ host.appendChild(img); requestAnimationFrame(()=>img.classList.add('go')); setTimeout(()=>{img.remove();clearTimeout(safety);fireOnce();},600); };
+  img.onerror=()=>{ img.remove(); spawnParticles(fallbackColor,big); clearTimeout(safety); setTimeout(fireOnce,600); };
   img.src=src;
 }
 function spawnParticles(elemColor,big){
