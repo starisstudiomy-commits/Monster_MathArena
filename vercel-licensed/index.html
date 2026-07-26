@@ -2293,6 +2293,90 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
    8) STATE + SIMPAN
    ============================================================ */
 const SAVE_KEY='mma_save_v1';
+const PROFILES_KEY='mma_profiles';
+const ACTIVE_PROFILE_KEY='mma_active_profile';
+const PROFILE_AVATARS=['🦁','🐱','🐶','🐼','🦊','🐸','🦄','🐲','🦅','🐙'];
+function getProfiles(){try{return JSON.parse(localStorage.getItem(PROFILES_KEY))||[];}catch(e){return [];}}
+function saveProfiles(list){localStorage.setItem(PROFILES_KEY,JSON.stringify(list));}
+function getActiveProfileId(){return localStorage.getItem(ACTIVE_PROFILE_KEY);}
+function setActiveProfileId(id){localStorage.setItem(ACTIVE_PROFILE_KEY,id);}
+function profileSaveKey(id){return SAVE_KEY+'_'+id;}
+function currentSaveKey(){return profileSaveKey(getActiveProfileId());}
+// 👥 Profil pemain: migrasi save lama (satu save sahaja, tiada profil) jadi "Profil 1"
+// automatik supaya progress sedia ada pemain tak hilang bila update ni sampai.
+function ensureProfiles(){
+  try{
+    let profiles=getProfiles();
+    if(profiles.length===0){
+      const legacy=localStorage.getItem(SAVE_KEY);
+      const id='p'+Date.now();
+      let name='Profil 1',avatar='🦁';
+      if(legacy){
+        try{const s=JSON.parse(legacy);if(s.playerName)name=s.playerName;if(s.avatar)avatar=s.avatar;}catch(e){}
+        localStorage.setItem(profileSaveKey(id),legacy);
+        const legacyBackup=localStorage.getItem(SAVE_KEY+'_backup');
+        if(legacyBackup)localStorage.setItem(profileSaveKey(id)+'_backup',legacyBackup);
+      }
+      profiles=[{id,name,avatar,createdAt:Date.now()}];
+      saveProfiles(profiles);
+      setActiveProfileId(id);
+    }else if(!getActiveProfileId()||!profiles.find(p=>p.id===getActiveProfileId())){
+      setActiveProfileId(profiles[0].id);
+    }
+  }catch(e){console.error('ensureProfiles error:',e);}
+}
+function renderProfiles(){
+  const profiles=getProfiles();
+  const activeId=getActiveProfileId();
+  app.innerHTML=topbar()+'<div class="panel"><h2 class="display" style="font-size:18px;margin-bottom:4px">👥 Profil Pemain</h2><p style="color:var(--text-secondary);font-size:12px;margin-bottom:12px">Setiap profil ada progress berasingan — sesuai kalau lebih drpd 1 anak guna peranti sama.</p>'+
+    profiles.map(p=>{
+      const isActive=p.id===activeId;
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:8px;border-radius:12px;background:var(--glass);border:2px solid '+(isActive?'var(--gold)':'var(--glass-border)')+'">'+
+        '<div style="font-size:32px">'+esc(p.avatar||'🦁')+'</div>'+
+        '<div style="flex:1"><div style="font-weight:700;color:var(--text);font-size:14px">'+esc(p.name)+'</div>'+(isActive?'<div style="font-size:10px;color:var(--gold);font-weight:700">✔ AKTIF SEKARANG</div>':'')+'</div>'+
+        (isActive?'':'<button class="btn btn-sm" style="width:auto;padding:6px 12px;background:var(--gold);color:#000" onclick="MMA.switchProfile(\''+p.id+'\')">Main</button>')+
+        (profiles.length>1?'<button class="iconbtn" style="width:32px;height:32px;font-size:14px" onclick="MMA.deleteProfile(\''+p.id+'\')">🗑️</button>':'')+
+      '</div>';
+    }).join('')+
+    '<button class="btn btn-primary" style="margin-top:8px" onclick="MMA.createProfile()">➕ Profil Baru</button>'+
+    '<button class="btn btn-ghost" style="margin-top:8px" onclick="MMA.route(\'settings\')">Kembali</button>'+
+  '</div>';
+}
+let profileSwitching=false;
+function switchProfile(id){
+  if(id===getActiveProfileId())return;
+  try{save();}catch(e){}
+  profileSwitching=true;
+  setActiveProfileId(id);
+  location.reload();
+}
+function createProfile(){
+  const name=prompt('Nama profil baru (cth: nama anak):');
+  if(!name||!name.trim())return;
+  const profiles=getProfiles();
+  const id='p'+Date.now();
+  const avatar=PROFILE_AVATARS[profiles.length%PROFILE_AVATARS.length];
+  profiles.push({id,name:name.trim().slice(0,20),avatar,createdAt:Date.now()});
+  saveProfiles(profiles);
+  switchProfile(id);
+}
+function deleteProfile(id){
+  const profiles=getProfiles();
+  if(profiles.length<=1){alert('Perlu sekurang-kurangnya 1 profil!');return;}
+  const p=profiles.find(x=>x.id===id);
+  if(!confirm('Padam profil "'+(p?p.name:'')+'"? Semua progress profil ni akan hilang, tak boleh undo!'))return;
+  localStorage.removeItem(profileSaveKey(id));
+  localStorage.removeItem(profileSaveKey(id)+'_backup');
+  const remaining=profiles.filter(x=>x.id!==id);
+  saveProfiles(remaining);
+  if(getActiveProfileId()===id){
+    profileSwitching=true;
+    setActiveProfileId(remaining[0].id);
+    location.reload();
+  }else{
+    renderProfiles();
+  }
+}
 let state=null;
 function defaultState(){return{
   started:false,starter:null,collection:{},deck:[],gold:0,gems:0,playerName:'Aydan',avatar:'🦁',
@@ -2309,13 +2393,13 @@ function defaultState(){return{
 }
 function load(){
   try{
-    let raw=localStorage.getItem(SAVE_KEY);
+    let raw=localStorage.getItem(currentSaveKey());
     let s;
     try{
       s=JSON.parse(raw);
     }catch(parseErr){
       console.error('save data corrupt, trying backup:',parseErr);
-      s=JSON.parse(localStorage.getItem(SAVE_KEY+'_backup'));
+      s=JSON.parse(localStorage.getItem(currentSaveKey()+'_backup'));
     }
     if(s){state=defaultState();Object.assign(state,s);
       if(!state.progress)state.progress={chapter:0,stage:0};
@@ -2361,14 +2445,14 @@ function load(){
 function save(){
   try{
     const json=JSON.stringify(state);
-    localStorage.setItem(SAVE_KEY,json);
-    localStorage.setItem(SAVE_KEY+'_backup',json);
+    localStorage.setItem(currentSaveKey(),json);
+    localStorage.setItem(currentSaveKey()+'_backup',json);
   }catch(e){
     console.error('save error:',e);
     if(typeof showToast==='function')showToast('⚠️','Gagal simpan! Ruang storan mungkin penuh.');
   }
 }
-function resetAll(){localStorage.removeItem(SAVE_KEY);state=defaultState();save();route('welcome');}
+function resetAll(){localStorage.removeItem(currentSaveKey());state=defaultState();save();route('welcome');}
 function getMonster(fam){
   const c=state.collection[fam];if(!c||!c.owned)return null;
   const base=FAMILIES[fam]?.stages[c.stage-1];if(!base)return null;
@@ -2664,7 +2748,7 @@ function nextTutorial(){tutorialStep++;if(tutorialStep>=5){state.tutorialDone=tr
    12) ROUTER + SCREENS
    ============================================================ */
 let current='welcome';
-function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);if(name!=='splash')applyMusicTheme('home');({splash:renderSplash,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
+function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);if(name!=='splash')applyMusicTheme('home');({splash:renderSplash,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator,profiles:renderProfiles}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
 
 function isPro(){ return (typeof localStorage!=='undefined'&&localStorage.getItem('mma_license_valid')==='true') || (state?.license && validateKey(state.license)); }
 
@@ -3129,6 +3213,7 @@ function renderSettings(){
   const needsBackupReminder=(state?.stats?.questions||0)>=30&&(daysSinceExport===null||daysSinceExport>=7);
   var html='<div class="panel"><h2 class="display" style="font-size:18px;margin-bottom:12px">⚙️ Tetapan</h2>'+
     (needsBackupReminder?'<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:14px;border-radius:12px;background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.35)"><span style="font-size:22px">💾</span><div style="flex:1"><div style="font-size:11px;font-weight:700;color:#4CAF50">Jangan lupa backup!</div><div style="font-size:10px;color:var(--text-secondary);margin-top:2px">'+(daysSinceExport===null?'Progress anak belum pernah di-backup.':'Dah '+daysSinceExport+' hari sejak backup terakhir.')+'</div></div><button class="btn btn-sm" style="width:auto;padding:6px 12px;background:#4CAF50;color:#fff;font-size:10px" onclick="MMA.exportSave()">Eksport</button></div>':'')+
+    (()=>{const profs=getProfiles();const cur=profs.find(p=>p.id===getActiveProfileId());return'<div class="statline" style="margin-bottom:12px"><span>👥 Profil</span><button class="btn btn-sm" style="width:auto;padding:8px 14px;background:var(--gold);color:#000;white-space:nowrap" onclick="MMA.route(\'profiles\')">'+(cur?cur.avatar+' '+esc(cur.name):'Profil')+' · Tukar</button></div>';})()+
     '<div class="statline"><span>👤 Nama Pemain</span><input type="text" id="player-name-input" value="'+esc(state.playerName||'Aydan')+'" maxlength="14" style="width:120px;background:var(--surface-light);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;font-family:var(--font);font-size:12px;color:var(--text);text-align:center;outline:none" onchange="MMA.setPlayerName(this.value)"></div>'+
     '<div class="statline"><span>🎯 Tahap Kesukaran</span><button class="btn btn-sm" style="width:auto;padding:8px 16px;background:'+DIFFICULTIES[state?.difficulty||'medium'].color+'" onclick="MMA.route(\'difficulty\')">'+DIFFICULTIES[state?.difficulty||'medium'].icon+' '+DIFFICULTIES[state?.difficulty||'medium'].name+'</button></div>'+
     '<div class="statline"><span>🎵 Muzik latar</span><button class="btn '+(state?.settings?.music?'btn-primary':'btn-ghost')+' btn-sm" style="width:auto;padding:8px 16px" onclick="MMA.toggle(\'music\')">'+(state?.settings?.music?'ON':'OFF')+'</button></div>'+
@@ -3190,7 +3275,13 @@ function renderDifficulty(){
 }
 function setDifficulty(diff){state.difficulty=diff;save();renderDifficulty();}
 function toggle(k){state.settings[k]=!state.settings[k];save();if(k==='music'){if(state.settings.music)startBGM();else stopBGM();}renderSettings();}
-function setPlayerName(n){state.playerName=n.trim()||'Aydan';save();}
+function setPlayerName(n){
+  state.playerName=n.trim()||'Aydan';save();
+  try{
+    const profiles=getProfiles();const p=profiles.find(x=>x.id===getActiveProfileId());
+    if(p){p.name=state.playerName;p.avatar=state.avatar||p.avatar;saveProfiles(profiles);}
+  }catch(e){}
+}
 function setAvatar(a){state.avatar=a;save();renderSettings();}
 function setBgmVolume(v){
   const vol = parseInt(v)/100;
@@ -5020,7 +5111,7 @@ function setTheme(t){
 
 // 12. Export/Import
 function exportSave(){
-  const data={state:state,progress:localStorage.getItem(SAVE_KEY)};
+  const data={state:state,progress:localStorage.getItem(currentSaveKey())};
   const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='monster-math-arena-save.json';a.click();
@@ -5035,7 +5126,7 @@ function importSave(){
     const r=new FileReader();r.onload=(ev)=>{
       try{
         const data=JSON.parse(ev.target.result);
-        if(data.state){localStorage.setItem(SAVE_KEY,JSON.stringify(data.state));}
+        if(data.state){localStorage.setItem(currentSaveKey(),JSON.stringify(data.state));}
         alert('Data diimport! Refresh page.');location.reload();
       }catch(e){alert('Fail rosak!');}
     };r.readAsText(f);
@@ -5530,7 +5621,7 @@ function unlockStorageSlot(){
   showToast('🔓','Slot storan dibuka!');renderIncubator();
 }
 
-window.MMA={route,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
+window.MMA={route,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,switchProfile,createProfile,deleteProfile,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
   startEggHunt,answerEggHunt,quitEggHunt,pickEggChoice,selectIncubatorItem,injectSelectedIncubatorItem,answerIncubatorChallenge,closeIncubatorChallenge,hatchUltraRare,closeHatchOverlay,takeEggFromStorage,unlockStorageSlot,swapActiveMonster};
 
 // Ambient orbs
@@ -5539,9 +5630,9 @@ const orb2=document.createElement('div');orb2.className='orb orb-2';document.bod
 const orb3=document.createElement('div');orb3.className='orb orb-3';document.body.appendChild(orb3);
 
 setInterval(()=>{if(state&&state.stats)state.stats.playSeconds+=5;},5000);
-window.addEventListener('beforeunload',save);
+window.addEventListener('beforeunload',()=>{if(!profileSwitching)save();});
 
-try{load();if(!state)state=defaultState();if(!state.progress)state.progress={chapter:0,stage:0};if(!state.stats)state.stats=defaultState().stats;if(!state.collection)state.collection={};if(!state.deck)state.deck=[];if(!state.difficulty)state.difficulty='medium';
+try{ensureProfiles();load();if(!state)state=defaultState();if(!state.progress)state.progress={chapter:0,stage:0};if(!state.stats)state.stats=defaultState().stats;if(!state.collection)state.collection={};if(!state.deck)state.deck=[];if(!state.difficulty)state.difficulty='medium';
 // 🔐 Gate lesen - kalau belum sah, hantar balik ke skrin masuk kod (elak akses terus URL game)
 if(localStorage.getItem('mma_license_valid')!=='true'){
   location.href=location.origin+'/license.html';
