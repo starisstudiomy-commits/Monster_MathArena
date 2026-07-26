@@ -5341,8 +5341,9 @@ function renderIncubator(){
       <div style="font-weight:700;font-size:13px;color:var(--gold);margin-bottom:8px">🐲 Monster Ultra-Rare Kamu (${ownedUltras.length}/${ULTRA_RARE_IDS.length})</div>
       ${ownedUltras.map(id=>{
         const c=state.collection[id],fam=FAMILIES[id];
+        const stg=stageData(id,c.stage-1);
         return`<div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--glass-border)">
-        <div style="width:104px;flex:0 0 auto">${cardHTML(stageData(id,c.stage-1),{})}</div>
+        <div onclick="MMA.showCardPreview('${id}')" style="width:92px;height:92px;flex:0 0 auto;border-radius:14px;background:linear-gradient(135deg,${fam.g1}22,${fam.g2}33);border:2px solid ${fam.g1}66;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35)"><div style="width:88%;height:88%">${getArt(stg.id)}</div></div>
         <div style="flex:1">
           <div style="font-weight:700;color:var(--text);font-size:13px">${esc(fam.stages[c.stage-1].name)}</div>
           <div style="font-size:10px;color:var(--text-secondary)">Tahap ${c.stage} drpd 3${c.stage===3?' · ✨ MYTHIC!':''}</div>
