@@ -369,14 +369,17 @@ body{
 
 /* ---- QUESTION ---- */
 .qbox{
-  position:relative;border-radius:var(--radius);padding:20px 14px;
-  text-align:center;margin:12px 0;
+  /* 📐 Dikecilkan: pd skrin pendek (cth iPhone SE 375x667) soalan panjang
+     menolak butang jawapan ke bawah skrin, jadi pemain kena scroll &
+     sebahagian arena hilang. Padding/margin/saiz teks dikurangkan. */
+  position:relative;border-radius:var(--radius);padding:12px 12px;
+  text-align:center;margin:8px 0;
   background:linear-gradient(180deg,#FFE066,#F5C542);
   border:4px solid #FFF4D6;
   box-shadow:var(--shadow-gold), inset 0 2px 0 rgba(255,255,255,.5);
 }
 .qbox.boss-ability-glow{border-color:#FB923C!important;box-shadow:0 0 24px rgba(251,146,60,.45)!important}
-.qtext{font-family:var(--readable);font-weight:900;font-size:clamp(26px,6vw,34px);color:var(--text-dark);line-height:1.25;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.qtext{font-family:var(--readable);font-weight:900;font-size:clamp(18px,4.4vw,25px);color:var(--text-dark);line-height:1.2;text-shadow:0 1px 0 rgba(255,255,255,.4)}
 
 /* ---- CHOICES ---- */
 .choices{display:flex;justify-content:center;gap:8px;max-width:400px;margin:0 auto}
@@ -799,7 +802,7 @@ body.theme-custom .mission-banner{
    🎯 KIDS UX PASS: butang jawapan besar, butang tutup merah,
    jahitan pada banner misi & chat bubble, kalendar stiker
    ============================================================ */
-.choice{min-height:64px;padding:16px 8px}
+.choice{min-height:56px;padding:12px 8px}
 .iconbtn.btn-close{
   width:48px;height:48px;font-size:22px;font-weight:900;
   background:linear-gradient(180deg,#F87171 0%,#DC2626 100%);
@@ -866,6 +869,221 @@ body.theme-custom .mission-banner{
   .topbar .pill{font-size:10px!important;padding:4px 4px!important}
   .topbar .iconbtn{width:30px!important;height:30px!important;font-size:13px!important}
 }
+
+/* ============================================================
+   ✨ ANIMASI EVOLUSI (dipulihkan)
+   Blok ni hilang sepenuhnya semasa CSS ditulis semula utk versi kids -
+   JS masih rujuk 41 kelas .evo-* ini, jadi animasi jalan tanpa gaya
+   (nampak "hancur"). Disalin balik daripada versi asal.
+   ============================================================ */
+/* Evolution Overlay */
+/* Diskopkan ke #evoOverlay sahaja - class .overlay dikongsi dgn overlay tetas
+   telur, cabaran inkubator & VS, yg patut kekal dgn gaya tema kids.
+   Latar dibuat LEGAP (asal guna alpha .18 di tengah, jadi skrin belakang
+   menembus & mengganggu tumpuan) tetapi kekal ungu ikut tema. */
+#evoOverlay{
+  position:fixed;inset:0;z-index:90;
+  background:radial-gradient(ellipse at 50% 35%,#4C1D95,#12002E 72%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;padding:20px;overflow:hidden;
+  animation:evo-fadeIn .5s ease;
+}
+@keyframes evo-fadeIn{from{opacity:0}to{opacity:1}}
+.whiteflash{position:fixed;inset:0;background:#fff;pointer-events:none;opacity:0;z-index:300}
+.whiteflash.go{animation:white-flash-anim .4s ease-out forwards}
+@keyframes white-flash-anim{0%{opacity:.85}60%{opacity:.15}100%{opacity:0}}
+.evo-platform{position:absolute;bottom:22%;width:220px;height:36px;border-radius:50%;background:radial-gradient(ellipse,#F59E0B 0%,transparent 72%);opacity:0;filter:blur(2px);animation:evo-platform-in .7s .35s ease forwards}
+@keyframes evo-platform-in{0%{opacity:0;transform:scaleX(.3)}100%{opacity:.55;transform:scaleX(1)}}
+.evo-ring{position:absolute;border-radius:50%;border:2px solid #F59E0B;opacity:0;pointer-events:none}
+.evo-ring.go{animation:evo-ring-expand 1s ease-out forwards}
+@keyframes evo-ring-expand{0%{width:20px;height:20px;opacity:.9;border-width:3px}100%{width:420px;height:420px;opacity:0;border-width:1px}}
+
+/* ===== POKÉMON-STYLE REVEAL: siluet zoom besar → flash+shake reveal penuh → settle pulsating ===== */
+.evo-vignette{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0;
+  background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.85) 100%);
+  transition:opacity .6s ease}
+.evo-vignette.on{opacity:1}
+
+.evo-energy-p{position:absolute;bottom:8%;border-radius:50%;pointer-events:none;z-index:1;
+  background:radial-gradient(circle,#fff,#FDE68A 60%,transparent 100%);
+  animation:evo-energy-rise 1.3s ease-in forwards}
+@keyframes evo-energy-rise{
+  0%{opacity:0;transform:translateY(0) scale(.4)}
+  15%{opacity:1}
+  85%{opacity:.8}
+  100%{opacity:0;transform:translateY(-300px) scale(1.1)}
+}
+
+.evo-evolving-text{position:absolute;top:20%;text-align:center;opacity:0;z-index:2;
+  font-size:16px;font-weight:800;letter-spacing:1.5px;color:#fff}
+.evo-evolving-text.on{animation:evo-evtxt-in .4s ease forwards,evo-evtxt-blink 1.1s ease-in-out .4s infinite}
+@keyframes evo-evtxt-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes evo-evtxt-blink{0%,100%{opacity:1}50%{opacity:.55}}
+.evo-evolving-text .hl{color:#EF4444;text-shadow:0 0 14px rgba(239,68,68,.7)}
+.evo-loading-dots{display:inline-flex;gap:3px;margin-left:4px;vertical-align:middle}
+.evo-loading-dots span{width:5px;height:5px;border-radius:50%;background:#fff;animation:evo-dot-bounce 1.1s ease-in-out infinite}
+.evo-loading-dots span:nth-child(2){animation-delay:.15s}
+.evo-loading-dots span:nth-child(3){animation-delay:.3s}
+@keyframes evo-dot-bounce{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+
+.evo-stage{position:relative;display:flex;flex-direction:column;align-items:center;z-index:2}
+.evo-mon{width:270px;height:270px;position:relative;z-index:3;opacity:0;transform:scale(.85)}
+.evo-mon.silhouette{
+  animation:evo-sil-zoom-in 1.5s cubic-bezier(.25,.4,.35,1) forwards,evo-sil-pulse .8s ease-in-out infinite;
+}
+@keyframes evo-sil-zoom-in{
+  0%{opacity:0;transform:scale(.4);filter:brightness(0) invert(1) drop-shadow(0 0 15px rgba(255,255,255,.5))}
+  12%{opacity:1}
+  100%{opacity:1;transform:scale(1.6);filter:brightness(0) invert(1) drop-shadow(0 0 55px rgba(255,255,255,1))}
+}
+@keyframes evo-sil-pulse{0%,100%{filter:brightness(0) invert(1) drop-shadow(0 0 25px rgba(255,255,255,.7))}50%{filter:brightness(0) invert(1) drop-shadow(0 0 55px rgba(255,255,255,1))}}
+.evo-mon.reveal-shake{
+  opacity:1;transform:scale(1);
+  filter:brightness(1) drop-shadow(0 0 35px var(--accent-glow,rgba(245,158,11,.75)));
+  animation:evo-mon-shake .55s cubic-bezier(.36,.07,.19,.97);
+}
+@keyframes evo-mon-shake{
+  0%{transform:scale(1) translateX(0) translateY(0) rotate(0)}
+  8%{transform:scale(1.06) translateX(-14px) translateY(2px) rotate(-5deg)}
+  16%{transform:scale(1.06) translateX(13px) translateY(-2px) rotate(5deg)}
+  24%{transform:scale(1.05) translateX(-11px) translateY(2px) rotate(-4deg)}
+  32%{transform:scale(1.05) translateX(10px) translateY(-1px) rotate(4deg)}
+  40%{transform:scale(1.04) translateX(-8px) rotate(-3deg)}
+  48%{transform:scale(1.04) translateX(7px) rotate(3deg)}
+  56%{transform:scale(1.03) translateX(-6px) rotate(-2deg)}
+  64%{transform:scale(1.03) translateX(5px) rotate(2deg)}
+  72%{transform:scale(1.02) translateX(-3px) rotate(-1deg)}
+  80%{transform:scale(1.02) translateX(2px) rotate(1deg)}
+  90%{transform:scale(1.01) translateX(-1px) rotate(0)}
+  100%{transform:scale(1) translateX(0) rotate(0)}
+}
+.evo-mon.settle-pulse{
+  opacity:1;transform:scale(1);
+  animation:evo-settle-pulse 1.3s ease-in-out infinite;
+}
+@keyframes evo-settle-pulse{
+  0%,100%{filter:brightness(1) drop-shadow(0 0 28px var(--accent-glow,rgba(245,158,11,.6)));transform:scale(1)}
+  50%{filter:brightness(1.12) drop-shadow(0 0 48px var(--accent-glow,rgba(245,158,11,.9)));transform:scale(1.035)}
+}
+#evoOverlay.screenshake{animation:evo-screen-shake .5s cubic-bezier(.36,.07,.19,.97)}
+@keyframes evo-screen-shake{
+  0%{transform:translate(0,0)}
+  8%{transform:translate(-6px,3px)} 16%{transform:translate(5px,-4px)}
+  24%{transform:translate(-6px,3px)} 32%{transform:translate(5px,-3px)}
+  40%{transform:translate(-5px,2px)} 48%{transform:translate(4px,-2px)}
+  56%{transform:translate(-4px,2px)} 64%{transform:translate(3px,-2px)}
+  72%{transform:translate(-3px,1px)} 80%{transform:translate(2px,-1px)}
+  88%{transform:translate(-1px,1px)} 96%{transform:translate(1px,-1px)}
+  100%{transform:translate(0,0)}
+}
+/* Cahaya aksen dilapik ATAS latar legap - asal guna #000 dgn alpha 16% di tengah,
+   jadi skrin belakang menembus semasa detik dedah. */
+#evoOverlay.reveal-bg{background:
+  radial-gradient(ellipse at 50% 35%,var(--ambient-reveal,rgba(245,158,11,.35)),transparent 72%),
+  #12002E !important}
+
+/* Bottom info: flex-column supaya nama/bintang/stats/butang TAK overlap */
+.evo-bottom-info{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;width:92%;z-index:2}
+.evo-label-wrap{margin-top:28px;height:60px;display:flex;align-items:center;justify-content:center;gap:2px;opacity:0;animation:evo-label-wrap-in .3s .95s ease forwards}
+@keyframes evo-label-wrap-in{to{opacity:1}}
+.evo-label{font-size:40px;font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,#FDE68A,#F59E0B,#EF4444,#F59E0B,#FDE68A);background-size:300% 300%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:evo-shimmer-label 2.5s linear infinite;filter:drop-shadow(0 4px 14px rgba(239,68,68,.5));display:inline-block;opacity:0;transform:translateY(14px) scale(.85)}
+.evo-label.reveal{animation:evo-letter-in .45s cubic-bezier(.2,1.4,.4,1) forwards,evo-shimmer-label 2.5s linear infinite 1s}
+@keyframes evo-letter-in{to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes evo-shimmer-label{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.evo-names-row{display:flex;align-items:center;gap:12px;margin-top:6px;font-size:15px;font-weight:700;opacity:0;animation:evo-fadeInUp .5s 1.15s ease forwards}
+@keyframes evo-fadeInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.evo-from{color:#8B93A8}
+.evo-arrow{font-size:20px;color:#F59E0B;animation:evo-pulse-arrow .8s ease-in-out infinite}
+@keyframes evo-pulse-arrow{0%,100%{transform:scale(1) translateX(0);opacity:.6}50%{transform:scale(1.25) translateX(2px);opacity:1}}
+.evo-to{color:#F59E0B;font-size:20px;text-shadow:0 0 18px rgba(245,158,11,.6);animation:evo-glow-text 1.6s ease-in-out infinite}
+@keyframes evo-glow-text{0%,100%{text-shadow:0 0 16px rgba(245,158,11,.6)}50%{text-shadow:0 0 34px rgba(245,158,11,.9),0 0 55px rgba(245,158,11,.3)}}
+.evo-stars-row{display:flex;gap:5px;margin-top:6px;opacity:0;animation:evo-fadeInUp .5s 1.3s ease forwards}
+.evo-star{font-size:15px;color:#3A3A3A;transition:color .3s}
+.evo-star.lit{color:#F59E0B;text-shadow:0 0 10px rgba(245,158,11,.7)}
+.evo-stats{display:flex;flex-direction:column;gap:8px;margin-top:14px;width:240px;opacity:0;animation:evo-fadeInUp .5s 1.4s ease forwards}
+.evo-stat-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.evo-stat-label{width:36px;color:#8B93A8;font-weight:700;text-align:right}
+.evo-stat-track{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden;position:relative}
+.evo-stat-fill-old{position:absolute;left:0;top:0;height:100%;background:#4B5563;border-radius:5px}
+.evo-stat-fill-new{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#F59E0B,#FDE68A);border-radius:5px;width:0;transition:width 1s cubic-bezier(.2,.9,.3,1);box-shadow:0 0 10px rgba(245,158,11,.6)}
+.evo-stat-val{width:50px;font-weight:800;font-variant-numeric:tabular-nums;color:#fff;text-align:right;font-family:var(--readable)}
+.evo-stat-delta{color:#34D399;font-weight:700;font-size:10px;opacity:0;transition:opacity .3s}
+.evo-stat-delta.show{opacity:1}
+.evo-btn{position:relative;overflow:hidden;margin-top:18px;padding:12px 40px;border:none;border-radius:14px;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#F59E0B,#D97706);color:#0A0A0A;letter-spacing:2px;box-shadow:0 4px 24px rgba(245,158,11,.45),inset 0 1px 0 rgba(255,255,255,.4);animation:evo-fadeInUp .5s .3s ease backwards}
+.evo-btn::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.6),transparent);animation:evo-shine-sweep 2.4s ease-in-out infinite;animation-delay:2.1s}
+@keyframes evo-shine-sweep{0%{left:-60%}35%{left:130%}100%{left:130%}}
+#evoOverlay.punch{animation:evo-scene-punch .5s ease-out}
+@keyframes evo-scene-punch{0%{transform:scale(1)}30%{transform:scale(1.045)}100%{transform:scale(1)}}
+.evo-sparkle{position:absolute;border-radius:50%;pointer-events:none;animation:evo-sparkle-fly 1.2s ease-out forwards}
+@keyframes evo-sparkle-fly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(0)}}
+
+/* ============================================================
+   📐 SKRIN PENDEK (cth iPhone SE 667px, Android 640px)
+   Soalan panjang + arena penuh menolak butang jawapan ke bawah skrin.
+   Pd ketinggian rendah, kecilkan arena/monster/soalan supaya SEMUA
+   (arena + soalan + jawapan) nampak tanpa scroll.
+   Guna max-height supaya telefon tinggi tak terjejas langsung.
+   ============================================================ */
+@media (max-height:720px){
+  .arena{padding:8px!important}
+  #monArt,#enemyArt{width:78px!important;height:78px!important}
+  .fighter{gap:8px!important}
+  .vs{margin:2px 0!important;font-size:15px!important}
+  .combowrap{margin-top:6px!important}
+  .timerwrap{margin-top:5px!important}
+  .hpbar{height:10px!important}
+  .qbox{padding:8px 10px!important;margin:6px 0!important}
+  .qtext{font-size:clamp(16px,4vw,21px)!important;line-height:1.15!important}
+  .choice{min-height:48px!important;padding:9px 6px!important;font-size:19px!important}
+  .deck-bench{margin-top:4px!important}
+  .items-bar{margin:2px 0!important}
+}
+@media (max-height:600px){
+  #monArt,#enemyArt{width:64px!important;height:64px!important}
+  .qtext{font-size:clamp(14px,3.6vw,18px)!important}
+  .qbox{padding:6px 8px!important;margin:4px 0!important}
+  .choice{min-height:42px!important;padding:7px 5px!important;font-size:17px!important}
+}
+
+/* ============================================================
+   🎨 HIERARKI VISUAL (mesra semua tema)
+   Guna pemboleh ubah tema sedia ada (--bg-panel-dark / --bg-soft /
+   --gold), jadi setiap tema - ungu, hutan, laut, padang pasir,
+   biru gelap & custom - dapat variasi gelap/cerah sendiri secara
+   automatik tanpa warna keras (hardcoded).
+   ============================================================ */
+
+/* Panel versi GELAP - utk seksyen yg perlu menonjol drpd jirannya */
+.panel-dark{
+  background:linear-gradient(180deg,var(--bg-panel-dark),var(--bg-deep))!important;
+  border-color:rgba(255,255,255,.14)!important;
+  box-shadow:var(--shadow-card), inset 0 1px 0 rgba(255,255,255,.06)!important;
+}
+
+/* Kad seksyen dlm Tetapan / Ibu Bapa - beri sempadan & latar tersendiri
+   supaya setiap kumpulan tetapan mudah dibezakan */
+.sgroup{
+  background:linear-gradient(180deg,var(--bg-panel-dark),var(--bg-deep));
+  border:2px solid rgba(255,255,255,.13);
+  border-radius:16px;
+  padding:4px 12px 8px;
+  margin:0 0 14px;
+}
+.sgroup + .sgroup{margin-top:0}
+/* Tajuk seksyen: jalur aksen warna tema supaya pantas dikenal pasti */
+.sgroup-title{
+  display:flex;align-items:center;gap:8px;
+  margin:0 -12px 6px;padding:9px 12px;
+  background:linear-gradient(90deg,var(--gold),transparent 78%);
+  border-radius:14px 14px 0 0;
+  font-weight:900;font-size:14px;letter-spacing:.4px;
+  color:var(--text-dark);
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+}
+/* Baris terakhir dlm kumpulan tak perlu garis bawah */
+.sgroup .statline:last-child{border-bottom:none}
+.sgroup .statline{border-bottom-color:rgba(255,255,255,.10)}
 </style>
 </head>
 <body>
@@ -2801,7 +3019,7 @@ function renderStickerWeek(){
       const played=pd.includes(d.toDateString());
       cells+='<div class="sticker-day'+(played?' played':'')+(i===0?' today':'')+'"><div class="d">'+dayNames[d.getDay()]+'</div><div class="s">'+(played?'\u2B50':'\u00B7')+'</div></div>';
     }
-    return '<div class="panel" style="padding:12px 14px"><div class="home-section-label" style="margin-bottom:2px">\u{1F4C5} STIKER HARIAN</div><div style="font-size:13px;color:var(--text-soft);font-weight:700">Main setiap hari utk kumpul stiker! \u{1F525} Streak: '+streak+' hari</div><div class="sticker-week">'+cells+'</div></div>';
+    return '<div class="panel panel-dark" style="padding:12px 14px"><div class="home-section-label" style="margin-bottom:2px">\u{1F4C5} STIKER HARIAN</div><div style="font-size:13px;color:var(--text-soft);font-weight:700">Main setiap hari utk kumpul stiker! \u{1F525} Streak: '+streak+' hari</div><div class="sticker-week">'+cells+'</div></div>';
   }catch(e){return '';}
 }
 function renderHome(){
@@ -3183,14 +3401,19 @@ function renderSettings(){
   const needsBackupReminder=(state?.stats?.questions||0)>=30&&(daysSinceExport===null||daysSinceExport>=7);
   var html='<div class="panel"><h2 class="display" style="font-size:18px;margin-bottom:12px">⚙️ Tetapan</h2>'+
     (needsBackupReminder?'<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:14px;border-radius:12px;background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.35)"><span style="font-size:22px">💾</span><div style="flex:1"><div style="font-size:11px;font-weight:700;color:#4CAF50">Jangan lupa backup!</div><div style="font-size:10px;color:var(--text-light);margin-top:2px">'+(daysSinceExport===null?'Progress anak belum pernah di-backup.':'Dah '+daysSinceExport+' hari sejak backup terakhir.')+'</div></div><button class="btn btn-sm" style="width:auto;padding:6px 12px;background:#4CAF50;color:#fff;font-size:10px" onclick="MMA.exportSave()">Eksport</button></div>':'')+
+    '<div class="sgroup"><div class="sgroup-title">👤 Profil & Pemain</div>'+
     (()=>{const profs=getProfiles();const cur=profs.find(p=>p.id===getActiveProfileId());return'<div class="statline" style="margin-bottom:12px"><span>👥 Profil</span><button class="btn btn-sm" style="width:auto;padding:8px 14px;background:var(--gold);color:#000;white-space:nowrap" onclick="MMA.route(\'profiles\')">'+(cur?cur.avatar+' '+esc(cur.name):'Profil')+' · Tukar</button></div>';})()+
     '<div class="statline"><span>👤 Nama Pemain</span><input type="text" id="player-name-input" value="'+esc(state.playerName||'Aydan')+'" maxlength="14" style="width:120px;background:var(--surface-light);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;font-family:var(--font);font-size:12px;color:var(--text);text-align:center;outline:none" onchange="MMA.setPlayerName(this.value)"></div>'+
     '<div class="statline"><span>🎯 Tahap Kesukaran</span><button class="btn btn-sm" style="width:auto;padding:8px 16px;background:'+DIFFICULTIES[state?.difficulty||'medium'].color+'" onclick="MMA.route(\'difficulty\')">'+DIFFICULTIES[state?.difficulty||'medium'].icon+' '+DIFFICULTIES[state?.difficulty||'medium'].name+'</button></div>'+
+    '</div>'+
+    '<div class="sgroup"><div class="sgroup-title">🔊 Bunyi & Permainan</div>'+
     '<div class="statline"><span>🐢 Mod Tiada Timer</span><button class="btn '+(state?.settings?.noTimer?'btn-primary':'btn-ghost')+' btn-sm" style="width:auto;padding:8px 16px" onclick="MMA.toggle(\'noTimer\')">'+(state?.settings?.noTimer?'ON':'OFF')+'</button></div>'+
     '<div class="statline"><span>🎵 Muzik latar</span><button class="btn '+(state?.settings?.music?'btn-primary':'btn-ghost')+' btn-sm" style="width:auto;padding:8px 16px" onclick="MMA.toggle(\'music\')">'+(state?.settings?.music?'ON':'OFF')+'</button></div>'+
     '<div class="statline"><span>🔉 Volum Muzik</span><div style="display:flex;align-items:center;gap:8px;width:120px"><input type="range" min="0" max="100" value="'+((state?.settings?.bgmVolume||0.18)*100).toFixed(0)+'" style="flex:1;height:6px;appearance:none;background:var(--glass-border);border-radius:3px;outline:none;accent-color:var(--purple)" oninput="MMA.setBgmVolume(this.value)"><span id="bgm-label" style="font-size:10px;color:var(--text-light);min-width:24px">'+((state?.settings?.bgmVolume||0.18)*100).toFixed(0)+'%</span></div></div>'+
     '<div class="statline"><span>🔊 Kesan bunyi</span><button class="btn '+(state?.settings?.sound?'btn-primary':'btn-ghost')+' btn-sm" style="width:auto;padding:8px 16px" onclick="MMA.toggle(\'sound\')">'+(state?.settings?.sound?'ON':'OFF')+'</button></div>'+
     '<div class="statline"><span>🔊 Volum Kesan Bunyi</span><div style="display:flex;align-items:center;gap:8px;width:120px"><input type="range" min="0" max="100" value="'+((state?.settings?.sfxVolume??1)*100).toFixed(0)+'" style="flex:1;height:6px;appearance:none;background:var(--glass-border);border-radius:3px;outline:none;accent-color:var(--purple)" oninput="MMA.setSfxVolume(this.value)"><span id="sfx-label" style="font-size:10px;color:var(--text-light);min-width:24px">'+((state?.settings?.sfxVolume??1)*100).toFixed(0)+'%</span></div></div>'+
+    '</div>'+
+    '<div class="sgroup"><div class="sgroup-title">🎨 Penampilan</div>'+
     '<div class="statline"><span>🎨 Tema</span><div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:180px">'+
     ['default','forest','ocean','desert','darkblue','custom'].map(t=>{
       const icons={default:'🌙',forest:'🌿',ocean:'🌊',desert:'🏜️',darkblue:'🌌',custom:'🎨'};
@@ -3200,8 +3423,8 @@ function renderSettings(){
     }).join('')+'</div></div>'+
     (state?.settings?.theme==='custom'?'<div class="statline"><span>🖌️ Warna Kamu</span><input type="color" value="'+(state?.settings?.customColor||'#8B5CF6')+'" oninput="MMA.setCustomColor(this.value)" style="width:44px;height:28px;border-radius:6px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;padding:2px"></div>':'')+
     '<div class="statline"><span>🖼️ Avatar</span><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:140px;justify-content:flex-end">'+['🦁','🐱','🐶','🐼','🦊','🐸','🦄','🐲','🦅','🐙','🦋','🐢'].map(a=>`<button style="width:28px;height:28px;border-radius:6px;border:${(state?.avatar||'🦁')===a?'2px solid var(--gold)':'1px solid var(--glass-border)'};background:${(state?.avatar||'🦁')===a?'var(--glass-heavy)':'transparent'};font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="MMA.setAvatar('${a}')">${a}</button>`).join('')+'</div></div>'+
-    '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--glass-border)">'+
-    '<h3 class="display" style="font-size:14px;margin-bottom:8px;color:var(--purple)">👨‍👩‍👧 Kawalan Ibu Bapa</h3>'+
+    '</div>'+
+    '<div class="sgroup"><div class="sgroup-title">👨‍👩‍👧 Kawalan Ibu Bapa</div>'+
     '<p style="color:var(--text-light);font-size:11px;margin-bottom:12px">Tetapkan bilangan soalan dan kesukaran setiap bab</p>'+
     (()=>{try{
       const bt=state?.stats?.byTopic||{};let weak=null;
