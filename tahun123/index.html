@@ -826,36 +826,46 @@ body.theme-custom .mission-banner{
 .sticker-day.played .d{color:var(--text-dark)}
 .sticker-day .s{font-size:20px;line-height:1.3}
 
-/* ============================================================
-   📏 HEADER SATU BARIS
-   Topbar ada 8 item; dgn saiz teks kids ia melimpah ke baris ke-2.
-   Nota: #app dihadkan 480px, jadi lebar bekas topbar = min(viewport,480) - 32.
-   Breakpoint 480px dipakai supaya padan dgn had bekas tu.
-   !important perlu sbb readability pass di atas pakai !important.
-   ============================================================ */
-.topbar{flex-wrap:nowrap!important;gap:3px!important}
-.topbar .pill{padding:3px 6px!important;font-size:11.5px!important;border-width:2px!important;gap:3px!important;flex:0 0 auto}
-.topbar .iconbtn{width:31px!important;height:31px!important;font-size:13px!important;border-radius:10px!important;border-width:2px!important}
-.topbar .pill img{width:11px!important;height:11px!important}
+/* ⭐ Bintang di bawah dot stage - dot hanya 38px lebar, jadi 3 bintang mesti muat.
+   Guna class (bukan inline 8px) supaya tidak dinaikkan oleh readability pass. */
+.stage-stars{
+  position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);
+  font-size:9px;line-height:1;white-space:nowrap;letter-spacing:-1.5px;
+  color:#FFE066;pointer-events:none;
+}
+/* 📏 Header: butang besar & mudah ditekan.
+   Bekas topbar dihadkan ~456px (had #app 480px), jadi tak semua boleh besar.
+   Yg dikorbankan ialah elemen BUKAN-interaktif: pill avatar dibuang terus
+   (hiasan, tiada onclick - masih ada di Tetapan) & nama kesukaran disembunyikan
+   (ikon berwarna sudah menyampaikan maksud). Baki butang jadi 42px/37px/33px.
+   Nilai ditala melalui pengukuran, bukan agakan. */
+.topbar{flex-wrap:nowrap!important;gap:5px!important}
+.topbar .pill{padding:7px 10px!important;font-size:15px!important;border-width:2.5px!important;gap:4px!important;flex:0 0 auto}
+.topbar .iconbtn{width:42px!important;height:42px!important;font-size:19px!important;border-radius:14px!important;border-width:2.5px!important}
+.topbar .pill img{width:15px!important;height:15px!important}
+.topbar .pill .diff-name{display:none}
 @media(max-width:479px){
+  .topbar{gap:4px!important}
+  .topbar .pill{font-size:12.5px!important;padding:6px 8px!important}
+  .topbar .iconbtn{width:37px!important;height:37px!important;font-size:17px!important;border-radius:12px!important}
+  .topbar .pill img{width:12px!important;height:12px!important}
+}
+@media(max-width:400px){
+  .topbar{gap:3px!important}
+  .topbar .pill{font-size:11.5px!important;padding:5px 7px!important}
+  .topbar .iconbtn{width:35px!important;height:35px!important;font-size:16px!important}
+}
+@media(max-width:360px){
+  .topbar{gap:2px!important}
+  .topbar .pill{font-size:10.5px!important;padding:4px 5px!important;border-width:2px!important}
+  .topbar .iconbtn{width:32px!important;height:32px!important;font-size:14px!important;border-width:2px!important}
+  .topbar .pill img{width:10px!important;height:10px!important}
+}
+@media(max-width:340px){
   .topbar{gap:1px!important}
-  .topbar .pill{font-size:10px!important;padding:2px 4px!important;border-width:1.5px!important}
-  .topbar .iconbtn{width:27px!important;height:27px!important;font-size:12px!important;border-radius:8px!important;border-width:1.5px!important}
-  .topbar .pill img{width:9px!important;height:9px!important}
-  /* skrin sempit: tunjuk ikon kesukaran sahaja, nama penuh masih ada di Tetapan */
-  .topbar .pill .diff-name{display:none}
+  .topbar .pill{font-size:10px!important;padding:4px 4px!important}
+  .topbar .iconbtn{width:30px!important;height:30px!important;font-size:13px!important}
 }
-
-/* ❓ Album: monster belum dimiliki tunjuk tanda soal (bukan siluet) supaya player rasa ingin tahu */
-.tc.locked .tc-mon{display:none}
-.tc.locked .tc-art::after{
-  content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-family:var(--display);font-size:58px;font-weight:900;color:rgba(255,255,255,.42);
-  text-shadow:0 3px 0 rgba(0,0,0,.3);z-index:3;
-}
-
-/* 🐛 FIX: bila kad ada badge nombor deck (1/2/3) di atas-kiri, anjak nama monster ke kanan supaya tak tertutup */
-.deck-card-in .tc-name{padding-left:34px}
 </style>
 </head>
 <body>
@@ -2697,7 +2707,7 @@ function topbar(){
   const diff=DIFFICULTIES[state?.difficulty||'medium'];
   const av=state?.avatar||'🦁';
   const yr=state?.selectedYear||1;
-  return`<div class="topbar"><button class="iconbtn" onclick="MMA.route('home')">🏠</button><div class="pill">🪙 ${state?.gold||0}</div><div class="pill"><img src="assets/gem.png" style="width:14px;height:14px;vertical-align:middle;margin-right:2px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))">${state?.gems||0}</div><div style="flex:1"></div><div class="pill" style="cursor:pointer;font-size:13px" onclick="MMA.route('yearselect')" title="Tukar Tahun">📚 Thn ${yr}</div><div class="pill" style="padding:4px 8px;font-size:16px">${av}</div><div class="pill" style="background:linear-gradient(180deg,#FF7AC2,#FF4DA6);border-color:#FFB3D9;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.2)">${diff.icon} <span class="diff-name">${diff.name}</span></div><button class="iconbtn" onclick="MMA.toggleBGM()">${state?.settings?.music?'🎵':'🔇'}</button><button class="iconbtn" onclick="MMA.route('settings')">⚙️</button></div>`;
+  return`<div class="topbar"><button class="iconbtn" onclick="MMA.route('home')">🏠</button><div class="pill">🪙 ${state?.gold||0}</div><div class="pill"><img src="assets/gem.png" style="width:14px;height:14px;vertical-align:middle;margin-right:2px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))">${state?.gems||0}</div><div style="flex:1"></div><div class="pill" style="cursor:pointer;font-size:13px" onclick="MMA.route('yearselect')" title="Tukar Tahun">📚 Tahun ${yr}</div><div class="pill" style="background:linear-gradient(180deg,#FF7AC2,#FF4DA6);border-color:#FFB3D9;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.2)">${diff.icon} <span class="diff-name">${diff.name}</span></div><button class="iconbtn" onclick="MMA.toggleBGM()">${state?.settings?.music?'🎵':'🔇'}</button><button class="iconbtn" onclick="MMA.route('settings')">⚙️</button></div>`;
 }
 
 // 🖐️ Sama spt pilih tahun - klik kad = PILIH sahaja, butang Teruskan = SAHKAN.
@@ -2876,7 +2886,7 @@ ${renderStickerWeek()}
       const clickable=i<cur;
       const clickTarget=s.bonus?`MMA.startBonusMission(${i})`:`MMA.startStage(${i},true)`;
       const clickTitle=s.bonus?'🎁 Main semula Bonus Mission utk lebih item':'⭐ Mastery Mode - main semula (enemy lebih kuat, ganjaran lebih baik)';
-      return`<div class="dot ${i<cur?'done':''} ${i===cur?'now':''} ${s.boss?'boss':''}" ${clickable?`onclick="${clickTarget}" title="${clickTitle}"`:''} style="${clickable?'cursor:pointer;':''}">${s.boss?'👑':s.bonus?'🎁':(i<cur?'✓':i+1)}${clickable&&bestStars>0&&!s.bonus?`<span style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:8px;white-space:nowrap;color:#FFE066">${'⭐'.repeat(bestStars)}</span>`:''}</div>`;
+      return`<div class="dot ${i<cur?'done':''} ${i===cur?'now':''} ${s.boss?'boss':''}" ${clickable?`onclick="${clickTarget}" title="${clickTitle}"`:''} style="${clickable?'cursor:pointer;':''}">${s.boss?'👑':s.bonus?'🎁':(i<cur?'✓':i+1)}${clickable&&bestStars>0&&!s.bonus?`<span class="stage-stars">${'⭐'.repeat(bestStars)}</span>`:''}</div>`;
     }).join('')}
   </div>
   ${cur>=stages.length
