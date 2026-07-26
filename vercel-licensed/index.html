@@ -2118,11 +2118,27 @@ function topbar(){
   return`<div class="topbar"><button class="iconbtn" onclick="MMA.route('home')">🏠</button><div class="pill">🪙 ${state?.gold||0}</div><div class="pill"><img src="assets/gem.png" style="width:14px;height:14px;vertical-align:middle;margin-right:2px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))">${state?.gems||0}</div><div style="flex:1"></div><div class="pill" style="padding:4px 8px;font-size:16px">${av}</div><div class="pill" style="background:linear-gradient(180deg,#FF7AC2,#FF4DA6);border-color:#FFB3D9;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.2)">${diff.icon} ${diff.name}</div><button class="iconbtn" onclick="MMA.toggleBGM()">${state?.settings?.music?'🎵':'🔇'}</button><button class="iconbtn" onclick="MMA.route('settings')">⚙️</button></div>`;
 }
 
+// 🖐️ Pilihan 2 langkah: klik kad = PILIH sahaja (tanda kuning), butang Teruskan = SAHKAN.
+// Dulu satu klik terus komit & melompat - senang tersalah pilih monster kekal.
+let pendingStarter=null;
+function pickStarterSelect(fam){pendingStarter=fam;renderWelcome();}
+function confirmStarter(){if(pendingStarter)pickStarter(pendingStarter);}
 function renderWelcome(){
-  app.innerHTML=`<div class="panel" style="text-align:center;margin-top:24px;color:#fff"><div style="font-size:44px;margin-bottom:12px">🦁</div><h1 class="display" style="font-size:16px;margin-bottom:6px;letter-spacing:1px">Profesor Nombor perlukan bantuan!</h1><p style="color:var(--text-light);font-size:12px;margin-bottom:16px;line-height:1.6">Semua Monster Matematik telah hilang. Pilih rakan pertama kamu!</p><div class="cardgrid" style="margin-bottom:12px">${STARTER_IDS.map(f=>`<div onclick="MMA.pickStarter('${f}')">${cardHTML(stageData(f,0),{tap:true})}<div class="cardcap">${FAMILIES[f].role}</div></div>`).join('')}</div><p style="color:var(--text-light);font-size:10px;letter-spacing:1px">TEKAN SATU KAD UNTUK MEMILIH</p><button class="btn btn-ghost btn-sm" style="margin-top:12px;opacity:.5;font-size:9px" onclick="if(confirm('Padam semua data?')){localStorage.removeItem('mma_save_v1');location.reload();}">🔄 Reset Data</button></div>`;
+  const sel=pendingStarter;
+  const nama=sel?(FAMILIES[sel]?.stages[0]?.name||'monster ni'):null;
+  app.innerHTML=`<div class="panel" style="text-align:center;margin-top:24px;color:#fff">
+    <div style="font-size:44px;margin-bottom:12px">🦁</div>
+    <h1 class="display" style="font-size:16px;margin-bottom:6px;letter-spacing:1px">Profesor Nombor perlukan bantuan!</h1>
+    <p style="color:var(--text-light);font-size:12px;margin-bottom:16px;line-height:1.6">Semua Monster Matematik telah hilang. Pilih rakan pertama kamu!</p>
+    <div class="cardgrid" style="margin-bottom:12px">${STARTER_IDS.map(f=>`<div onclick="MMA.pickStarterSelect('${f}')">${cardHTML(stageData(f,0),{tap:true,sel:sel===f})}<div class="cardcap">${sel===f?'<b style="color:#FFE066">✓ Dipilih</b>':FAMILIES[f].role}</div></div>`).join('')}</div>
+    ${sel
+      ? `<button class="btn btn-cta" onclick="MMA.confirmStarter()">Teruskan dengan ${esc(nama)} →</button>
+         <p style="color:var(--text-light);font-size:11px;margin-top:8px">Tekan kad lain kalau nak tukar pilihan</p>`
+      : `<p style="color:var(--text-light);font-size:12px;letter-spacing:1px">👆 TEKAN SATU KAD UNTUK MEMILIH</p>`}
+    <button class="btn btn-ghost btn-sm" style="margin-top:12px;opacity:.5;font-size:9px" onclick="if(confirm('Padam semua data?')){localStorage.removeItem('mma_save_v1');location.reload();}">🔄 Reset Data</button>
+  </div>`;
 }
-
-function pickStarter(fam){try{state.started=true;state.starter=fam;state.collection[fam]={owned:true,stage:1,correct:0};state.deck=[fam];save();if(!state.tutorialDone){tutorialStep=0;showTutorial();}else route('home');}catch(e){route('home');}}
+function pickStarter(fam){try{pendingStarter=null;state.started=true;state.starter=fam;state.collection[fam]={owned:true,stage:1,correct:0};state.deck=[fam];save();if(!state.tutorialDone){tutorialStep=0;showTutorial();}else route('home');}catch(e){route('home');}}
 
 function contrastOn(hex){
   try{
@@ -5030,7 +5046,7 @@ function unlockStorageSlot(){
   showToast('🔓','Slot storan dibuka!');renderIncubator();
 }
 
-window.MMA={route,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,switchProfile,createProfile,deleteProfile,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
+window.MMA={route,pickStarterSelect,confirmStarter,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,switchProfile,createProfile,deleteProfile,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
   startEggHunt,answerEggHunt,quitEggHunt,pickEggChoice,selectIncubatorItem,injectSelectedIncubatorItem,answerIncubatorChallenge,closeIncubatorChallenge,hatchUltraRare,closeHatchOverlay,takeEggFromStorage,unlockStorageSlot,swapActiveMonster};
 
 // Ambient orbs

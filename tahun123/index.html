@@ -2609,38 +2609,42 @@ function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='inc
 
 function isPro(){ return true; } // 👑 Versi berbayar: pembeli automatik PRO, tiada pengaktifan diperlukan
 
+// 🖐️ Pilihan 2 langkah: klik = PILIH (tanda kuning), butang Teruskan = SAHKAN.
+// Dulu satu klik terus melompat ke skrin lain - senang tersalah pilih.
+let pendingYear=null;
+function pickYear(yr){pendingYear=yr;renderYearSelector();}
+function confirmYear(){if(pendingYear)setYear(pendingYear);}
 function renderYearSelector(){
   try{
   const yr=state?.selectedYear||1;
-  const chapters=yr===3?CHAPTERS_Y3:yr===2?CHAPTERS_Y2:CHAPTERS;
+  const sel=pendingYear||yr;
+  const info=[
+    {n:1,ico:'🟢',nama:'Tahun 1',desc:'Nombor hingga 100 · Tambah & Tolak asas · Bentuk & Wang',bab:CHAPTERS},
+    {n:2,ico:'🟡',nama:'Tahun 2',desc:'Nombor hingga 1000 · Darab & Bahagi mula · Pecahan asas',bab:CHAPTERS_Y2},
+    {n:3,ico:'🔴',nama:'Tahun 3',desc:'Nombor hingga 10000 · Pecahan & Perpuluhan · Perimeter & Data',bab:CHAPTERS_Y3},
+  ];
   app.innerHTML=`<div class="panel" style="text-align:center;margin-top:24px;color:#fff">
     <div style="font-size:48px;margin-bottom:8px">📚</div>
     <h2 class="display" style="font-size:20px;margin-bottom:6px">Pilih Tahun</h2>
     <p style="color:var(--text-light);font-size:13px;margin-bottom:18px">Ibu bapa — pilih tahun pembelajaran anak</p>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <div onclick="MMA.setYear(1)" style="cursor:pointer;padding:16px;border-radius:16px;border:3px solid ${yr===1?'#FFE066':'rgba(255,255,255,.2)'};background:${yr===1?'linear-gradient(180deg,rgba(255,224,102,.25),rgba(245,197,66,.12))':'var(--glass)'};text-align:left">
-        <div style="font-size:22px;font-weight:800">🟢 Tahun 1</div>
-        <div style="font-size:13px;color:var(--text-light);margin-top:4px">Nombor hingga 100 · Tambah & Tolak asas · Bentuk & Wang</div>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:4px">${getChapters().length} bab · ${getChapters().reduce((s,c)=>s+c.stages.length,0)} stage</div>
-      </div>
-      <div onclick="MMA.setYear(2)" style="cursor:pointer;padding:16px;border-radius:16px;border:3px solid ${yr===2?'#FFE066':'rgba(255,255,255,.2)'};background:${yr===2?'linear-gradient(180deg,rgba(255,224,102,.25),rgba(245,197,66,.12))':'var(--glass)'};text-align:left">
-        <div style="font-size:22px;font-weight:800">🟡 Tahun 2</div>
-        <div style="font-size:13px;color:var(--text-light);margin-top:4px">Nombor hingga 1000 · Darab & Bahagi mula · Pecahan asas</div>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:4px">${CHAPTERS_Y2.length} bab · ${CHAPTERS_Y2.reduce((s,c)=>s+c.stages.length,0)} stage</div>
-      </div>
-      <div onclick="MMA.setYear(3)" style="cursor:pointer;padding:16px;border-radius:16px;border:3px solid ${yr===3?'#FFE066':'rgba(255,255,255,.2)'};background:${yr===3?'linear-gradient(180deg,rgba(255,224,102,.25),rgba(245,197,66,.12))':'var(--glass)'};text-align:left">
-        <div style="font-size:22px;font-weight:800">🔴 Tahun 3</div>
-        <div style="font-size:13px;color:var(--text-light);margin-top:4px">Nombor hingga 10000 · Pecahan & Perpuluhan · Perimeter & Data</div>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:4px">${CHAPTERS_Y3.length} bab · ${CHAPTERS_Y3.reduce((s,c)=>s+c.stages.length,0)} stage</div>
-      </div>
+      ${info.map(o=>{const on=sel===o.n;return`
+      <div onclick="MMA.pickYear(${o.n})" style="position:relative;cursor:pointer;padding:16px;border-radius:16px;border:3px solid ${on?'#FFE066':'rgba(255,255,255,.2)'};background:${on?'linear-gradient(180deg,rgba(255,224,102,.25),rgba(245,197,66,.12))':'var(--glass)'};text-align:left;${on?'box-shadow:0 0 0 4px rgba(245,197,66,.25)':''}">
+        ${on?'<div style="position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;background:#FFE066;color:#3B1A5C;font-weight:900;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 0 #C99200">✓</div>':''}
+        <div style="font-size:22px;font-weight:800">${o.ico} ${o.nama}</div>
+        <div style="font-size:13px;color:var(--text-light);margin-top:4px;padding-right:34px">${o.desc}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:4px">${o.bab.length} bab · ${o.bab.reduce((t,c)=>t+c.stages.length,0)} stage</div>
+      </div>`;}).join('')}
     </div>
-    <p style="color:var(--text-light);font-size:11px;margin-top:16px">💡 Boleh tukar tahun bila-bila masa dari topbar & Tetapan</p>
-    ${state.started?`<button class="btn btn-primary" style="margin-top:10px" onclick="MMA.route('home')">🏠 Kembali ke Rumah</button>`:''}
+    <button class="btn btn-cta" style="margin-top:16px" onclick="MMA.confirmYear()">Teruskan dengan ${info.find(o=>o.n===sel).nama} →</button>
+    <p style="color:var(--text-light);font-size:11px;margin-top:12px">💡 Boleh tukar tahun bila-bila masa dari topbar & Tetapan</p>
+    ${state.started?`<button class="btn btn-ghost" style="margin-top:8px" onclick="MMA.route('home')">🏠 Kembali ke Rumah</button>`:''}
   </div>`;
   }catch(e){console.error('renderYearSelector error:',e);route('welcome');}
 }
 function setYear(yr){
   try{
+  pendingYear=null;
   state.selectedYear=yr;save();
   route(state.started?'home':'welcome');
   }catch(e){console.error('setYear error:',e);route('welcome');}
@@ -2696,11 +2700,26 @@ function topbar(){
   return`<div class="topbar"><button class="iconbtn" onclick="MMA.route('home')">🏠</button><div class="pill">🪙 ${state?.gold||0}</div><div class="pill"><img src="assets/gem.png" style="width:14px;height:14px;vertical-align:middle;margin-right:2px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))">${state?.gems||0}</div><div style="flex:1"></div><div class="pill" style="cursor:pointer;font-size:13px" onclick="MMA.route('yearselect')" title="Tukar Tahun">📚 Thn ${yr}</div><div class="pill" style="padding:4px 8px;font-size:16px">${av}</div><div class="pill" style="background:linear-gradient(180deg,#FF7AC2,#FF4DA6);border-color:#FFB3D9;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.2)">${diff.icon} <span class="diff-name">${diff.name}</span></div><button class="iconbtn" onclick="MMA.toggleBGM()">${state?.settings?.music?'🎵':'🔇'}</button><button class="iconbtn" onclick="MMA.route('settings')">⚙️</button></div>`;
 }
 
+// 🖐️ Sama spt pilih tahun - klik kad = PILIH sahaja, butang Teruskan = SAHKAN.
+let pendingStarter=null;
+function pickStarterSelect(fam){pendingStarter=fam;renderWelcome();}
+function confirmStarter(){if(pendingStarter)pickStarter(pendingStarter);}
 function renderWelcome(){
-  app.innerHTML=`<div class="panel" style="text-align:center;margin-top:24px;color:#fff"><div style="font-size:44px;margin-bottom:12px">🦁</div><h1 class="display" style="font-size:16px;margin-bottom:6px;letter-spacing:1px">Profesor Nombor perlukan bantuan!</h1><p style="color:var(--text-light);font-size:12px;margin-bottom:16px;line-height:1.6">Semua Monster Matematik telah hilang. Pilih rakan pertama kamu!</p><div class="cardgrid" style="margin-bottom:12px">${STARTER_IDS.map(f=>`<div onclick="MMA.pickStarter('${f}')">${cardHTML(stageData(f,0),{tap:true})}<div class="cardcap">${FAMILIES[f].role}</div></div>`).join('')}</div><p style="color:var(--text-light);font-size:10px;letter-spacing:1px">TEKAN SATU KAD UNTUK MEMILIH</p><button class="btn btn-ghost btn-sm" style="margin-top:12px;opacity:.5;font-size:9px" onclick="if(confirm('Padam semua data?')){localStorage.removeItem('mma_save_v1');location.reload();}">🔄 Reset Data</button></div>`;
+  const sel=pendingStarter;
+  const nama=sel?(FAMILIES[sel]?.stages[0]?.name||'monster ni'):null;
+  app.innerHTML=`<div class="panel" style="text-align:center;margin-top:24px;color:#fff">
+    <div style="font-size:44px;margin-bottom:12px">🦁</div>
+    <h1 class="display" style="font-size:16px;margin-bottom:6px;letter-spacing:1px">Profesor Nombor perlukan bantuan!</h1>
+    <p style="color:var(--text-light);font-size:12px;margin-bottom:16px;line-height:1.6">Semua Monster Matematik telah hilang. Pilih rakan pertama kamu!</p>
+    <div class="cardgrid" style="margin-bottom:12px">${STARTER_IDS.map(f=>`<div onclick="MMA.pickStarterSelect('${f}')">${cardHTML(stageData(f,0),{tap:true,sel:sel===f})}<div class="cardcap">${sel===f?'<b style="color:#FFE066">✓ Dipilih</b>':FAMILIES[f].role}</div></div>`).join('')}</div>
+    ${sel
+      ? `<button class="btn btn-cta" onclick="MMA.confirmStarter()">Teruskan dengan ${esc(nama)} →</button>
+         <p style="color:var(--text-light);font-size:11px;margin-top:8px">Tekan kad lain kalau nak tukar pilihan</p>`
+      : `<p style="color:var(--text-light);font-size:12px;letter-spacing:1px">👆 TEKAN SATU KAD UNTUK MEMILIH</p>`}
+    <button class="btn btn-ghost btn-sm" style="margin-top:12px;opacity:.5;font-size:9px" onclick="if(confirm('Padam semua data?')){localStorage.removeItem('mma_save_v1');location.reload();}">🔄 Reset Data</button>
+  </div>`;
 }
-
-function pickStarter(fam){try{state.started=true;state.starter=fam;state.collection[fam]={owned:true,stage:1,correct:0};state.deck=[fam];save();if(!state.tutorialDone){tutorialStep=0;showTutorial();}else route('home');}catch(e){route('home');}}
+function pickStarter(fam){try{pendingStarter=null;state.started=true;state.starter=fam;state.collection[fam]={owned:true,stage:1,correct:0};state.deck=[fam];save();if(!state.tutorialDone){tutorialStep=0;showTutorial();}else route('home');}catch(e){route('home');}}
 
 function contrastOn(hex){
   try{
@@ -5608,7 +5627,7 @@ function unlockStorageSlot(){
   showToast('🔓','Slot storan dibuka!');renderIncubator();
 }
 
-window.MMA={route,setYear,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,switchProfile,createProfile,deleteProfile,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
+window.MMA={route,setYear,pickYear,confirmYear,pickStarterSelect,confirmStarter,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,switchProfile,createProfile,deleteProfile,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
   startEggHunt,answerEggHunt,quitEggHunt,pickEggChoice,selectIncubatorItem,injectSelectedIncubatorItem,answerIncubatorChallenge,closeIncubatorChallenge,hatchUltraRare,closeHatchOverlay,takeEggFromStorage,unlockStorageSlot,swapActiveMonster};
 
 // Ambient orbs
