@@ -5622,7 +5622,10 @@ window.addEventListener('beforeunload',()=>{if(!profileSwitching)save();});
 try{ensureProfiles();load();if(!state)state=defaultState();if(!state.progress)state.progress={chapter:0,stage:0};if(!state.stats)state.stats=defaultState().stats;if(!state.collection)state.collection={};if(!state.deck)state.deck=[];if(!state.difficulty)state.difficulty='medium';
 // 🔐 Gate lesen - kalau belum sah, hantar balik ke skrin masuk kod (elak akses terus URL game)
 if(localStorage.getItem('mma_license_valid')!=='true'){
-  location.href=location.origin+'/license.html';
+  // 🐛 FIX: dulu location.origin+'/license.html' - andaikan app di AKAR domain.
+  // Betul di Vercel, tapi 404 kalau app dlm subfolder (githack, GitHub Pages, server tempatan).
+  // Laluan relatif beri hasil sama di Vercel & berfungsi di mana-mana.
+  location.href='license.html';
 }else{
   preloadAllAssets(()=>route('splash'));
 }
