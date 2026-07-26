@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MathArena">
-<meta name="theme-color" content="#0A0A0A">
+<meta name="theme-color" content="#2E1065">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Monster Math Arena - Kids</title>
 <link rel="manifest" href="manifest.json">
@@ -28,24 +28,24 @@
   --display:"Baloo 2",system-ui,sans-serif;
   --readable:"Nunito",system-ui,sans-serif;
 
-  --gold:#D4AF37;
-  --gold-light:#F5D55E;
-  --gold-dark:#B8860B;
-  --gold-pale:#FFF8DC;
+  --gold:#FFC93C;
+  --gold-light:#FFE066;
+  --gold-dark:#E8A317;
+  --gold-pale:#FFF6D8;
 
-  --glass:rgba(212,175,55,.08);
-  --glass-heavy:rgba(212,175,55,.12);
-  --glass-border:rgba(212,175,55,.25);
-  --glass-highlight:rgba(212,175,55,.4);
+  --glass:rgba(255,201,60,.12);
+  --glass-heavy:rgba(255,201,60,.18);
+  --glass-border:rgba(255,201,60,.4);
+  --glass-highlight:rgba(255,201,60,.55);
 
   /* 🧒 Teks lebih terang & kontras tinggi supaya senang dibaca kanak-kanak */
   --text:#FFFFFF;
-  --text-secondary:#E4D9B8;
-  --text-muted:#B8A876;
+  --text-secondary:#F3E6C8;
+  --text-muted:#D9C9A0;
 
-  --surface:#0A0A0A;
-  --surface-light:#141414;
-  --surface-lighter:#1E1E1E;
+  --surface:#2E1065;
+  --surface-light:#3B1370;
+  --surface-lighter:#5B21B6;
 
   --success:#4CAF50;
   --warning:#FFC107;
@@ -54,7 +54,7 @@
   --shadow-sm:0 2px 8px rgba(0,0,0,.5);
   --shadow-md:0 8px 24px rgba(0,0,0,.6);
   --shadow-lg:0 16px 48px rgba(0,0,0,.7);
-  --shadow-glow:0 0 40px rgba(212,175,55,.2);
+  --shadow-glow:0 0 40px rgba(255,201,60,.2);
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;touch-action:manipulation}
@@ -102,10 +102,10 @@ button,.btn,.choice,input{font-family:var(--font)}
   inset:0;
   z-index:-2;
   background:
-    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(212,175,55,.15), transparent),
+    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255,201,60,.15), transparent),
     radial-gradient(ellipse 60% 40% at 80% 80%, rgba(184,134,11,.1), transparent),
-    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(212,175,55,.05), transparent),
-    linear-gradient(135deg, #0A0A0A 0%, #141414 50%, #0A0A0A 100%);
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,201,60,.05), transparent),
+    linear-gradient(135deg, #2E1065 0%, #3B1370 50%, #2E1065 100%);
 }
 
 #bg::before{
@@ -113,10 +113,10 @@ button,.btn,.choice,input{font-family:var(--font)}
   position:absolute;
   inset:0;
   background-image:
-    radial-gradient(1px 1px at 20% 30%, rgba(212,175,55,.2), transparent),
-    radial-gradient(1px 1px at 40% 70%, rgba(212,175,55,.15), transparent),
-    radial-gradient(1.5px 1.5px at 60% 20%, rgba(212,175,55,.18), transparent),
-    radial-gradient(1px 1px at 80% 60%, rgba(212,175,55,.1), transparent);
+    radial-gradient(1px 1px at 20% 30%, rgba(255,201,60,.2), transparent),
+    radial-gradient(1px 1px at 40% 70%, rgba(255,201,60,.15), transparent),
+    radial-gradient(1.5px 1.5px at 60% 20%, rgba(255,201,60,.18), transparent),
+    radial-gradient(1px 1px at 80% 60%, rgba(255,201,60,.1), transparent);
   background-size:cover;
   animation:twinkle 6s ease-in-out infinite;
 }
@@ -207,19 +207,19 @@ button,.btn,.choice,input{font-family:var(--font)}
 
 .btn-primary{
   background:linear-gradient(135deg, var(--gold), var(--gold-dark));
-  color:#0A0A0A;
+  color:#2E1065;
   font-weight:700;
-  box-shadow:0 4px 16px rgba(212,175,55,.4), inset 0 1px 0 rgba(255,255,255,.3);
+  box-shadow:0 4px 16px rgba(255,201,60,.4), inset 0 1px 0 rgba(255,255,255,.3);
 }
 
 .btn-primary:hover{
-  box-shadow:0 6px 24px rgba(212,175,55,.5), inset 0 1px 0 rgba(255,255,255,.3);
+  box-shadow:0 6px 24px rgba(255,201,60,.5), inset 0 1px 0 rgba(255,255,255,.3);
   transform:translateY(-1px);
 }
 
 .btn-primary:active{
   transform:translateY(1px);
-  box-shadow:0 2px 8px rgba(212,175,55,.3), inset 0 1px 0 rgba(255,255,255,.2);
+  box-shadow:0 2px 8px rgba(255,201,60,.3), inset 0 1px 0 rgba(255,255,255,.2);
 }
 
 /* CTA hijau - khas utk "apa nak tekan seterusnya" (mula stage/bab), diasingkan drpd gold btn-primary yg dipakai merata2 supaya lebih menonjol */
@@ -238,7 +238,7 @@ button,.btn,.choice,input{font-family:var(--font)}
 }
 
 .btn-secondary{
-  background:rgba(212,175,55,.1);
+  background:rgba(255,201,60,.1);
   border:1px solid var(--glass-border);
   box-shadow:var(--shadow-sm);
   color:var(--gold);
@@ -278,7 +278,7 @@ button,.btn,.choice,input{font-family:var(--font)}
 .gold-text{color:var(--gold);}
 
 .text-glow{
-  text-shadow:0 0 20px rgba(212,175,55,.5);
+  text-shadow:0 0 20px rgba(255,201,60,.5);
 }
 
 .letter-wide{letter-spacing:4px}
@@ -356,7 +356,7 @@ button,.btn,.choice,input{font-family:var(--font)}
   -webkit-background-clip:text;
   background-clip:text;
   color:transparent;
-  filter:drop-shadow(0 2px 12px rgba(212,175,55,.5));
+  filter:drop-shadow(0 2px 12px rgba(255,201,60,.5));
   margin-bottom:4px;
 }
 
@@ -373,13 +373,13 @@ button,.btn,.choice,input{font-family:var(--font)}
 #splash{
   position:fixed;inset:0;z-index:999;
   display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-  background:#0A0A0A;
+  background:#2E1065;
   animation:splashFadeIn .6s ease;
 }
 #splash .bg{
   position:absolute;inset:0;
   background:url('assets/splashscreen.png') center/contain no-repeat;
-  background-color:#0A0A0A;
+  background-color:#2E1065;
   image-rendering:pixelated;
   image-rendering:-webkit-optimize-contrast;
 }
@@ -389,12 +389,12 @@ button,.btn,.choice,input{font-family:var(--font)}
 /* Preload / Loading Screen */
 #preloadScreen{
   position:fixed;inset:0;z-index:9999;
-  background:#0A0A0A;
+  background:#2E1065;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
   transition:opacity .5s ease;
 }
 #preloadScreen.hidden{opacity:0;pointer-events:none}
-.preload-logo{width:min(58vw,210px);height:auto;animation:mon-breathe 1.4s ease-in-out infinite;filter:drop-shadow(0 0 26px rgba(212,175,55,.45))}
+.preload-logo{width:min(58vw,210px);height:auto;animation:mon-breathe 1.4s ease-in-out infinite;filter:drop-shadow(0 0 26px rgba(255,201,60,.45))}
 .preload-title{font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
 .preload-bar-wrap{width:min(70vw,280px);height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
 .preload-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-light),var(--gold));transition:width .2s ease;border-radius:999px}
@@ -407,11 +407,11 @@ button,.btn,.choice,input{font-family:var(--font)}
   background:linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
   border:none;border-radius:14px;
   font-family:var(--font);font-weight:700;font-size:clamp(14px,2.5vw,20px);
-  color:#0A0A0A;
+  color:#2E1065;
   padding:clamp(14px,2vw,20px) clamp(48px,8vw,80px);
   margin-bottom:clamp(32px,6vh,80px);
   cursor:pointer;letter-spacing:3px;
-  box-shadow:0 4px 32px rgba(212,175,55,.5), inset 0 1px 0 rgba(255,255,255,.35);
+  box-shadow:0 4px 32px rgba(255,201,60,.5), inset 0 1px 0 rgba(255,255,255,.35);
   transition:all .25s cubic-bezier(.4,0,.2,1);
   overflow:hidden;
 }
@@ -461,16 +461,16 @@ button,.btn,.choice,input{font-family:var(--font)}
 .dot.now{
   background:linear-gradient(135deg, var(--gold), var(--gold-dark));
   border-color:transparent;
-  color:#0A0A0A;
-  box-shadow:0 0 20px rgba(212,175,55,.5);
+  color:#2E1065;
+  box-shadow:0 0 20px rgba(255,201,60,.5);
   animation:pulse 2s infinite;
 }
 
 .dot.boss{border-radius:50%}
 
 @keyframes pulse{
-  0%,100%{transform:scale(1);box-shadow:0 0 20px rgba(212,175,55,.5)}
-  50%{transform:scale(1.05);box-shadow:0 0 30px rgba(212,175,55,.7)}
+  0%,100%{transform:scale(1);box-shadow:0 0 20px rgba(255,201,60,.5)}
+  50%{transform:scale(1.05);box-shadow:0 0 30px rgba(255,201,60,.7)}
 }
 
 /* Menu Grid */
@@ -488,7 +488,7 @@ button,.btn,.choice,input{font-family:var(--font)}
   position:relative;
   border-radius:16px;
   padding:4px;
-  background:linear-gradient(135deg, #1A1A1A, #0A0A0A);
+  background:linear-gradient(135deg, #1A1A1A, #2E1065);
   border:2px solid var(--glass-border);
   box-shadow:var(--shadow-md), var(--shadow-glow);
   transition:all .3s;
@@ -500,34 +500,34 @@ button,.btn,.choice,input{font-family:var(--font)}
   position:absolute;
   inset:0;
   border-radius:14px;
-  background:linear-gradient(135deg, rgba(212,175,55,.1), transparent 50%);
+  background:linear-gradient(135deg, rgba(255,201,60,.1), transparent 50%);
   pointer-events:none;
 }
 
 .tc.rar-common{
-  --card-glow:rgba(212,175,55,.2);
-  --card-border:rgba(212,175,55,.3);
+  --card-glow:rgba(255,201,60,.2);
+  --card-border:rgba(255,201,60,.3);
 }
 .tc.rar-rare{
-  --card-glow:rgba(212,175,55,.4);
-  --card-border:rgba(212,175,55,.5);
-  background:linear-gradient(135deg, #1E1A0F, #0A0A0A);
+  --card-glow:rgba(255,201,60,.4);
+  --card-border:rgba(255,201,60,.5);
+  background:linear-gradient(135deg, #1E1A0F, #2E1065);
 }
 .tc.rar-epic{
-  --card-glow:rgba(212,175,55,.6);
-  --card-border:rgba(212,175,55,.7);
-  background:linear-gradient(135deg, #2A2210, #0A0A0A);
+  --card-glow:rgba(255,201,60,.6);
+  --card-border:rgba(255,201,60,.7);
+  background:linear-gradient(135deg, #2A2210, #2E1065);
 }
 .tc.rar-legendary{
   --card-glow:rgba(245,213,94,.8);
   --card-border:rgba(245,213,94,.9);
-  background:linear-gradient(135deg, #3A3010, #1A1505, #0A0A0A);
+  background:linear-gradient(135deg, #5B21B6, #3B1370, #2E1065);
   animation:legendary-glow 3s ease-in-out infinite;
 }
 
 @keyframes legendary-glow{
-  0%,100%{box-shadow:0 0 20px var(--card-glow), 0 0 40px rgba(212,175,55,.2)}
-  50%{box-shadow:0 0 30px var(--card-glow), 0 0 60px rgba(212,175,55,.3)}
+  0%,100%{box-shadow:0 0 20px var(--card-glow), 0 0 40px rgba(255,201,60,.2)}
+  50%{box-shadow:0 0 30px var(--card-glow), 0 0 60px rgba(255,201,60,.3)}
 }
 /* 🐛 FIX: .rar-mythic guna glow ungu sendiri (dulu pinjam legendary-glow yg hardcode bayang emas -
    jadi kad mythic nampak keemasan bercampur, bukan ungu/pelangi tulen) */
@@ -547,17 +547,17 @@ button,.btn,.choice,input{font-family:var(--font)}
   -webkit-mask-composite:xor;mask-composite:exclude;
   pointer-events:none;z-index:2;
 }
-.tc.rar-legendary::after{background:linear-gradient(120deg,#F5D55E,#D4AF37,#B8860B,#F5D55E);background-size:300% 100%}
+.tc.rar-legendary::after{background:linear-gradient(120deg,#FFE066,#FFC93C,#E8A317,#FFE066);background-size:300% 100%}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* 🥚 MOD: EGG INCUBATOR - .tc.rar-mythic utk ultra-rare Tahap 3 (Prime, tahap akhir), satu tingkat lagi lebih menonjol drpd legendary (pelangi, bukan gold sahaja) */
 .tc.rar-mythic{
   --card-glow:rgba(124,108,255,.9);
   --card-border:rgba(124,108,255,1);
-  background:linear-gradient(135deg,#241A3A,#150E28,#0A0A0A);
+  background:linear-gradient(135deg,#241A3A,#150E28,#2E1065);
   animation:mythic-glow 2.2s ease-in-out infinite;
 }
-.tc.rar-mythic::after{background:linear-gradient(120deg,#7C6CFF,#F5D55E,#4CC9F0,#F472B6,#7C6CFF);background-size:400% 100%;animation:shimmer 1.4s linear infinite}
+.tc.rar-mythic::after{background:linear-gradient(120deg,#7C6CFF,#FFE066,#4CC9F0,#F472B6,#7C6CFF);background-size:400% 100%;animation:shimmer 1.4s linear infinite}
 
 @keyframes count-pop{0%{transform:scale(3);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes confetti-fall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(var(--r))}}
@@ -590,11 +590,11 @@ button,.btn,.choice,input{font-family:var(--font)}
 }
 
 .tc-name .lv{
-  background:rgba(212,175,55,.2);
+  background:rgba(255,201,60,.2);
   border-radius:4px;
   padding:2px 6px;
   font-size:8px;
-  border:1px solid rgba(212,175,55,.3);
+  border:1px solid rgba(255,201,60,.3);
 }
 
 .tc-art{
@@ -612,13 +612,13 @@ button,.btn,.choice,input{font-family:var(--font)}
   content:"";
   position:absolute;
   inset:0;
-  background:radial-gradient(circle at 50% 30%, rgba(212,175,55,.2), transparent 60%);
+  background:radial-gradient(circle at 50% 30%, rgba(255,201,60,.2), transparent 60%);
 }
 
 .tc-rays{
   position:absolute;
   inset:-30%;
-  background:repeating-conic-gradient(from 0deg, rgba(212,175,55,.08) 0deg 8deg, transparent 8deg 20deg);
+  background:repeating-conic-gradient(from 0deg, rgba(255,201,60,.08) 0deg 8deg, transparent 8deg 20deg);
   animation:spin 20s linear infinite;
   mask:radial-gradient(circle, #000 20%, transparent 60%);
   -webkit-mask:radial-gradient(circle, #000 20%, transparent 60%);
@@ -632,7 +632,7 @@ button,.btn,.choice,input{font-family:var(--font)}
   height:90%;
   position:relative;
   z-index:3;
-  filter:drop-shadow(0 8px 16px rgba(212,175,55,.3));
+  filter:drop-shadow(0 8px 16px rgba(255,201,60,.3));
   animation:mon-breathe 3s ease-in-out infinite;
 }
 
@@ -662,7 +662,7 @@ button,.btn,.choice,input{font-family:var(--font)}
   z-index:4;
   font-size:14px;
   color:var(--gold);
-  text-shadow:0 0 8px rgba(212,175,55,.5);
+  text-shadow:0 0 8px rgba(255,201,60,.5);
   letter-spacing:2px;
 }
 
@@ -680,12 +680,12 @@ button,.btn,.choice,input{font-family:var(--font)}
   font-weight:700;
   color:var(--gold);
   font-size:10px;
-  background:rgba(212,175,55,.1);
-  border:1px solid rgba(212,175,55,.2);
+  background:rgba(255,201,60,.1);
+  border:1px solid rgba(255,201,60,.2);
 }
 
 .tc-stat.hp{background:rgba(244,67,54,.15);border-color:rgba(244,67,54,.3);color:#F44336}
-.tc-stat.atk{background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.3)}
+.tc-stat.atk{background:rgba(255,201,60,.15);border-color:rgba(255,201,60,.3)}
 
 .tc-tag{
   text-align:center;
@@ -697,14 +697,14 @@ button,.btn,.choice,input{font-family:var(--font)}
   text-transform:uppercase;
 }
 
-.tc.locked .tc-art{background:#0A0A0A}
+.tc.locked .tc-art{background:#2E1065}
 .tc.locked .tc-mon{filter:brightness(0) opacity(.15)}
 .tc.locked .tc-name,.tc.locked .tc-elem,.tc.locked .tc-stars{opacity:.2}
 
 .tc.sel{
   outline:3px solid var(--gold);
   outline-offset:3px;
-  box-shadow:0 0 30px rgba(212,175,55,.5);
+  box-shadow:0 0 30px rgba(255,201,60,.5);
 }
 
 .tc.tap{cursor:pointer}
@@ -721,7 +721,7 @@ button,.btn,.choice,input{font-family:var(--font)}
   border-radius:20px;
   padding:14px;
   overflow:hidden;
-  background:linear-gradient(180deg, rgba(10,10,10,.9), rgba(20,20,20,.95));
+  background:linear-gradient(180deg, rgba(46,16,101,.9), rgba(59,19,112,.95));
   border:2px solid var(--glass-border);
   box-shadow:var(--shadow-lg), var(--shadow-glow);
   backdrop-filter:blur(16px);
@@ -731,7 +731,7 @@ button,.btn,.choice,input{font-family:var(--font)}
   content:"";
   position:absolute;
   inset:0;
-  background:radial-gradient(ellipse at 50% 0%, rgba(212,175,55,.15), transparent 60%);
+  background:radial-gradient(ellipse at 50% 0%, rgba(255,201,60,.15), transparent 60%);
   pointer-events:none;
 }
 
@@ -918,7 +918,7 @@ button,.btn,.choice,input{font-family:var(--font)}
   background:linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
   transition:width .3s;
   border-radius:3px;
-  box-shadow:0 0 12px rgba(212,175,55,.6);
+  box-shadow:0 0 12px rgba(255,201,60,.6);
 }
 
 .combotxt{
@@ -988,7 +988,7 @@ button,.btn,.choice,input{font-family:var(--font)}
   padding:16px 12px;
   text-align:center;
   margin:8px 0;
-  background:rgba(212,175,55,.08);
+  background:rgba(255,201,60,.08);
   border:2px solid var(--glass-border);
   box-shadow:var(--shadow-md), inset 0 1px 0 var(--glass-highlight);
   backdrop-filter:blur(12px);
@@ -1029,8 +1029,8 @@ button,.btn,.choice,input{font-family:var(--font)}
   border-radius:12px;
   position:relative;
   overflow:hidden;
-  background:rgba(212,175,55,.12);
-  border:2px solid var(--glass-border);
+  background:rgba(255,201,60,.28);
+  border:2px solid rgba(255,201,60,.55);
   box-shadow:var(--shadow-sm), inset 0 1px 0 var(--glass-highlight);
   transition:all .15s;
 }
@@ -1039,7 +1039,7 @@ button,.btn,.choice,input{font-family:var(--font)}
   content:"";
   position:absolute;
   inset:0 0 50% 0;
-  background:linear-gradient(rgba(212,175,55,.15), transparent);
+  background:linear-gradient(rgba(255,201,60,.15), transparent);
   pointer-events:none;
 }
 
@@ -1141,8 +1141,8 @@ button,.btn,.choice,input{font-family:var(--font)}
 .projectile{
   position:absolute;z-index:5;pointer-events:none;
   width:16px;height:16px;border-radius:50%;
-  background:radial-gradient(circle,#F5D55E,#D4AF37);
-  box-shadow:0 0 12px rgba(212,175,55,.8),0 0 30px rgba(212,175,55,.3);
+  background:radial-gradient(circle,#FFE066,#FFC93C);
+  box-shadow:0 0 12px rgba(255,201,60,.8),0 0 30px rgba(255,201,60,.3);
 }
 .projectile.crit{
   width:22px;height:22px;
@@ -1218,14 +1218,14 @@ button,.btn,.choice,input{font-family:var(--font)}
   flex:1;max-width:90px;padding:5px 4px;border-radius:12px;text-align:center;cursor:pointer;
   background:var(--glass);border:2px solid var(--glass-border);transition:all .2s ease;position:relative;
 }
-.bench-slot.active{border-color:var(--gold);box-shadow:0 0 14px rgba(212,175,55,.35);background:rgba(212,175,55,.14);cursor:default}
+.bench-slot.active{border-color:var(--gold);box-shadow:0 0 14px rgba(255,201,60,.35);background:rgba(255,201,60,.14);cursor:default}
 .bench-slot.fainted{opacity:.35;cursor:not-allowed}
 .bench-slot:not(.active):not(.fainted):active{transform:scale(.94)}
 .bench-slot img,.bench-slot svg{width:34px;height:34px;margin:0 auto;display:block}
 .bench-hpbar{height:4px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;margin-top:3px}
 .bench-hpfill{height:100%;background:linear-gradient(90deg,var(--success),#34D399);border-radius:3px}
 .bench-hpfill.low{background:linear-gradient(90deg,var(--danger),#F87171)}
-.bench-tag{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-size:7px;background:var(--gold);color:#0A0A0A;padding:1px 5px;border-radius:8px;font-weight:800;letter-spacing:.5px}
+.bench-tag{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-size:7px;background:var(--gold);color:#2E1065;padding:1px 5px;border-radius:8px;font-weight:800;letter-spacing:.5px}
 .bench-swap-in{animation:swapIn .35s cubic-bezier(.2,1.3,.4,1)}
 @keyframes swapIn{0%{opacity:0;transform:scale(.5) translateY(10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
 
@@ -1258,9 +1258,9 @@ button,.btn,.choice,input{font-family:var(--font)}
   font-size:50px;
   position:relative;
   overflow:hidden;
-  background:linear-gradient(135deg, #1A1505, #0A0A0A);
+  background:linear-gradient(135deg, #3B1370, #2E1065);
   border:2px solid var(--glass-border);
-  box-shadow:var(--shadow-md), 0 0 20px rgba(212,175,55,.3);
+  box-shadow:var(--shadow-md), 0 0 20px rgba(255,201,60,.3);
 }
 
 .revealback::after{
@@ -1399,7 +1399,7 @@ button,.btn,.choice,input{font-family:var(--font)}
 .evo-stat-val{width:50px;font-weight:800;font-variant-numeric:tabular-nums;color:#fff;text-align:right;font-family:var(--readable)}
 .evo-stat-delta{color:#34D399;font-weight:700;font-size:10px;opacity:0;transition:opacity .3s}
 .evo-stat-delta.show{opacity:1}
-.evo-btn{position:relative;overflow:hidden;margin-top:18px;padding:12px 40px;border:none;border-radius:14px;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#F59E0B,#D97706);color:#0A0A0A;letter-spacing:2px;box-shadow:0 4px 24px rgba(245,158,11,.45),inset 0 1px 0 rgba(255,255,255,.4);animation:evo-fadeInUp .5s .3s ease backwards}
+.evo-btn{position:relative;overflow:hidden;margin-top:18px;padding:12px 40px;border:none;border-radius:14px;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#F59E0B,#D97706);color:#2E1065;letter-spacing:2px;box-shadow:0 4px 24px rgba(245,158,11,.45),inset 0 1px 0 rgba(255,255,255,.4);animation:evo-fadeInUp .5s .3s ease backwards}
 .evo-btn::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.6),transparent);animation:evo-shine-sweep 2.4s ease-in-out infinite;animation-delay:2.1s}
 @keyframes evo-shine-sweep{0%{left:-60%}35%{left:130%}100%{left:130%}}
 .overlay.punch{animation:evo-scene-punch .5s ease-out}
@@ -1450,7 +1450,7 @@ button,.btn,.choice,input{font-family:var(--font)}
 }
 
 .tutorial-card{
-  background:#141414;
+  background:#3B1370;
   border:2px solid var(--glass-border);
   border-radius:24px;
   padding:28px;
@@ -1494,7 +1494,7 @@ button,.btn,.choice,input{font-family:var(--font)}
 
 /* Difficulty Selection */
 .diff-card{
-  background:rgba(212,175,55,.05);
+  background:rgba(255,201,60,.05);
   border:2px solid var(--glass-border);
   border-radius:14px;
   padding:12px;
@@ -1505,13 +1505,13 @@ button,.btn,.choice,input{font-family:var(--font)}
 
 .diff-card:hover{
   border-color:var(--gold);
-  box-shadow:0 0 20px rgba(212,175,55,.3);
+  box-shadow:0 0 20px rgba(255,201,60,.3);
 }
 
 .diff-card.active{
   border-color:var(--gold);
-  background:rgba(212,175,55,.15);
-  box-shadow:0 0 24px rgba(212,175,55,.4);
+  background:rgba(255,201,60,.15);
+  box-shadow:0 0 24px rgba(255,201,60,.4);
 }
 
 /* Responsive */
@@ -1529,7 +1529,7 @@ body.theme-ocean{--gold:#2196F3;--gold-light:#42A5F5;--gold-dark:#1565C0;--gold-
 body.theme-desert{--gold:#FF9800;--gold-light:#FFB74D;--gold-dark:#E65100;--gold-pale:#FFF3E0;--surface:#1A1008;--surface-light:#281A10;--surface-lighter:#322418;--text:#F5E1D0;--text-secondary:#C4A896;--text-muted:#8B755E;--glass:rgba(255,152,0,.08);--glass-heavy:rgba(255,152,0,.12);--glass-border:rgba(255,152,0,.25);--glass-highlight:rgba(255,152,0,.4);--shadow-glow:0 0 40px rgba(255,152,0,.2);}
 body.theme-darkblue{--gold:#4C7DFF;--gold-light:#7DA0FF;--gold-dark:#2A4FCC;--gold-pale:#E8EEFB;--surface:#050914;--surface-light:#0D1424;--surface-lighter:#161F38;--text:#E8EEFB;--text-secondary:#A8B8D8;--text-muted:#5E6E8B;--glass:rgba(76,125,255,.08);--glass-heavy:rgba(76,125,255,.12);--glass-border:rgba(76,125,255,.25);--glass-highlight:rgba(76,125,255,.4);--shadow-glow:0 0 40px rgba(76,125,255,.2);}
 /* theme-custom: --gold* diganti secara dinamik oleh JS (applyCustomAccent), --text/--surface KEKAL selamat untuk legibility */
-body.theme-custom{--gold:#8B5CF6;--gold-light:#A78BFA;--gold-dark:#6D28D9;--gold-pale:#F5F0E1;--surface:#0A0A0A;--surface-light:#141414;--surface-lighter:#1E1E1E;--text:#F5F0E1;--text-secondary:#C4B896;--text-muted:#8B7D5E;--glass:rgba(139,92,246,.08);--glass-heavy:rgba(139,92,246,.12);--glass-border:rgba(139,92,246,.25);--glass-highlight:rgba(139,92,246,.4);--shadow-glow:0 0 40px rgba(139,92,246,.2);}
+body.theme-custom{--gold:#8B5CF6;--gold-light:#A78BFA;--gold-dark:#6D28D9;--gold-pale:#F5F0E1;--surface:#2E1065;--surface-light:#3B1370;--surface-lighter:#5B21B6;--text:#F5F0E1;--text-secondary:#C4B896;--text-muted:#8B7D5E;--glass:rgba(139,92,246,.08);--glass-heavy:rgba(139,92,246,.12);--glass-border:rgba(139,92,246,.25);--glass-highlight:rgba(139,92,246,.4);--shadow-glow:0 0 40px rgba(139,92,246,.2);}
 
 /* Card Preview Overlay */
 #card-preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:180;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
@@ -1544,7 +1544,7 @@ body.theme-custom{--gold:#8B5CF6;--gold-light:#A78BFA;--gold-dark:#6D28D9;--gold
 /* Sort Pills */
 .sort-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;justify-content:center}
 .sort-pills button{font-family:var(--font);font-size:9px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text-secondary);cursor:pointer;letter-spacing:.5px;transition:all .2s}
-.sort-pills button.active{background:var(--gold);color:#0A0A0A;border-color:transparent}
+.sort-pills button.active{background:var(--gold);color:#2E1065;border-color:transparent}
 
 /* Active Deck swap strip */
 .activedeck{display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:14px;padding:10px;background:var(--glass);border:1px solid var(--glass-border);border-radius:14px}
@@ -1598,7 +1598,7 @@ body.theme-custom{--gold:#8B5CF6;--gold-light:#A78BFA;--gold-dark:#6D28D9;--gold
 <div id="app"></div>
 
 <div id="m-guide" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
-  <div style="background:#141414;border:2px solid var(--glass-border);border-radius:24px;padding:28px;max-width:320px;width:100%;box-shadow:var(--shadow-lg),var(--shadow-glow);position:relative;max-height:90vh;overflow-y:auto">
+  <div style="background:#3B1370;border:2px solid var(--glass-border);border-radius:24px;padding:28px;max-width:320px;width:100%;box-shadow:var(--shadow-lg),var(--shadow-glow);position:relative;max-height:90vh;overflow-y:auto">
     <button style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="MMA.closeGuide()">✕</button>
     <h2 class="display" style="font-size:18px;color:var(--gold);margin-bottom:16px;text-align:center">🎯 Cara Bermain</h2>
     <div style="margin-bottom:14px">
@@ -2842,7 +2842,7 @@ function showMonsterIntro(cb){
   const ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;background:#000;z-index:300;display:flex;align-items:center;justify-content:center';
   const img=document.createElement('img');
-  img.style.cssText='width:min(70vw,320px);height:auto;filter:drop-shadow(0 0 40px rgba(212,175,55,.4));transition:all .07s ease';
+  img.style.cssText='width:min(70vw,320px);height:auto;filter:drop-shadow(0 0 40px rgba(255,201,60,.4));transition:all .07s ease';
   ov.appendChild(img);
   document.body.appendChild(ov);
   let i=0;const total=18;
@@ -2948,15 +2948,15 @@ function renderHome(){
 ${savedBattle ? `<button class="btn btn-primary" style="margin-bottom:10px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));font-size:13px" onclick="MMA.resumeBattle()">⚡ SAMBUNG PERTARUNGAN</button>` : ''}
 
 <!-- Mission Banner -->
-<div style="background:linear-gradient(135deg,${chapter.color||'#D4AF37'}33,${chapter.color||'#D4AF37'}11);border:2px solid ${chapter.color||'var(--gold)'};border-radius:18px;padding:14px 18px;margin-bottom:14px;text-align:center;box-shadow:0 4px 20px ${chapter.color||'var(--gold)'}22">
+<div style="background:linear-gradient(135deg,${chapter.color||'#FFC93C'}33,${chapter.color||'#FFC93C'}11);border:2px solid ${chapter.color||'var(--gold)'};border-radius:18px;padding:14px 18px;margin-bottom:14px;text-align:center;box-shadow:0 4px 20px ${chapter.color||'var(--gold)'}22">
   <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:${chapter.color||'var(--gold)'};opacity:.8;margin-bottom:4px">🎯 MISI SEMASA</div>
   <div style="font-size:12px;font-weight:700;color:${chapter.color||'var(--gold)'};letter-spacing:2px;text-transform:uppercase">${mission}</div>
 </div>
 
 <!-- Monster Speech -->
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border)">
-  <div style="width:64px;height:64px;flex:0 0 auto;border-radius:10px;overflow:hidden;background:rgba(212,175,55,.1)">${getArt(speechMonId)}</div>
-    <div style="flex:1;position:relative;padding:10px 14px;border-radius:12px;background:rgba(212,175,55,.08);border:1px solid var(--glass-border)">
+  <div style="width:64px;height:64px;flex:0 0 auto;border-radius:10px;overflow:hidden;background:rgba(255,201,60,.1)">${getArt(speechMonId)}</div>
+    <div style="flex:1;position:relative;padding:10px 14px;border-radius:12px;background:rgba(255,201,60,.08);border:1px solid var(--glass-border)">
       <div style="font-size:12px;color:var(--text);line-height:1.5">${av} ${pName}, bantu kami hapuskan ${enemyName}!</div>
     <div style="position:absolute;left:-6px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-right:6px solid var(--glass-border)"></div>
   </div>
@@ -2980,7 +2980,7 @@ ${savedBattle ? `<button class="btn btn-primary" style="margin-bottom:10px;backg
       const clickable=i<cur;
       const clickTarget=s.bonus?`MMA.startBonusMission(${i})`:`MMA.startStage(${i},true)`;
       const clickTitle=s.bonus?'🎁 Main semula Bonus Mission utk lebih item':'⭐ Mastery Mode - main semula (enemy lebih kuat, ganjaran lebih baik)';
-      return`<div class="dot ${i<cur?'done':''} ${i===cur?'now':''} ${s.boss?'boss':''}" ${clickable?`onclick="${clickTarget}" title="${clickTitle}"`:''} style="${clickable?'cursor:pointer;':''}${i<cur?`background:linear-gradient(135deg,${chapter.color||'#4CAF50'},${chapter.color||'#4CAF50'}88);border-color:transparent;color:#fff;box-shadow:0 0 12px ${chapter.color||'#4CAF50'}44`:''}${i===cur?`background:linear-gradient(135deg,${chapter.color||'#D4AF37'},${chapter.color||'#D4AF37'}88);border-color:transparent;color:#0A0A0A;box-shadow:0 0 20px ${chapter.color||'#D4AF37'}88`:''}">${s.boss?'👑':s.bonus?'🎁':(i<cur?'✓':i+1)}${clickable&&bestStars>0&&!s.bonus?`<span style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:8px;white-space:nowrap;color:${chapter.color||'#D4AF37'}">${'⭐'.repeat(bestStars)}</span>`:''}</div>`;
+      return`<div class="dot ${i<cur?'done':''} ${i===cur?'now':''} ${s.boss?'boss':''}" ${clickable?`onclick="${clickTarget}" title="${clickTitle}"`:''} style="${clickable?'cursor:pointer;':''}${i<cur?`background:linear-gradient(135deg,${chapter.color||'#4CAF50'},${chapter.color||'#4CAF50'}88);border-color:transparent;color:#fff;box-shadow:0 0 12px ${chapter.color||'#4CAF50'}44`:''}${i===cur?`background:linear-gradient(135deg,${chapter.color||'#FFC93C'},${chapter.color||'#FFC93C'}88);border-color:transparent;color:#2E1065;box-shadow:0 0 20px ${chapter.color||'#FFC93C'}88`:''}">${s.boss?'👑':s.bonus?'🎁':(i<cur?'✓':i+1)}${clickable&&bestStars>0&&!s.bonus?`<span style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:8px;white-space:nowrap;color:${chapter.color||'#FFC93C'}">${'⭐'.repeat(bestStars)}</span>`:''}</div>`;
     }).join('')}
   </div>
   ${cur>=stages.length
@@ -2997,7 +2997,7 @@ ${savedBattle ? `<button class="btn btn-primary" style="margin-bottom:10px;backg
 </div>
 
 <!-- Quick Actions -->
-<div class="home-section" style="--accent:#D4AF37">
+<div class="home-section" style="--accent:#FFC93C">
   <div class="home-section-label">⚡ AKSI PANTAS</div>
   <div class="menu-grid">
   <button class="btn btn-secondary btn-sm" onclick="MMA.route('deck')">
@@ -3005,7 +3005,7 @@ ${savedBattle ? `<button class="btn btn-primary" style="margin-bottom:10px;backg
     <span>Deck<br><span style="font-size:10px;opacity:.7">${deckMons.length}/3</span></span>
   </button>
   <button class="btn btn-secondary btn-sm" style="position:relative" onclick="MMA.route('incubator')">
-    ${state.incubator?.status==='ready'?'<span style="position:absolute;top:4px;right:6px;width:8px;height:8px;border-radius:50%;background:#F5D55E;box-shadow:0 0 6px #F5D55E"></span>':''}
+    ${state.incubator?.status==='ready'?'<span style="position:absolute;top:4px;right:6px;width:8px;height:8px;border-radius:50%;background:#FFE066;box-shadow:0 0 6px #FFE066"></span>':''}
     <span style="font-size:18px">🥚</span>
     <span>Inkubator<br><span style="font-size:10px;opacity:.7">${state.incubator?.status==='ready'?'Sedia!':state.incubator?.status==='incubating'?'Mengeram':'Kosong'}</span></span>
   </button>
@@ -3140,7 +3140,7 @@ function renderDeck(){
   <div class="sort-pills">
     <button class="${deckSort==='rarity'?'active':''}" onclick="MMA.toggleDeckSort()">${deckSort==='rarity'?'★ Rarity ▲':'Urut'}</button>
     <span style="font-size:9px;color:var(--text-muted);align-self:center">|</span>
-    <button onclick="MMA.route('fusion')" style="font-family:var(--font);font-size:9px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--gold);background:rgba(212,175,55,.1);color:var(--gold);cursor:pointer;letter-spacing:.5px">⚗️ Fusion</button>
+    <button onclick="MMA.route('fusion')" style="font-family:var(--font);font-size:9px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--gold);background:rgba(255,201,60,.1);color:var(--gold);cursor:pointer;letter-spacing:.5px">⚗️ Fusion</button>
   </div>
   <div class="cardgrid">${owned.map(f=>{const m=getMonster(f);if(!m)return'';const d=stageData(f,m.stage-1);const deckPos=state.deck.indexOf(f);const inDeck=deckPos>=0;const role=FAMILIES[f]?.role||'';const curHp=inBattle&&B.monHp[f]!==undefined?B.monHp[f]:null;const dShow=curHp!==null?{...d,hp:Math.max(0,curHp)}:d;return`<div onclick="MMA.toggleDeck('${f}')" style="position:relative">${cardHTML(dShow,{tap:true,sel:inDeck,lv:m.level,role})}${inDeck?`<div style="position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:var(--gold);color:#000;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;z-index:6;box-shadow:0 2px 6px rgba(0,0,0,.4)">${deckPos+1}</div>`:''}<button style="position:absolute;top:34px;right:6px;width:22px;height:22px;border-radius:6px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:6" onclick="event.stopPropagation();MMA.showCardPreview('${f}')">🔍</button><div class="cardcap">${inDeck?'✔ Dalam deck':''}${curHp!==null&&curHp<=0?' 💀 <span style=color:var(--danger)>Pengsan</span>':curHp!==null&&curHp<d.hp?` ❤ <span style=color:var(--danger)>${curHp}/${d.hp}</span>`:''}</div></div>`;}).join('')}</div><button class="btn btn-primary" style="margin-top:12px" onclick="MMA.route('home')">Siap</button></div>`;
 }
@@ -3289,7 +3289,7 @@ function renderSettings(){
       const icons={default:'🌙',forest:'🌿',ocean:'🌊',desert:'🏜️',darkblue:'🌌',custom:'🎨'};
       const names={default:'Emas',forest:'Hutan',ocean:'Lautan',desert:'Gurun',darkblue:'Biru Gelap',custom:'Ikut Kamu'};
       const active=(state?.settings?.theme||'default')===t;
-      return`<button class="btn btn-sm" title="${names[t]}" style="padding:6px 8px;width:auto;font-size:9px;${active?'background:var(--gold);color:#0A0A0A;border-color:transparent;font-weight:700':'background:transparent;border:1px solid var(--glass-border);color:var(--text-secondary)'}" onclick="MMA.setTheme('${t}')">${icons[t]}</button>`;
+      return`<button class="btn btn-sm" title="${names[t]}" style="padding:6px 8px;width:auto;font-size:9px;${active?'background:var(--gold);color:#2E1065;border-color:transparent;font-weight:700':'background:transparent;border:1px solid var(--glass-border);color:var(--text-secondary)'}" onclick="MMA.setTheme('${t}')">${icons[t]}</button>`;
     }).join('')+'</div></div>'+
     (state?.settings?.theme==='custom'?'<div class="statline"><span>🖌️ Warna Kamu</span><input type="color" value="'+(state?.settings?.customColor||'#8B5CF6')+'" oninput="MMA.setCustomColor(this.value)" style="width:44px;height:28px;border-radius:6px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;padding:2px"></div>':'')+
     '<div class="statline"><span>🖼️ Avatar</span><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:140px;justify-content:flex-end">'+['🦁','🐱','🐶','🐼','🦊','🐸','🦄','🐲','🦅','🐙','🦋','🐢'].map(a=>`<button style="width:28px;height:28px;border-radius:6px;border:${(state?.avatar||'🦁')===a?'2px solid var(--gold)':'1px solid var(--glass-border)'};background:${(state?.avatar||'🦁')===a?'var(--glass-heavy)':'transparent'};font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="MMA.setAvatar('${a}')">${a}</button>`).join('')+'</div></div>'+
@@ -3322,7 +3322,7 @@ function renderSettings(){
       '<div style="display:flex;gap:4px">';
     ['easy','medium','hard'].forEach(k=>{
       var dd=DIFFICULTIES[k];
-      html+='<button class="btn btn-sm" style="flex:1;padding:6px 4px;font-size:9px;'+(d===k?'background:'+dd.color+';color:#0A0A0A;font-weight:700':'background:transparent;border:1px solid var(--glass-border);color:var(--text-secondary)')+'" onclick="MMA._pcDiff(\''+t.id+'\',\''+k+'\')">'+dd.name+'</button>';
+      html+='<button class="btn btn-sm" style="flex:1;padding:6px 4px;font-size:9px;'+(d===k?'background:'+dd.color+';color:#2E1065;font-weight:700':'background:transparent;border:1px solid var(--glass-border);color:var(--text-secondary)')+'" onclick="MMA._pcDiff(\''+t.id+'\',\''+k+'\')">'+dd.name+'</button>';
     });
     html+='</div></div>';
   });
@@ -3402,7 +3402,7 @@ function renderTrendChart(hist){
     const color=total?(pct>=70?'linear-gradient(180deg,#4CAF50,#2E7D32)':pct>=40?'linear-gradient(180deg,#FFC107,#FF9800)':'linear-gradient(180deg,#F44336,#C62828)'):'rgba(255,255,255,.08)';
     return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:64px;gap:3px"><span style="font-size:8px;color:var(--text-muted)">${total?pct+'%':''}</span><div style="width:100%;max-width:20px;height:${h}px;background:${color};border-radius:4px 4px 2px 2px"></div><span style="font-size:8px;color:var(--text-muted)">${d.label}</span></div>`;
   }).join('');
-  return`<div style="display:flex;gap:5px;align-items:flex-end;padding:10px 8px;background:rgba(212,175,55,.05);border-radius:10px;border:1px solid var(--glass-border)">${bars}</div>`;
+  return`<div style="display:flex;gap:5px;align-items:flex-end;padding:10px 8px;background:rgba(255,201,60,.05);border-radius:10px;border:1px solid var(--glass-border)">${bars}</div>`;
 }
 function renderParent(){
   const s=state.stats;const tot=s.correct+s.wrong;const acc=tot?Math.round(s.correct/tot*100):0;
@@ -3413,7 +3413,7 @@ function renderParent(){
   const recent30=hist.filter(h=>h.ts>=cutoff30);
   const totalQ30=recent30.reduce((sum,h)=>sum+(h.correct||0)+(h.wrong||0),0);
   const estMin30=Math.round(totalQ30*8/60);
-  app.innerHTML=topbar()+`<div class="panel"><h2 class="display" style="font-size:18px;margin-bottom:12px">📈 Papan Ibu Bapa</h2><div style="padding:10px 12px;margin-bottom:12px;border-radius:12px;background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(212,175,55,.04));border:1px solid var(--glass-border)"><div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--gold);margin-bottom:4px">📅 30 HARI LEPAS</div><div style="font-size:13px;color:var(--text)">Anak anda dah jawab <b style="color:var(--gold)">${totalQ30}</b> soalan (~<b style="color:var(--gold)">${estMin30}</b> minit main, ${recent30.length} sesi)</div><div style="font-size:9px;color:var(--text-muted);margin-top:2px">*Anggaran masa berdasarkan purata 8 saat/soalan</div></div><div class="statline"><span>Ketepatan</span><b>${acc}% (${s.correct}/${tot})</b></div><div class="statline"><span>Soalan dijawab (jumlah)</span><b>${s.questions}</b></div><div class="statline"><span>Masa bermain (jumlah)</span><b>${mins} minit</b></div><div class="statline"><span>Monster dibuka</span><b>${Object.values(state.collection).filter(c=>c.owned).length}/${FAMILY_IDS.length*3}</b></div><div style="margin-top:12px"><div style="font-weight:600;font-size:12px;color:var(--purple-light);margin-bottom:8px">Ikut Difficulty</div>${DIFFICULTY_IDS.map(d=>{const a=diffAcc(d);const dd=DIFFICULTIES[d];return`<div class="statline"><span>${dd.icon} ${dd.name}</span><b style="color:${dd.color}">${a===null?'-':a+'%'}</b></div>`;}).join('')}</div><div class="section-title" style="font-weight:600;font-size:12px;color:var(--gold);margin:16px 0 8px">📈 Trend Ketepatan (7 Hari)</div>${renderTrendChart(hist)}<div class="section-title" style="font-weight:600;font-size:12px;color:var(--gold);margin:16px 0 8px">📊 Laporan Kemajuan Ikut Bab</div><div id="progress-report">${TOPIC_META.map(t=>{const ts=state.stats.byTopic[t.id]||{c:0,w:0};const total=ts.c+ts.w;const pct=total?Math.round(ts.c/total*100):0;return`<div style="display:flex;align-items:center;gap:8px;margin:6px 0;padding:8px 10px;background:rgba(212,175,55,.05);border-radius:10px;border:1px solid var(--glass-border)"><span style="font-size:1.3rem">${t.ico}</span><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;color:var(--text)">${t.name}</div><div style="height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-top:3px"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#4CAF50,#34D399);border-radius:3px;transition:width .5s"></div></div></div><span style="font-size:11px;font-weight:700;color:${pct>=70?'#4CAF50':pct>=40?'#FFC107':'#F44336'}">${pct}%</span><span style="font-size:9px;color:var(--text-muted)">${ts.c}✓ ${ts.w}✗</span></div>`;}).join('')}</div><div class="section-title" style="font-weight:600;font-size:12px;color:var(--gold);margin:16px 0 8px">📜 Riwayat Sesi (5 terkini)</div>${hist.slice(0,5).map(h=>{const d=DIFFICULTIES[h.diff]||DIFFICULTIES.medium;return`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:4px 0;border-radius:8px;background:rgba(212,175,55,.03);border:1px solid var(--glass-border);font-size:10px"><span>${h.result==='win'?'⭐':'😅'}</span><span style="flex:1;color:var(--text)">${CHAPTERS[h.chapter]?.name||'Bab '+(h.chapter+1)} · Stage ${h.stage+1}</span><span style="color:${d.color}">${d.icon}</span><span style="color:var(--text-secondary)">${h.correct}✓ ${h.wrong}✗</span></div>`;}).join('')||'<div style="color:var(--text-muted);font-size:11px;text-align:center;padding:8px">Belum ada sesi</div>'}${''/* end hist block */}<button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="MMA.changePin()">Tukar PIN</button><button class="btn btn-primary" style="margin-top:8px" onclick="MMA.route('home')">Kembali</button></div>`;
+  app.innerHTML=topbar()+`<div class="panel"><h2 class="display" style="font-size:18px;margin-bottom:12px">📈 Papan Ibu Bapa</h2><div style="padding:10px 12px;margin-bottom:12px;border-radius:12px;background:linear-gradient(135deg,rgba(255,201,60,.12),rgba(255,201,60,.04));border:1px solid var(--glass-border)"><div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--gold);margin-bottom:4px">📅 30 HARI LEPAS</div><div style="font-size:13px;color:var(--text)">Anak anda dah jawab <b style="color:var(--gold)">${totalQ30}</b> soalan (~<b style="color:var(--gold)">${estMin30}</b> minit main, ${recent30.length} sesi)</div><div style="font-size:9px;color:var(--text-muted);margin-top:2px">*Anggaran masa berdasarkan purata 8 saat/soalan</div></div><div class="statline"><span>Ketepatan</span><b>${acc}% (${s.correct}/${tot})</b></div><div class="statline"><span>Soalan dijawab (jumlah)</span><b>${s.questions}</b></div><div class="statline"><span>Masa bermain (jumlah)</span><b>${mins} minit</b></div><div class="statline"><span>Monster dibuka</span><b>${Object.values(state.collection).filter(c=>c.owned).length}/${FAMILY_IDS.length*3}</b></div><div style="margin-top:12px"><div style="font-weight:600;font-size:12px;color:var(--purple-light);margin-bottom:8px">Ikut Difficulty</div>${DIFFICULTY_IDS.map(d=>{const a=diffAcc(d);const dd=DIFFICULTIES[d];return`<div class="statline"><span>${dd.icon} ${dd.name}</span><b style="color:${dd.color}">${a===null?'-':a+'%'}</b></div>`;}).join('')}</div><div class="section-title" style="font-weight:600;font-size:12px;color:var(--gold);margin:16px 0 8px">📈 Trend Ketepatan (7 Hari)</div>${renderTrendChart(hist)}<div class="section-title" style="font-weight:600;font-size:12px;color:var(--gold);margin:16px 0 8px">📊 Laporan Kemajuan Ikut Bab</div><div id="progress-report">${TOPIC_META.map(t=>{const ts=state.stats.byTopic[t.id]||{c:0,w:0};const total=ts.c+ts.w;const pct=total?Math.round(ts.c/total*100):0;return`<div style="display:flex;align-items:center;gap:8px;margin:6px 0;padding:8px 10px;background:rgba(255,201,60,.05);border-radius:10px;border:1px solid var(--glass-border)"><span style="font-size:1.3rem">${t.ico}</span><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;color:var(--text)">${t.name}</div><div style="height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-top:3px"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#4CAF50,#34D399);border-radius:3px;transition:width .5s"></div></div></div><span style="font-size:11px;font-weight:700;color:${pct>=70?'#4CAF50':pct>=40?'#FFC107':'#F44336'}">${pct}%</span><span style="font-size:9px;color:var(--text-muted)">${ts.c}✓ ${ts.w}✗</span></div>`;}).join('')}</div><div class="section-title" style="font-weight:600;font-size:12px;color:var(--gold);margin:16px 0 8px">📜 Riwayat Sesi (5 terkini)</div>${hist.slice(0,5).map(h=>{const d=DIFFICULTIES[h.diff]||DIFFICULTIES.medium;return`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:4px 0;border-radius:8px;background:rgba(255,201,60,.03);border:1px solid var(--glass-border);font-size:10px"><span>${h.result==='win'?'⭐':'😅'}</span><span style="flex:1;color:var(--text)">${CHAPTERS[h.chapter]?.name||'Bab '+(h.chapter+1)} · Stage ${h.stage+1}</span><span style="color:${d.color}">${d.icon}</span><span style="color:var(--text-secondary)">${h.correct}✓ ${h.wrong}✗</span></div>`;}).join('')||'<div style="color:var(--text-muted);font-size:11px;text-align:center;padding:8px">Belum ada sesi</div>'}${''/* end hist block */}<button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="MMA.changePin()">Tukar PIN</button><button class="btn btn-primary" style="margin-top:8px" onclick="MMA.route('home')">Kembali</button></div>`;
 }
 function changePin(){state.parentPin=null;pinFirst='';pinBuf='';save();renderPinSet();}
 
@@ -3782,7 +3782,7 @@ function finishMegaBoss(){
 
 function activeMon(){
   const fam=B.deck[B.activeIdx];const mon=getMonster(fam);
-  if(!mon)return{fam:state?.starter||'flamy',name:'Monster',id:(state?.starter||'flamy')+'_1',stage:1,hp:50,atk:10,correct:0,level:1,rarity:'common',color:'#D4AF37'};
+  if(!mon)return{fam:state?.starter||'flamy',name:'Monster',id:(state?.starter||'flamy')+'_1',stage:1,hp:50,atk:10,correct:0,level:1,rarity:'common',color:'#FFC93C'};
   return mon;
 }
 // Refresh sprite/HP/nama bila monster aktif ditukar di luar penuh renderBattle() (cth: pengsan akibat susutan HP masa timer, atau swap manual)
@@ -3833,7 +3833,7 @@ function renderBattle(){
     const megaHasArt=megaData&&!!ART['mega_'+B.enemy.id];
     const enemyArtStyle=megaData?`position:relative;width:100px;height:100px;flex:0 0 auto;filter:${megaHasArt?'none':megaData.filter};transform:scale(${megaData.scale});transform-origin:center`:'position:relative;width:100px;height:100px;flex:0 0 auto';
     const enemyArtId=megaData?megaArtId(B.enemy.id):B.enemy.id;
-    app.innerHTML=`<div class="topbar"><button class="iconbtn" onclick="MMA.quitBattle()">✕</button><div class="pill">🪙 ${state?.gold||0}</div><div style="flex:1"></div><div class="pill" style="font-size:10px;color:${diff.color}">${diff.icon} ${diff.name}</div>${(state.items?.bomb||0)>0?`<button class="iconbtn" style="font-size:14px;background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);color:#EF4444;width:auto;padding:0 8px" onclick="MMA.useItem('bomb')" title="Quick Bomb">💣${state.items.bomb}</button>`:''}<div class="pill">${B.stage.name}</div>${B.masteryMode?'<div class="pill" style="color:#FBBF24;border-color:rgba(251,191,36,.4)">⭐ Mastery</div>':''}${B.megaMode?'<div class="pill" style="color:#FBBF24;border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.1)">👑 MEGA</div>':''}</div><div class="arena${B.stage.boss?' boss-mode':''}" id="arena" style="background:radial-gradient(ellipse at 50% 0%,${chColor}22,transparent 60%),linear-gradient(180deg,rgba(10,10,10,.9),rgba(20,20,20,.95))">${B.stage.boss?'<div class="boss-overlay"></div>':''}<div class="fighter enemy"><div id="enemyArt" style="${enemyArtStyle}">${getArt(enemyArtId)}</div><div class="hpwrap"><div class="hpname"><span>${B.enemy.name}</span><span>${B.enemy.hp}/${B.enemy.max}</span></div><div class="hpbar"><div class="hpfill enemy-hpfill" id="ehp" style="width:${ehpPct}%;background:linear-gradient(90deg,#F44336,#FF6B6B)"></div></div></div></div><div class="vs">⚔</div><div class="fighter"><div id="monArt" style="position:relative;width:100px;height:100px;flex:0 0 auto">${getArt(m.id)}</div><div class="hpwrap"><div class="hpname"><span>${m.name} · Lv${m.level}</span><span id="mhptxt">${mhp}/${mmax}</span></div><div class="hpbar"><div class="hpfill ${mhp/mmax<.3?'low':''}" id="mhp" style="width:${mhp/mmax*100}%;background:linear-gradient(90deg,${FAMILIES[m.fam]?.g2||'#D4AF37'},${FAMILIES[m.fam]?.g1||'#F5D55E'})"></div></div></div></div><div class="deck-bench" id="deckBench">${benchHTML()}</div><div class="combowrap"><div class="combometer"><div class="combofill" id="combo"></div></div><div class="combotxt" id="combotxt"></div></div><div class="items-bar" style="display:flex;gap:4px;justify-content:center;margin:4px 0">${Object.entries(state.items||{}).filter(([id,qty])=>qty>0).map(([id,qty])=>{const item=ITEMS[id]||BONUS_ITEMS[id];if(!item)return'';const ic={freeze:'#3B82F6',potion:'#10B981',bomb:'#EF4444',shield:'#A78BFA',revive:'#F472B6',shield_token:'#A78BFA',double_dmg_token:'#FBBF24',gold_boost_token:'#F59E0B',rare_combo_token:'#FDE68A'};const iconHtml=ART[id]?`<img src="${ART[id]}" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle">`:item.icon;return`<button class="item-btn" data-item="${id}" onclick="MMA.useItem('${id}')" style="background:${ic[id]||'#888'}22;border:1px solid ${ic[id]||'#888'}44;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:${ic[id]||'#fff'};font-family:var(--font);display:inline-flex;align-items:center;gap:4px">${iconHtml} ${qty}</button>`;}).join('')}${(state.evoStones||0)>0?`<button class="item-btn" onclick="MMA.useEvoStone()" style="background:#22D3EE22;border:1px solid #22D3EE44;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:#22D3EE;font-family:var(--font)">💠 ${state.evoStones}</button>`:''}</div><div class="timerwrap"><div class="timerbar"><div class="timerfill" id="timerfill"></div></div><div class="timertxt" id="timertxt">⏳ 10s</div></div></div><div class="qbox"><div class="qtext" id="qtext">…</div></div><div class="choices" id="choices"></div><div class="feedback" id="feedback"></div>`;
+    app.innerHTML=`<div class="topbar"><button class="iconbtn" onclick="MMA.quitBattle()">✕</button><div class="pill">🪙 ${state?.gold||0}</div><div style="flex:1"></div><div class="pill" style="font-size:10px;color:${diff.color}">${diff.icon} ${diff.name}</div>${(state.items?.bomb||0)>0?`<button class="iconbtn" style="font-size:14px;background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);color:#EF4444;width:auto;padding:0 8px" onclick="MMA.useItem('bomb')" title="Quick Bomb">💣${state.items.bomb}</button>`:''}<div class="pill">${B.stage.name}</div>${B.masteryMode?'<div class="pill" style="color:#FBBF24;border-color:rgba(251,191,36,.4)">⭐ Mastery</div>':''}${B.megaMode?'<div class="pill" style="color:#FBBF24;border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.1)">👑 MEGA</div>':''}</div><div class="arena${B.stage.boss?' boss-mode':''}" id="arena" style="background:radial-gradient(ellipse at 50% 0%,${chColor}22,transparent 60%),linear-gradient(180deg,rgba(46,16,101,.9),rgba(59,19,112,.95))">${B.stage.boss?'<div class="boss-overlay"></div>':''}<div class="fighter enemy"><div id="enemyArt" style="${enemyArtStyle}">${getArt(enemyArtId)}</div><div class="hpwrap"><div class="hpname"><span>${B.enemy.name}</span><span>${B.enemy.hp}/${B.enemy.max}</span></div><div class="hpbar"><div class="hpfill enemy-hpfill" id="ehp" style="width:${ehpPct}%;background:linear-gradient(90deg,#F44336,#FF6B6B)"></div></div></div></div><div class="vs">⚔</div><div class="fighter"><div id="monArt" style="position:relative;width:100px;height:100px;flex:0 0 auto">${getArt(m.id)}</div><div class="hpwrap"><div class="hpname"><span>${m.name} · Lv${m.level}</span><span id="mhptxt">${mhp}/${mmax}</span></div><div class="hpbar"><div class="hpfill ${mhp/mmax<.3?'low':''}" id="mhp" style="width:${mhp/mmax*100}%;background:linear-gradient(90deg,${FAMILIES[m.fam]?.g2||'#FFC93C'},${FAMILIES[m.fam]?.g1||'#FFE066'})"></div></div></div></div><div class="deck-bench" id="deckBench">${benchHTML()}</div><div class="combowrap"><div class="combometer"><div class="combofill" id="combo"></div></div><div class="combotxt" id="combotxt"></div></div><div class="items-bar" style="display:flex;gap:4px;justify-content:center;margin:4px 0">${Object.entries(state.items||{}).filter(([id,qty])=>qty>0).map(([id,qty])=>{const item=ITEMS[id]||BONUS_ITEMS[id];if(!item)return'';const ic={freeze:'#3B82F6',potion:'#10B981',bomb:'#EF4444',shield:'#A78BFA',revive:'#F472B6',shield_token:'#A78BFA',double_dmg_token:'#FBBF24',gold_boost_token:'#F59E0B',rare_combo_token:'#FDE68A'};const iconHtml=ART[id]?`<img src="${ART[id]}" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle">`:item.icon;return`<button class="item-btn" data-item="${id}" onclick="MMA.useItem('${id}')" style="background:${ic[id]||'#888'}22;border:1px solid ${ic[id]||'#888'}44;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:${ic[id]||'#fff'};font-family:var(--font);display:inline-flex;align-items:center;gap:4px">${iconHtml} ${qty}</button>`;}).join('')}${(state.evoStones||0)>0?`<button class="item-btn" onclick="MMA.useEvoStone()" style="background:#22D3EE22;border:1px solid #22D3EE44;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:#22D3EE;font-family:var(--font)">💠 ${state.evoStones}</button>`:''}</div><div class="timerwrap"><div class="timerbar"><div class="timerfill" id="timerfill"></div></div><div class="timertxt" id="timertxt">⏳ 10s</div></div></div><div class="qbox"><div class="qtext" id="qtext">…</div></div><div class="choices" id="choices"></div><div class="feedback" id="feedback"></div>`;
     updateCombo();
   }catch(e){console.error('renderBattle error:',e);route('home');}
 }
@@ -4457,7 +4457,7 @@ function stopEvoEnergyParticles(){if(evoEnergyInterval){clearInterval(evoEnergyI
 
 function spawnEvoSparks(accent,n){
   const ov=document.getElementById('evoOverlay');if(!ov)return;
-  const colors=[accent||'#F59E0B','#FDE68A','#EF4444','#fff','#F5D55E'];
+  const colors=[accent||'#F59E0B','#FDE68A','#EF4444','#fff','#FFE066'];
   for(let i=0;i<n;i++){
     const s=document.createElement('div');s.className='evo-sparkle';
     s.style.cssText=`width:${3+Math.random()*10}px;height:${3+Math.random()*10}px;background:${colors[Math.floor(Math.random()*colors.length)]};box-shadow:0 0 6px currentColor;left:${30+Math.random()*40}%;top:${30+Math.random()*28}%;--sx:${(Math.random()-.5)*220}px;--sy:${-70-Math.random()*110}px;animation-delay:${Math.random()*.5}s`;
@@ -4904,7 +4904,7 @@ function checkAchievement(opts){
 function showAchievement(name,icon,desc){
   const ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn .3s ease';
-  ov.innerHTML=`<div style="background:linear-gradient(135deg,#1A1505,#0A0A0A);border:2px solid var(--gold);border-radius:24px;padding:28px;text-align:center;max-width:280px;box-shadow:0 0 40px rgba(212,175,55,.4);animation:popa .5s cubic-bezier(.2,1.5,.4,1)"><div style="font-size:60px;margin-bottom:8px">${icon}</div><div style="font-size:16px;font-weight:700;color:var(--gold);font-family:var(--display);letter-spacing:2px;margin-bottom:4px">${name}</div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px">${desc}</div><button class="btn btn-primary" onclick="this.parentElement.parentElement.remove()" style="width:auto;padding:10px 24px;font-size:12px">Hebat!</button></div>`;
+  ov.innerHTML=`<div style="background:linear-gradient(135deg,#3B1370,#2E1065);border:2px solid var(--gold);border-radius:24px;padding:28px;text-align:center;max-width:280px;box-shadow:0 0 40px rgba(255,201,60,.4);animation:popa .5s cubic-bezier(.2,1.5,.4,1)"><div style="font-size:60px;margin-bottom:8px">${icon}</div><div style="font-size:16px;font-weight:700;color:var(--gold);font-family:var(--display);letter-spacing:2px;margin-bottom:4px">${name}</div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px">${desc}</div><button class="btn btn-primary" onclick="this.parentElement.parentElement.remove()" style="width:auto;padding:10px 24px;font-size:12px">Hebat!</button></div>`;
   document.body.appendChild(ov);
 }
 
@@ -4920,7 +4920,7 @@ function updateLeaderboard(gold,combo){
 function renderLeaderboard(){
   const lb=state?.leaderboard||{topGold:0,topCombo:0,topMonsters:0};
   app.innerHTML=topbar()+`<div class="panel" style="text-align:center"><h2 class="display" style="font-size:18px;margin-bottom:12px">🏆 Papan Pendahulu</h2>
-    <div style="background:linear-gradient(135deg,rgba(212,175,55,.2),rgba(212,175,55,.05));border:2px solid var(--gold);border-radius:16px;padding:16px;margin-bottom:12px">
+    <div style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.05));border:2px solid var(--gold);border-radius:16px;padding:16px;margin-bottom:12px">
       <div style="font-size:40px;margin-bottom:4px">🏆</div>
       <div style="font-size:14px;font-weight:700;color:var(--gold);font-family:var(--display);letter-spacing:2px">Emas Terbanyak</div>
       <div style="font-size:28px;font-weight:900;color:var(--text);margin-top:4px">🪙 ${lb.topGold}</div>
@@ -5277,21 +5277,21 @@ function stopIncHeartbeat(){if(incHeartbeatInterval){clearInterval(incHeartbeatI
 function eggSVG(stage){ // 0=utuh 1=retak sikit(80%+) 2=retak penuh(sedia)
   const cr=stage>=2?`<path d="M100 55 L90 90 L108 98 L94 130 L104 158" fill="none" stroke="#3A2E12" stroke-width="3" opacity=".75"/><path d="M70 100 L82 115 L68 128" fill="none" stroke="#3A2E12" stroke-width="2.5" opacity=".65"/>`:stage>=1?`<path d="M100 60 L92 92 L106 100" fill="none" stroke="#3A2E12" stroke-width="2.5" opacity=".6"/>`:'';
   return`<svg viewBox="0 0 200 210" style="width:100%;height:100%"><defs>
-    <linearGradient id="incegg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5D55E"/><stop offset="1" stop-color="#D4AF37"/></linearGradient>
+    <linearGradient id="incegg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE066"/><stop offset="1" stop-color="#FFC93C"/></linearGradient>
     <radialGradient id="inceggs" cx=".38" cy=".28" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".8"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
     <ellipse cx="100" cy="112" rx="56" ry="70" fill="url(#incegg)"/>
-    <g opacity=".45" fill="#B8860B"><ellipse cx="76" cy="86" rx="9" ry="12"/><ellipse cx="122" cy="102" rx="11" ry="8"/><ellipse cx="90" cy="140" rx="8" ry="10"/><ellipse cx="128" cy="150" rx="7" ry="9"/><ellipse cx="70" cy="130" rx="6" ry="8"/></g>
+    <g opacity=".45" fill="#E8A317"><ellipse cx="76" cy="86" rx="9" ry="12"/><ellipse cx="122" cy="102" rx="11" ry="8"/><ellipse cx="90" cy="140" rx="8" ry="10"/><ellipse cx="128" cy="150" rx="7" ry="9"/><ellipse cx="70" cy="130" rx="6" ry="8"/></g>
     <ellipse cx="100" cy="112" rx="56" ry="70" fill="url(#inceggs)"/>${cr}</svg>`;
 }
 function podSVG(status){
   // status: empty | incubating | ready — warna ditukar ke palet gold/violet sedia ada (bukan cyan sci-fi demo)
-  const glow=status==='empty'?'#3A3A44':(status==='ready'?'#F5D55E':'#A78BFA');
+  const glow=status==='empty'?'#3A3A44':(status==='ready'?'#FFE066':'#A78BFA');
   const liquid=status==='empty'?'rgba(58,58,68,.25)':'rgba(167,139,250,.28)';
   return`<svg viewBox="0 0 220 300" style="width:100%">
   <defs>
     <linearGradient id="incmetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fa6b8"/><stop offset=".5" stop-color="#3a4a58"/><stop offset="1" stop-color="#1a2530"/></linearGradient>
     <linearGradient id="incmetalDark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a3a48"/><stop offset="1" stop-color="#0e161e"/></linearGradient>
-    <linearGradient id="incglass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="rgba(212,175,55,.18)"/><stop offset=".5" stop-color="rgba(212,175,55,.05)"/><stop offset="1" stop-color="rgba(212,175,55,.22)"/></linearGradient>
+    <linearGradient id="incglass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="rgba(255,201,60,.18)"/><stop offset=".5" stop-color="rgba(255,201,60,.05)"/><stop offset="1" stop-color="rgba(255,201,60,.22)"/></linearGradient>
     <radialGradient id="incpodglow" cx=".5" cy=".55" r=".6"><stop offset="0" stop-color="${glow}" stop-opacity=".35"/><stop offset="1" stop-color="${glow}" stop-opacity="0"/></radialGradient>
   </defs>
   <rect x="30" y="248" width="160" height="34" rx="6" fill="url(#incmetal)" stroke="#0a1218" stroke-width="2"/>
@@ -5317,18 +5317,18 @@ function podSVG(status){
   <ellipse cx="110" cy="38" rx="26" ry="10" fill="#1a2530" stroke="${glow}" stroke-width="1.5"/>
   <ellipse cx="110" cy="36" rx="10" ry="4" fill="${glow}" opacity=".6"/>
   <rect x="66" y="72" width="88" height="20" rx="10" fill="#0a1620" stroke="#233444" stroke-width="1.5"/>
-  <circle cx="86" cy="82" r="5" fill="${status==='empty'?'#3a4a58':'#F5D55E'}" opacity=".85"/>
+  <circle cx="86" cy="82" r="5" fill="${status==='empty'?'#3a4a58':'#FFE066'}" opacity=".85"/>
   <circle cx="110" cy="82" r="5" fill="#ffb23f"><animate attributeName="opacity" values="1;.35;1" dur="1.3s" repeatCount="indefinite"/></circle>
-  <circle cx="134" cy="82" r="5" fill="${status==='ready'?'#F5D55E':'#274038'}"/>
+  <circle cx="134" cy="82" r="5" fill="${status==='ready'?'#FFE066':'#274038'}"/>
   <rect x="30" y="150" width="10" height="90" rx="3" fill="url(#incmetal)" stroke="#0a1218" stroke-width="1.5"/>
   <rect x="180" y="150" width="10" height="90" rx="3" fill="url(#incmetal)" stroke="#0a1218" stroke-width="1.5"/>
   </svg>`;
 }
 function incGaugeSVG(pct){
   const r=48,c=2*Math.PI*r,off=c*(1-pct/100);
-  const[c1,c2]=pct<34?['#EF4444','#F59E0B']:pct<70?['#F59E0B','#F5D55E']:['#A78BFA','#F5D55E'];
+  const[c1,c2]=pct<34?['#EF4444','#F59E0B']:pct<70?['#F59E0B','#FFE066']:['#A78BFA','#FFE066'];
   return`<svg viewBox="0 0 120 120"><defs><linearGradient id="incgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
-    <circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(212,175,55,.15)" stroke-width="10"/>
+    <circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(255,201,60,.15)" stroke-width="10"/>
     <circle cx="60" cy="60" r="${r}" fill="none" stroke="url(#incgg)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset .5s"/>
   </svg>`;
 }
