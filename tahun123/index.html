@@ -1823,7 +1823,10 @@ function genNomborY2(maxNum, numChoices, tier){
     return {prompt,answer,choices,topic:'nombor2'};
   }
   if(t==='compare'){
-    const a=rand(100,effMax),b=rand(100,effMax);
+    // 🐛 FIX: dulu a & b boleh sama -> "112 atau 112", soalan tanpa jawapan betul.
+    const a=rand(100,effMax);let b=rand(100,effMax),g=0;
+    while(b===a&&g++<40)b=rand(100,effMax);
+    if(b===a)b=(a<effMax)?a+1:a-1;
     const askBig=Math.random()<0.5;
     const answer=askBig?Math.max(a,b):Math.min(a,b);
     const prompt=askBig?`Nombor yang manakah lebih besar? ${a} atau ${b}`:`Nombor yang manakah lebih kecil? ${a} atau ${b}`;
@@ -1866,7 +1869,10 @@ function genNomborY3(maxNum, numChoices, tier){
     return {prompt,answer,choices,topic:'nombor3'};
   }
   if(t==='compare'){
-    const a=rand(100,effMax),b=rand(100,effMax);
+    // 🐛 FIX: dulu a & b boleh sama -> "112 atau 112", soalan tanpa jawapan betul.
+    const a=rand(100,effMax);let b=rand(100,effMax),g=0;
+    while(b===a&&g++<40)b=rand(100,effMax);
+    if(b===a)b=(a<effMax)?a+1:a-1;
     const askBig=Math.random()<0.5;
     const answer=askBig?Math.max(a,b):Math.min(a,b);
     const prompt=askBig?`Nombor yang manakah lebih besar? ${a} atau ${b}`:`Nombor yang manakah lebih kecil? ${a} atau ${b}`;
@@ -1914,7 +1920,10 @@ function genBahagi(maxNum,numChoices,tier){
 }
 function genDarabY3(maxNum,numChoices,tier){
   if(tier<=1){return genDarab(maxNum,numChoices,tier);}
-  const a=rand(2,Math.round(maxNum*0.15)),b=rand(2,Math.round(maxNum*0.15));
+  // 🐛 FIX: dulu rand(2,maxNum*0.15) x rand(2,...) -> boleh jadi "1497 × 1444" (2.1 juta).
+  // KSSR Tahun 3: darab nombor 2-3 digit dgn nombor 1 digit sahaja.
+  const a=tier>=3?rand(100,999):rand(11,99);
+  const b=rand(2,9);
   const answer=a*b;
   const prompt=`${a} × ${b} = ?`;
   const choices=makeChoices(answer,answer*3,numChoices);
@@ -1925,8 +1934,10 @@ function genBahagiY3(maxNum,numChoices,tier){
     const prompt=`${n} ÷ ${d} = ?`;
     const choices=makeChoices(answer,n,numChoices);
     return {prompt,answer,choices,topic:'bahagi3'};}
-  const d=rand(2,9);const n=d*rand(tier>=3?5:1,15);
-  const answer=n/d;
+  // 🐛 FIX: dulu hasil bahagi max 15 sahaja utk semua tier - terlalu mudah utk Tahun 3
+  // dan tak naik ikut tier. Sekarang tier 2 hingga 20, tier 3 hingga 50.
+  const d=rand(2,9);const q=tier>=3?rand(10,50):rand(2,20);const n=d*q;
+  const answer=q;
   const prompt=`${n} ÷ ${d} = ?`;
   const choices=makeChoices(answer,n,numChoices);
   return {prompt,answer,choices,topic:'bahagi3'};
@@ -1949,8 +1960,14 @@ function genPecahanY3(maxNum,numChoices,tier){
     const choices=makeChoices(per,9,numChoices).map(c=>({label:'0.'+c.value,value:'0.'+c.value}));
     return {prompt,answer,choices,topic:'pecahan3'};
   }
+  // 🐛 FIX: dulu dua pecahan boleh BERNILAI sama (cth 1/2 vs 2/4, atau 1/4 vs 1/4),
+  // jadi "manakah lebih besar?" tiada jawapan betul. Bandingkan nilai, bukan teks.
   const den=rand(2,8);const numVal=rand(1,den-1);
-  const compare=rand(2,8);const compNum=rand(1,compare-1);
+  let compare=rand(2,8),compNum=rand(1,compare-1),gP=0;
+  while(numVal/den===compNum/compare&&gP++<40){compare=rand(2,8);compNum=rand(1,compare-1);}
+  if(numVal/den===compNum/compare){ // jaminan berbeza
+    if(numVal/den!==0.5){compare=2;compNum=1;}else{compare=3;compNum=1;}
+  }
   const ans1=`${numVal}/${den}`;const ans2=`${compNum}/${compare}`;
   const v1=numVal/den,v2=compNum/compare;
   const askBig=Math.random()<0.5;
@@ -2004,14 +2021,20 @@ function genUkuranY2(maxNum,numChoices,tier){
     const choices=makeChoices(target,200,numChoices);
     return {prompt,answer:target,choices,topic:'ukuran2'};
   }
-  const a=rand(5,50),b=rand(5,50);
+  // 🐛 FIX: dulu a & b boleh sama -> "22 kg atau 22 kg", soalan tanpa jawapan betul.
+  const a=rand(5,50);let b=rand(5,50),gU=0;
+  while(b===a&&gU++<40)b=rand(5,50);
+  if(b===a)b=(a<50)?a+1:a-1;
   const askBig=Math.random()<0.5;
   const answer=askBig?Math.max(a,b):Math.min(a,b);
   const prompt=askBig?`Manakah yang lebih berat? ${a} kg atau ${b} kg`:`Manakah yang lebih ringan? ${a} kg atau ${b} kg`;
   return {prompt,answer,choices:[{label:`${a} kg`,value:a},{label:`${b} kg`,value:b}],two:true,topic:'ukuran2'};
 }
 function genUkuranY3(maxNum,numChoices,tier){
-  const a=rand(1,Math.round(maxNum*0.2)),b=rand(1,Math.round(maxNum*0.2));
+  // 🐛 FIX: dulu abaikan `tier` & guna rand(1,maxNum*0.2) -> "2000 kg = berapa g?" (2 juta g).
+  // KSSR Tahun 3: penukaran unit guna nombor kecil, naik ikut tier.
+  const a=tier<=1?rand(1,9):tier===2?rand(10,50):rand(20,99);
+  const b=rand(1,9);
   if(Math.random()<0.5){
     const answer=a*100;
     const prompt=`${a} m = berapa cm?`;
