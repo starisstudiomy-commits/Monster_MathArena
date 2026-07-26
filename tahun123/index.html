@@ -5564,7 +5564,12 @@ setInterval(()=>{if(state&&state.stats)state.stats.playSeconds+=5;},5000);
 window.addEventListener('beforeunload',()=>{if(!profileSwitching)save();});
 
 try{ensureProfiles();load();if(!state)state=defaultState();if(!state.progress)state.progress={chapter:0,stage:0};if(!state.stats)state.stats=defaultState().stats;if(!state.collection)state.collection={};if(!state.deck)state.deck=[];if(!state.difficulty)state.difficulty='medium';
-preloadAllAssets(()=>route('splash'));
+// 🔐 Gate lesen - kalau belum sah, hantar balik ke skrin masuk kod (elak akses terus URL game)
+if(localStorage.getItem('mma_license_valid')!=='true'){
+  location.href=location.origin+'/license.html';
+}else{
+  preloadAllAssets(()=>route('splash'));
+}
 
 // PWA: daftar service worker (cache-first + runtime caching) supaya boleh main offline
 if('serviceWorker' in navigator){
