@@ -101,11 +101,7 @@ button,.btn,.choice,input{font-family:var(--font)}
   position:fixed;
   inset:0;
   z-index:-2;
-  background:
-    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255,201,60,.15), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(184,134,11,.1), transparent),
-    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,201,60,.05), transparent),
-    linear-gradient(135deg, #2E1065 0%, #3B1370 50%, #2E1065 100%);
+  background:var(--surface);
 }
 
 #bg::before{
@@ -125,13 +121,8 @@ button,.btn,.choice,input{font-family:var(--font)}
 
 /* Ambient glow orbs */
 .orb{
-  position:fixed;
-  border-radius:50%;
-  filter:blur(80px);
-  opacity:.2;
-  pointer-events:none;
-  z-index:-1;
-  animation:float 20s ease-in-out infinite;
+  /* 🧒 Dimatikan utk kids-friendly: elak kesan glow/gradient di background, kekal purple solid */
+  display:none;
 }
 .orb-1{width:300px;height:300px;background:var(--gold);top:-100px;left:-100px}
 .orb-2{width:250px;height:250px;background:var(--gold-dark);bottom:-80px;right:-80px;animation-delay:-10s}
