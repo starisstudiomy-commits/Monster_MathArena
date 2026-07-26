@@ -828,6 +828,14 @@ body.theme-custom .mission-banner{
 
 /* 🐛 FIX: bila kad ada badge nombor deck (1/2/3) di atas-kiri, anjak nama monster ke kanan supaya tak tertutup */
 .deck-card-in .tc-name{padding-left:34px}
+
+/* ❓ Album: monster belum dimiliki tunjuk tanda soal (bukan siluet) supaya player rasa ingin tahu */
+.tc.locked .tc-mon{display:none}
+.tc.locked .tc-art::after{
+  content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:58px;font-weight:900;color:rgba(255,255,255,.42);
+  text-shadow:0 3px 0 rgba(0,0,0,.3);z-index:3;
+}
 </style>
 </head>
 <body>
@@ -1756,7 +1764,15 @@ function save(){
     if(typeof showToast==='function')showToast('⚠️','Gagal simpan! Ruang storan mungkin penuh.');
   }
 }
-function resetAll(){localStorage.removeItem(currentSaveKey());state=defaultState();save();route('welcome');}
+function resetAll(){
+  localStorage.removeItem(currentSaveKey());
+  // 🐛 FIX: dulu cuma save utama dipadam - pertarungan tersimpan, streak & stiker harian
+  // masih tinggal, jadi butang "SAMBUNG PERTARUNGAN" kekal muncul selepas reset.
+  // NOTA: kunci lesen (mma_license/mma_license_valid) TIDAK dipadam - itu bukti pembelian.
+  ['mma_saved_battle','mma_last_login','mma_login_streak','mma_play_days','mma_session_history']
+    .forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+  state=defaultState();save();route('welcome');
+}
 function getMonster(fam){
   const c=state.collection[fam];if(!c||!c.owned)return null;
   const base=FAMILIES[fam]?.stages[c.stage-1];if(!base)return null;
@@ -2108,6 +2124,14 @@ function renderWelcome(){
 
 function pickStarter(fam){try{state.started=true;state.starter=fam;state.collection[fam]={owned:true,stage:1,correct:0};state.deck=[fam];save();if(!state.tutorialDone){tutorialStep=0;showTutorial();}else route('home');}catch(e){route('home');}}
 
+function contrastOn(hex){
+  try{
+    const h=String(hex||'').replace('#','');
+    if(h.length!==6)return '#FFFFFF';
+    const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+    return ((0.299*r+0.587*g+0.114*b)/255)>0.62 ? '#2A1055' : '#FFFFFF';
+  }catch(e){return '#FFFFFF';}
+}
 function renderChapterIntro(chapter,chapterIdx){
   const bossStage=chapter.stages.find(s=>s.boss)||chapter.stages[chapter.stages.length-1];
   const bossName=ENEMIES[bossStage.enemy]?.name||'???';
@@ -2116,13 +2140,15 @@ function renderChapterIntro(chapter,chapterIdx){
   const story=getChapterStory(chapter.topic);
   const learnList=chapter.stages.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="width:20px;height:20px;border-radius:6px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:10px;flex:0 0 auto">${s.boss?'👑':s.bonus?'🎁':i+1}</span><span style="font-size:12px;color:var(--text-light)">${esc(s.sub||s.name)}</span></div>`).join('');
   app.innerHTML=`<div class="panel" style="text-align:center;border-color:${chapter.color};box-shadow:0 4px 24px ${chapter.color}33">
-    <div style="font-size:11px;letter-spacing:3px;color:${chapter.color};font-weight:700;margin-bottom:4px">BAB ${chapterIdx+1}</div>
-    <h2 class="display" style="font-size:20px;margin-bottom:12px;color:${chapter.color}">${esc(chapter.name)}</h2>
+    ${(()=>{const tc=contrastOn(chapter.color);return`<div style="background:${chapter.color};border:3px solid rgba(255,255,255,.5);border-radius:18px;padding:12px 14px;margin-bottom:14px;box-shadow:0 4px 0 0 rgba(0,0,0,.28)">
+      <div style="font-size:13px;letter-spacing:2px;color:${tc};font-weight:900;opacity:.92;margin-bottom:2px">BAB ${chapterIdx+1}</div>
+      <div style="font-size:21px;font-weight:900;color:${tc};line-height:1.25">${esc(chapter.name)}</div>
+    </div>`;})()}
     <div style="width:96px;height:96px;margin:0 auto 10px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,${chapter.color}22,transparent);border:2px solid ${chapter.color}66">${getArt(bossStage.enemy)}</div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:14px">Kamu akan hadapi <b style="color:${chapter.color}">${esc(bossName)}</b>!</div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:14px">Kamu akan hadapi <b style="color:var(--gold-light)">${esc(bossName)}</b>!</div>
     <p style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:16px">${esc(story)}</p>
     <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:12px 14px;margin-bottom:16px;text-align:left">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:${chapter.color};margin-bottom:8px">📚 APA AKAN DIPELAJARI</div>
+      <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--gold-light);margin-bottom:8px">📚 APA AKAN DIPELAJARI</div>
       ${learnList}
     </div>
     <div class="pill" style="display:inline-flex;margin-bottom:16px">🗺️ ${normalCount} Stage${bonusCount?` + 🎁 ${bonusCount} Bonus`:''} + 👑 1 Boss</div>
