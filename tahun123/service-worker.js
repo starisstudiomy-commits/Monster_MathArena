@@ -2,7 +2,7 @@
 // Cache-first + runtime caching: precache "app shell" (HTML/manifest/splash/icons),
 // lepas tu setiap asset (monster/effect/enemy PNG dll.) di-cache automatik bila
 // pertama kali di-fetch semasa main. Selepas itu, semua boleh dimuatkan offline.
-const CACHE_NAME = 'mma-t123-cache-v9';
+const CACHE_NAME = 'mma-t123-cache-v10';
 const CORE_ASSETS = [
   './index.html',
   './license.html',
