@@ -3,18 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Preview — Monster Math Arena</title>
 <!--
   ⚠️  BUILD PREVIEW SAHAJA — MELANGKAU GATE LESEN.
 
-  Untuk review sendiri di telefon melalui githack, di mana gate lesen
-  MUSTAHIL dilepasi: license.html hantar kod ke /api/validate-license,
-  iaitu fungsi serverless yang hanya wujud di Vercel. Di hos statik,
-  kod yang betul pun gagal dgn "Ralat rangkaian".
+  Kenapa fail ni wujud: gate lesen MUSTAHIL dilepasi pd hos statik spt
+  githack, sebab license.html hantar kod ke /api/validate-license iaitu
+  fungsi serverless yg hanya ada di Vercel.
 
-  Fail ni sengaja TIDAK menyalin index.html - ia cuma tetapkan penanda
-  lesen lalu alihkan ke index.html sebenar. Jadi ia tak boleh jadi lapuk
-  bila index.html dikemas kini.
+  Ia juga NYAHDAFTAR service worker & kosongkan semua cache dahulu.
+  service-worker.js guna strategi cache-first ("if (cached) return cached")
+  dan header no-cache dlm vercel.json TIDAK berkuat kuasa di githack -
+  jadi SW lama akan sajikan index.html lama selama-lamanya. Tanpa
+  pembersihan ni, preview sentiasa tunjuk versi lapuk.
 
   PADAM fail ni bila review selesai / repo ditukar ke private.
 -->
@@ -24,19 +26,36 @@
   .spin{font-size:52px;animation:s 1s linear infinite;display:inline-block}
   @keyframes s{to{transform:rotate(360deg)}}
   p{font-size:15px;font-weight:700;margin:14px 0 0}
-  small{display:block;margin-top:10px;opacity:.7;font-size:12px;line-height:1.5}
+  small{display:block;margin-top:10px;opacity:.75;font-size:12px;line-height:1.5}
 </style>
 </head>
 <body>
 <div>
   <div class="spin">🔄</div>
-  <p>Membuka preview…</p>
-  <small>Mod preview — gate lesen dilangkau untuk semakan sendiri.</small>
+  <p id="msg">Membersihkan cache…</p>
+  <small>Mod preview — gate lesen dilangkau &amp; cache lama dibuang.</small>
   <noscript><p>JavaScript diperlukan untuk membuka game.</p></noscript>
 </div>
 <script>
+(async function () {
+  var msg = document.getElementById('msg');
+  try {
+    if ('serviceWorker' in navigator) {
+      var regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(function (r) { return r.unregister(); }));
+    }
+  } catch (e) {}
+  try {
+    if (window.caches) {
+      var keys = await caches.keys();
+      await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+    }
+  } catch (e) {}
   try { localStorage.setItem('mma_license_valid', 'true'); } catch (e) {}
-  location.replace('index.html');
+  if (msg) msg.textContent = 'Membuka versi terkini…';
+  // cache-bust supaya CDN githack & browser tak sajikan salinan lama
+  location.replace('index.html?fresh=' + Date.now());
+})();
 </script>
 </body>
 </html>
