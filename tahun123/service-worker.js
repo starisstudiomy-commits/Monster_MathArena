@@ -2,7 +2,7 @@
 // Cache-first + runtime caching: precache "app shell" (HTML/manifest/splash/icons),
 // lepas tu setiap asset (monster/effect/enemy PNG dll.) di-cache automatik bila
 // pertama kali di-fetch semasa main. Selepas itu, semua boleh dimuatkan offline.
-const CACHE_NAME = 'mma-t123-cache-v10';
+const CACHE_NAME = 'mma-t123-cache-v11';
 const CORE_ASSETS = [
   './index.html',
   './license.html',
@@ -38,6 +38,28 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   // Cuma cache same-origin (assets/HTML sendiri) - elak isu opaque-response utk font CDN luar
   if (url.origin !== location.origin) return;
+
+  // 🐛 FIX: dulu cache-first utk SEMUA - termasuk index.html. Pemain hanya
+  // dapat versi baru bila CACHE_NAME ditukar secara manual; sekali terlupa,
+  // mereka terperangkap dgn versi lama selama-lamanya. Dokumen HTML kini
+  // network-first (cache jadi sandaran luar talian); aset kekal cache-first
+  // sebab ia tak berubah tanpa nama fail baru.
+  const isHTML = e.request.mode === 'navigate' ||
+                 (e.request.headers.get('accept') || '').includes('text/html');
+  if (isHTML) {
+    e.respondWith(
+      fetch(e.request)
+        .then((resp) => {
+          if (resp && resp.status === 200) {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
+          }
+          return resp;
+        })
+        .catch(() => caches.match(e.request).then((c) => c || caches.match('./index.html')))
+    );
+    return;
+  }
 
   e.respondWith(
     caches.match(e.request).then((cached) => {

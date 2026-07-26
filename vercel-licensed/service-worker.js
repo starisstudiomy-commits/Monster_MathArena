@@ -2,7 +2,7 @@
 // Sama strategi macam versi percuma: cache-first + runtime caching.
 // Selamat cache index.html sebab gate lesen disemak secara client-side (localStorage)
 // setiap kali app dibuka, bukan bergantung pada respons rangkaian.
-const CACHE_NAME = 'mma-licensed-cache-v17';
+const CACHE_NAME = 'mma-licensed-cache-v18';
 const CORE_ASSETS = [
   './index.html',
   './license.html',
@@ -39,6 +39,28 @@ self.addEventListener('fetch', (e) => {
   // Cuma cache same-origin (assets/HTML sendiri) - elak isu opaque-response utk font CDN luar,
   // dan elak cache /api/validate-license (POST sahaja pun dah exclude di atas).
   if (url.origin !== location.origin) return;
+
+  // 🐛 FIX: dulu cache-first utk SEMUA - termasuk index.html. Pemain hanya
+  // dapat versi baru bila CACHE_NAME ditukar secara manual; sekali terlupa,
+  // mereka terperangkap dgn versi lama selama-lamanya. Dokumen HTML kini
+  // network-first (cache jadi sandaran luar talian); aset kekal cache-first
+  // sebab ia tak berubah tanpa nama fail baru.
+  const isHTML = e.request.mode === 'navigate' ||
+                 (e.request.headers.get('accept') || '').includes('text/html');
+  if (isHTML) {
+    e.respondWith(
+      fetch(e.request)
+        .then((resp) => {
+          if (resp && resp.status === 200) {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
+          }
+          return resp;
+        })
+        .catch(() => caches.match(e.request).then((c) => c || caches.match('./index.html')))
+    );
+    return;
+  }
 
   e.respondWith(
     caches.match(e.request).then((cached) => {

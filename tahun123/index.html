@@ -1084,6 +1084,28 @@ body.theme-custom .mission-banner{
 /* Baris terakhir dlm kumpulan tak perlu garis bawah */
 .sgroup .statline:last-child{border-bottom:none}
 .sgroup .statline{border-bottom-color:rgba(255,255,255,.10)}
+
+/* 🎉 Letupan teks combo - Critical / Ultimate / setiap 10 */
+.combo-burst{
+  position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);
+  font-family:var(--display);font-weight:900;font-size:30px;letter-spacing:1px;
+  text-shadow:0 3px 0 rgba(0,0,0,.45),0 0 22px currentColor;
+  pointer-events:none;z-index:8;white-space:nowrap;
+  animation:combo-pop 1.1s cubic-bezier(.2,1.4,.4,1) forwards;
+}
+@keyframes combo-pop{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}
+  25%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+  60%{opacity:1;transform:translate(-50%,-62%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-95%) scale(.95)}
+}
+/* 🎚️ Aras kesukaran sbg titik - isyarat bukan-warna utk pengguna buta warna,
+   kekal nampak walaupun nama disembunyikan pd skrin sempit */
+.diff-lv{letter-spacing:1px;font-size:.92em;margin:0 1px}
+/* 🔁 Skrin melintang: #app dihadkan 480px, jadi pusatkan & benarkan skrol menegak */
+@media (orientation:landscape) and (max-height:520px){
+  #app{padding-top:6px;padding-bottom:10px}
+}
 </style>
 </head>
 <body>
@@ -1719,7 +1741,27 @@ function pvChoices(dig,maxPow,answer,numChoices){
   const picks=shuffle([...set].filter(v=>v>0)).slice(0,Math.max(1,numChoices-1));
   return shuffle([answer,...picks]).map(v=>({label:String(v),value:v}));
 }
+// 🔁 Ingatan soalan terkini - elak soalan SAMA keluar berturut-turut.
+// Cuba jana semula beberapa kali; kalau masih sama, terima sahaja supaya
+// topik berpilihan sempit (cth pecahan) tidak tersekat dlm gelung.
+let _qRecent=[];
+const _QMEM=8;
 function genQuestion(tier, topic){
+  for(let cuba=0;cuba<6;cuba++){
+    const q=_genQuestionRaw(tier,topic);
+    const kunci=String(q&&q.prompt);
+    if(!_qRecent.includes(kunci)){
+      _qRecent.push(kunci);
+      if(_qRecent.length>_QMEM)_qRecent.shift();
+      return q;
+    }
+  }
+  const q=_genQuestionRaw(tier,topic);
+  _qRecent.push(String(q&&q.prompt));
+  if(_qRecent.length>_QMEM)_qRecent.shift();
+  return q;
+}
+function _genQuestionRaw(tier, topic){
   const diff = DIFFICULTIES[state?.difficulty||'medium'];
   const numChoices = diff.choices||3;
   const year = state?.selectedYear||1;
@@ -2203,14 +2245,36 @@ function genBahagiY3(maxNum,numChoices,tier){
   return {prompt,answer,choices,topic:'bahagi3'};
 }
 function genPecahanY2(maxNum,numChoices,tier){
-  const fracs=['1/2','1/4','2/4','3/4'];
-  const f=fracs[Math.floor(Math.random()*fracs.length)];
-  const visuals={};
-  const answer=f;
-  const prompt=`Pecahan yang manakah ditunjukkan oleh gambar di bawah?`;
-  const visual=`<div style="font-size:32px;margin-top:6px">${f==='1/2'?'🍕 ◗':'🍕 ◪'}</div>`;
-  const choices=shuffle(fracs.map(v=>({label:v,value:v})));
-  return {prompt,answer,choices,visual,topic:'pecahan2'};
+  // 🐛 FIX: dulu gambar '◗'/'◪' sama utk 1/4, 2/4 & 3/4 - tak mewakili pecahan
+  // yg ditanya. Sekarang kotak dilukis ikut pengangka/penyebut sebenar.
+  // Tier juga dihormati: tier 1 separuh/suku, tier 2 penyebut lebih besar,
+  // tier 3 banding dua pecahan.
+  const kotak=(a,b)=>`<div style="font-size:26px;letter-spacing:3px;margin-top:6px">${'🟧'.repeat(a)}${'⬜'.repeat(b-a)}</div>`;
+  if(tier>=3){
+    // 🐛 penyebut mesti >=4: kalau b=2 maka rand(1,b-1) sentiasa 1,
+    // jadi kedua-dua pecahan jadi 1/2 (soalan tanpa jawapan betul).
+    const b=pick([4,6,8]);let n1=rand(1,b-1),n2=rand(1,b-1),g=0;
+    while(n2===n1&&g++<30)n2=rand(1,b-1);
+    if(n2===n1)n2=(n1===1)?2:1;
+    const besar=Math.random()<0.5;
+    const a1=`${n1}/${b}`,a2=`${n2}/${b}`;
+    const answer=besar?(n1>n2?a1:a2):(n1<n2?a1:a2);
+    return {prompt:`Pecahan yang manakah lebih ${besar?'besar':'kecil'}? ${a1} atau ${a2}`,
+            answer, choices:[{label:a1,value:a1},{label:a2,value:a2}], two:true, topic:'pecahan2'};
+  }
+  const b=tier===1?pick([2,4]):pick([4,6,8]);
+  const a=rand(1,b-1);
+  const answer=`${a}/${b}`;
+  const set=new Set([answer]);
+  let guard=0;
+  while(set.size<Math.max(2,numChoices)&&guard++<40){
+    const bb=tier===1?pick([2,4]):pick([4,6,8]);const aa=rand(1,bb-1);
+    set.add(`${aa}/${bb}`);
+  }
+  const lain=[...set].filter(v=>v!==answer).slice(0,Math.max(1,numChoices-1));
+  return {prompt:'Pecahan yang manakah ditunjukkan oleh gambar di bawah?',
+          answer, visual:kotak(a,b),
+          choices:shuffle([answer,...lain]).map(v=>({label:v,value:v})), topic:'pecahan2'};
 }
 function genPecahanY3(maxNum,numChoices,tier){
   if(tier===1){
@@ -2236,29 +2300,54 @@ function genPecahanY3(maxNum,numChoices,tier){
   return {prompt,answer,choices:[{label:ans1,value:ans1},{label:ans2,value:ans2}],two:true,topic:'pecahan3'};
 }
 function genWangY2(maxNum,numChoices,tier){
-  const duitPool=[50,100];
-  const duit=duitPool[Math.floor(Math.random()*duitPool.length)];
-  const harga=rand(5,duit-5);
+  // Tier: jumlah wang & bilangan barang naik ikut tahap (dulu sentiasa RM50/RM100).
+  const duit=tier===1?pick([10,20]):tier===2?pick([20,50]):pick([50,100]);
+  if(tier>=3){
+    const h1=rand(3,Math.floor(duit/2)-1),h2=rand(2,Math.floor(duit/2)-1);
+    const answer=duit-h1-h2;
+    return {prompt:`Kamu ada RM${duit}. Kamu beli dua barang berharga RM${h1} dan RM${h2}. Berapakah baki wang kamu?`,
+            answer, choices:makeChoices(answer,duit,numChoices), topic:'wang2'};
+  }
+  const harga=rand(2,duit-2);
   const answer=duit-harga;
-  const prompt=`Kamu ada RM${duit}. Kamu beli barang berharga RM${harga}. Berapakah baki wang kamu?`;
-  const choices=makeChoices(answer,duit*2,numChoices);
-  return {prompt,answer,choices,topic:'wang2'};
+  return {prompt:`Kamu ada RM${duit}. Kamu beli barang berharga RM${harga}. Berapakah baki wang kamu?`,
+          answer, choices:makeChoices(answer,duit,numChoices), topic:'wang2'};
 }
 function genWangY3(maxNum,numChoices,tier){
-  const duit=rand(100,Math.round(maxNum*0.5));
-  const harga=rand(5,duit-5);
+  // 🐛 FIX: dulu rand(100,maxNum*0.5) -> "Kamu ada RM4905" (tak realistik utk
+  // Tahun 3) & tier diabaikan. Sekarang julat munasabah & naik ikut tier.
+  const duit=tier===1?pick([20,50]):tier===2?pick([50,100]):pick([100,200]);
+  if(tier>=3){
+    const h1=rand(5,Math.floor(duit/2)-1),h2=rand(5,Math.floor(duit/2)-1);
+    const answer=duit-h1-h2;
+    return {prompt:`Kamu ada RM${duit}. Kamu beli dua barang berharga RM${h1} dan RM${h2}. Berapakah baki wang kamu?`,
+            answer, choices:makeChoices(answer,duit,numChoices), topic:'wang3'};
+  }
+  const harga=rand(3,duit-3);
   const answer=duit-harga;
-  const prompt=`Kamu ada RM${duit}. Kamu beli barang berharga RM${harga}. Berapakah baki wang kamu?`;
-  const choices=makeChoices(answer,duit,numChoices);
-  return {prompt,answer,choices,topic:'wang3'};
+  return {prompt:`Kamu ada RM${duit}. Kamu beli barang berharga RM${harga}. Berapakah baki wang kamu?`,
+          answer, choices:makeChoices(answer,duit,numChoices), topic:'wang3'};
 }
 function genMasaY3(maxNum,numChoices,tier){
-  const h=rand(1,11),m=(Math.floor(Math.random()*12)*5);
-  const mm=m===0?'00':String(m);
-  const answer=`${h}:${mm}`;
-  const prompt=`Jam menunjukkan pukul ${h}:${mm}. Pukul berapakah ini?`;
-  const choices=makeChoices(h,12,Math.min(numChoices,3)).map(c=>({label:`${c.value}:${mm}`,value:`${c.value}:${mm}`}));
-  return {prompt,answer,choices,topic:'masa3'};
+  // 🐛 FIX: dulu "Jam menunjukkan pukul 3:15. Pukul berapakah ini?" - jawapan
+  // tertulis dlm soalan itu sendiri, jadi tiada apa yg dikira. Sekarang soalan
+  // sebenar: tambah jam, tempoh berlalu, & tukar jam->minit ikut tier.
+  if(tier<=1){
+    const h=rand(1,9),tambah=rand(1,3);
+    const answer=h+tambah;
+    return {prompt:`Sekarang pukul ${h}. Pukul berapakah ${tambah} jam kemudian?`,
+            answer, choices:makeChoices(answer,12,numChoices), topic:'masa3'};
+  }
+  if(tier===2){
+    const mula=rand(1,7),tamat=mula+rand(2,4);
+    const answer=tamat-mula;
+    return {prompt:`Ali mula belajar pukul ${mula} dan habis pukul ${tamat}. Berapa jam dia belajar?`,
+            answer, choices:makeChoices(answer,10,numChoices), topic:'masa3'};
+  }
+  const jam=rand(2,6);
+  const answer=jam*60;
+  return {prompt:`${jam} jam = berapa minit?`,
+          answer, choices:makeChoices(answer,jam*90,numChoices), topic:'masa3'};
 }
 function genBentukY3(maxNum,numChoices,tier){
   if(tier<=1){
@@ -2308,16 +2397,25 @@ function genUkuranY3(maxNum,numChoices,tier){
   return {prompt,answer,choices,topic:'ukuran3'};
 }
 function genDataY3(maxNum,numChoices,tier){
-  const n=rand(2,5);
-  const items=[];
-  for(let i=0;i<n;i++)items.push({name:pick(['Epal','Oren','Anggur','Pisang','Mangga','Tembikai']),count:rand(2,10)});
-  const total=items.reduce((s,i)=>s+i.count,0);
-  const idx=Math.floor(Math.random()*items.length);
-  const answer=items[idx].count;
+  // Tier: tier 1 kira satu item, tier 2 jumlah semua, tier 3 beza terbanyak-tersedikit.
+  const n=tier===1?rand(2,3):rand(3,5);
+  const nama=shuffle(['Epal','Oren','Anggur','Pisang','Mangga','Tembikai']).slice(0,n);
+  const items=nama.map(x=>({name:x,count:rand(2,10)}));
   const visual=`<div style="font-size:14px;line-height:1.6;margin-top:6px">${items.map(i=>`${i.name}: ${'🍎'.repeat(i.count)}`).join('<br>')}</div>`;
-  const prompt=`Berapakah bilangan ${items[idx].name}?`;
-  const choices=makeChoices(answer,total,numChoices);
-  return {prompt,answer,choices,visual,topic:'data3'};
+  const total=items.reduce((t,i)=>t+i.count,0);
+  if(tier>=3){
+    const c=items.map(i=>i.count);
+    const answer=Math.max(...c)-Math.min(...c);
+    return {prompt:'Berapakah beza antara buah terbanyak dan buah paling sedikit?',
+            answer, visual, choices:makeChoices(answer,total,numChoices), topic:'data3'};
+  }
+  if(tier===2){
+    return {prompt:'Berapakah jumlah kesemua buah?',
+            answer:total, visual, choices:makeChoices(total,total*2,numChoices), topic:'data3'};
+  }
+  const idx=Math.floor(Math.random()*items.length);
+  return {prompt:`Berapakah bilangan ${items[idx].name}?`,
+          answer:items[idx].count, visual, choices:makeChoices(items[idx].count,total,numChoices), topic:'data3'};
 }
 
 function makeChoices(answer, maxRange, n){
@@ -2853,7 +2951,7 @@ function nextTutorial(){tutorialStep++;if(tutorialStep>=5){state.tutorialDone=tr
    12) ROUTER + SCREENS
    ============================================================ */
 let current='welcome';
-function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);if(name!=='splash')applyMusicTheme('home');({splash:renderSplash,yearselect:renderYearSelector,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator,profiles:renderProfiles}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
+function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);if(name!=='splash')applyMusicTheme('home');({splash:renderSplash,yearselect:renderYearSelector,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator,profiles:renderProfiles,achievements:renderAchievements}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
 
 function isPro(){ return true; } // 👑 Versi berbayar: pembeli automatik PRO, tiada pengaktifan diperlukan
 
@@ -2973,7 +3071,7 @@ function topbar(){
   const diff=DIFFICULTIES[state?.difficulty||'medium'];
   const av=state?.avatar||'🦁';
   const yr=state?.selectedYear||1;
-  return`<div class="topbar"><button class="iconbtn" onclick="MMA.route('home')">🏠</button><div class="pill">🪙 ${state?.gold||0}</div><div class="pill"><img src="assets/gem.png" style="width:14px;height:14px;vertical-align:middle;margin-right:2px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))">${state?.gems||0}</div><div style="flex:1"></div><div class="pill" style="cursor:pointer;font-size:13px" onclick="MMA.route('yearselect')" title="Tukar Tahun">📚 Tahun ${yr}</div><div class="pill" style="background:linear-gradient(180deg,#FF7AC2,#FF4DA6);border-color:#FFB3D9;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.2)">${diff.icon} <span class="diff-name">${diff.name}</span></div><button class="iconbtn" onclick="MMA.toggleBGM()">${state?.settings?.music?'🎵':'🔇'}</button><button class="iconbtn" onclick="MMA.route('settings')">⚙️</button></div>`;
+  return`<div class="topbar"><button class="iconbtn" onclick="MMA.route('home')">🏠</button><div class="pill">🪙 ${state?.gold||0}</div><div class="pill"><img src="assets/gem.png" style="width:14px;height:14px;vertical-align:middle;margin-right:2px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))">${state?.gems||0}</div><div style="flex:1"></div><div class="pill" style="cursor:pointer;font-size:13px" onclick="MMA.route('yearselect')" title="Tukar Tahun">📚 Tahun ${yr}</div><div class="pill" style="background:linear-gradient(180deg,#FF7AC2,#FF4DA6);border-color:#FFB3D9;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.2)">${diff.icon}<span class="diff-lv">${'●'.repeat(({easy:1,medium:2,hard:3})[state?.difficulty||'medium'])}${'○'.repeat(3-({easy:1,medium:2,hard:3})[state?.difficulty||'medium'])}</span><span class="diff-name">${diff.name}</span></div><button class="iconbtn" onclick="MMA.toggleBGM()">${state?.settings?.music?'🎵':'🔇'}</button><button class="iconbtn" onclick="MMA.route('settings')">⚙️</button></div>`;
 }
 
 // 🖐️ Sama spt pilih tahun - klik kad = PILIH sahaja, butang Teruskan = SAHKAN.
@@ -3201,6 +3299,10 @@ ${renderStickerWeek()}
     <span style="font-size:22px">⚔</span>
     <span>Random Battle<br><span style="font-size:10px;opacity:.85">Tanpa henti</span></span>
   </button>
+  <button class="btn btn-sm" style="flex-direction:column;gap:2px;min-height:72px;padding:12px 8px;border-radius:18px;color:#fff;font-weight:800;border:3px solid #FDE68A;background:linear-gradient(180deg,#FBBF24 0%,#D97706 100%);box-shadow:0 4px 0 0 #B45309, inset 0 2px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.25);" onclick="MMA.route('achievements')">
+    <span style="font-size:22px">🏆</span>
+    <span>Pencapaian<br><span style="font-size:10px;opacity:.85">${ACHIEVEMENT_DEFS.filter(d=>state?.achievements?.[d.k]).length}/${ACHIEVEMENT_DEFS.length}</span></span>
+  </button>
   <button class="btn btn-sm" style="flex-direction:column;gap:2px;min-height:72px;padding:12px 8px;border-radius:18px;color:#fff;font-weight:800;border:3px solid #67E8F9;background:linear-gradient(180deg,#22D3EE 0%,#0891B2 100%);box-shadow:0 4px 0 0 #155E75, inset 0 2px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.25);" onclick="MMA.renderLeaderboard()">
     <span style="font-size:22px">🏆</span>
     <span>Pendahulu<br><span style="font-size:10px;opacity:.85">Rekod</span></span>
@@ -3346,7 +3448,7 @@ function swapDeckPos(i,j){
 
 function renderAlbum(){
   let no=0;
-  app.innerHTML=topbar()+`<div class="panel"><h2 class="display" style="font-size:18px;margin-bottom:12px">📖 Album Monster</h2>${FAMILY_IDS.map(f=>{const c=state?.collection?.[f];const reached=c?.owned?c.stage:0;return`<div style="margin-bottom:12px"><div style="font-weight:600;font-size:13px;color:var(--purple-light);margin-bottom:8px">${FAMILIES[f].name}</div><div class="cardgrid">${FAMILIES[f].stages.map((st,si)=>{no++;const unlocked=reached>=si+1;const d=stageData(f,si);return`<div>${cardHTML(d,{locked:!unlocked})}<div class="cardcap">No.${String(no).padStart(3,'0')}${unlocked&&si+1===reached?` · ✔${c?.correct||0}`:''}</div></div>`;}).join('')}</div></div>`;}).join('')}<button class="btn btn-primary" onclick="MMA.route('home')">Kembali</button></div>`;
+  app.innerHTML=topbar()+`<div class="panel"><h2 class="display" style="font-size:18px;margin-bottom:12px">📖 Album Monster</h2>${(()=>{const jum=FAMILY_IDS.length*3;const ada=FAMILY_IDS.reduce((t,f)=>t+(state?.collection?.[f]?.owned?state.collection[f].stage:0),0);const pct=Math.round(ada/jum*100);return`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;margin-bottom:5px"><span style="color:var(--text-soft)">Koleksi kamu</span><span style="color:var(--gold-light)">${ada}/${jum} · ${pct}%</span></div><div style="height:14px;background:rgba(0,0,0,.3);border-radius:9px;overflow:hidden;border:2px solid rgba(255,255,255,.18)"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--gold-light),var(--gold));border-radius:7px;transition:width .6s"></div></div>${pct>=100?'<div style="text-align:center;font-size:14px;font-weight:900;color:var(--gold-light);margin-top:6px">🎉 Album penuh! Hebat!</div>':''}</div>`;})()}${FAMILY_IDS.map(f=>{const c=state?.collection?.[f];const reached=c?.owned?c.stage:0;return`<div style="margin-bottom:12px"><div style="font-weight:600;font-size:13px;color:var(--purple-light);margin-bottom:8px">${FAMILIES[f].name}</div><div class="cardgrid">${FAMILIES[f].stages.map((st,si)=>{no++;const unlocked=reached>=si+1;const d=stageData(f,si);return`<div>${cardHTML(d,{locked:!unlocked})}<div class="cardcap">No.${String(no).padStart(3,'0')}${unlocked&&si+1===reached?` · ✔${c?.correct||0}`:''}</div></div>`;}).join('')}</div></div>`;}).join('')}<button class="btn btn-primary" onclick="MMA.route('home')">Kembali</button></div>`;
 }
 
 const EVO_STONE_GEM_COST=50;
@@ -3476,9 +3578,9 @@ function renderSettings(){
     '<p style="color:var(--text-light);font-size:11px;margin-bottom:12px">Tetapkan bilangan soalan dan kesukaran setiap bab</p>'+
     (()=>{try{
       const bt=state?.stats?.byTopic||{};let weak=null;
-      getTopicMeta().forEach(t=>{const d=bt[t.id];if(!d)return;const tot=d.c+d.w;if(tot<3)return;const pct=Math.round(d.c/tot*100);if(!weak||pct<weak.pct)weak={name:t.name,ico:t.ico,pct,c:d.c,w:d.w};});
+      getTopicMeta().forEach(t=>{const d=bt[t.id];if(!d)return;const tot=d.c+d.w;if(tot<3)return;const pct=Math.round(d.c/tot*100);if(!weak||pct<weak.pct)weak={id:t.id,name:t.name,ico:t.ico,pct,c:d.c,w:d.w};});
       if(!weak)return '';
-      return '<div style="padding:10px 12px;border-radius:12px;background:rgba(248,113,113,.12);border:2px dashed rgba(248,113,113,.4);margin-bottom:12px"><div style="font-size:12px;font-weight:800;color:#FECACA;margin-bottom:2px">\u{1F4CC} Topik Paling Lemah</div><div style="font-size:13px;font-weight:800;color:#fff">'+weak.ico+' '+esc(weak.name)+' \u2014 '+weak.pct+'% betul ('+weak.c+'\u2713 '+weak.w+'\u2717)</div><div style="font-size:11px;color:var(--text-soft);margin-top:2px">Cadangan: ulang bab ni bersama anak. Laporan penuh di Papan Ibu Bapa \u{1F447}</div></div>';
+      return '<div style="padding:10px 12px;border-radius:12px;background:rgba(248,113,113,.12);border:2px dashed rgba(248,113,113,.4);margin-bottom:12px"><div style="font-size:12px;font-weight:800;color:#FECACA;margin-bottom:2px">\u{1F4CC} Topik Paling Lemah</div><div style="font-size:13px;font-weight:800;color:#fff">'+weak.ico+' '+esc(weak.name)+' \u2014 '+weak.pct+'% betul ('+weak.c+'\u2713 '+weak.w+'\u2717)</div><div style="font-size:11px;color:var(--text-soft);margin-top:2px">Cadangan: ulang bab ni bersama anak.</div><button class="btn btn-cta" style="margin-top:8px" onclick="MMA.startPracticeTopic(\''+weak.id+'\')">\u{1F3AF} Latih topik ni sekarang</button></div>';
     }catch(e){return '';}})()+
     '<div style="padding:10px;border-radius:10px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:14px">'+
       '<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px">⏱️ Kelajuan Kehilangan HP</div>'+
@@ -3761,6 +3863,9 @@ function startBonusMission(i){
 
 // 🎯 Practice Round - 5 soalan percuma fokus topik terlemah, tiada risiko, sebelum Boss
 function getWeakestTopic(){
+  // Nota: byTopic simpan semua tahun dlm satu objek, tetapi kunci topik unik
+  // ikut tahun (nombor/nombor2/nombor3) & paparan guna getTopicMeta(), jadi
+  // laporan memang hanya tunjuk topik tahun semasa.
   const byTopic=state?.stats?.byTopic||{};
   let weakest=null,weakestAcc=101;
   getTopicMeta().forEach(t=>{
@@ -3770,6 +3875,16 @@ function getWeakestTopic(){
     if(acc<weakestAcc){weakestAcc=acc;weakest=t.id;}
   });
   return weakest||(getChapters()[state?.progress?.chapter||0]||getChapters()[0]).topic;
+}
+// 🎯 Latihan bersasar - mula latihan pd SATU topik tertentu (cth terus
+// dari laporan "Topik Paling Lemah"), bukan hanya topik terlemah automatik.
+function startPracticeTopic(topic){
+  try{
+    const meta=getTopicMeta().find(t=>t.id===topic);
+    BM={i:-1,chapter:state?.progress?.chapter||0,topic,idx:0,correct:0,total:5,locked:false,practice:true};
+    showToast('🎯','Latihan: '+(meta?meta.name:topic));
+    renderBonusMission();nextBonusQuestion();
+  }catch(e){console.error('startPracticeTopic error:',e);route('home');}
 }
 function startPracticeRound(){
   try{
@@ -4019,6 +4134,26 @@ function renderBattle(){
   }catch(e){console.error('renderBattle error:',e);route('home');}
 }
 
+// 🎉 Raikan combo - kanak-kanak paling bertindak balas pd ganjaran serta-merta.
+// Dulu combo hanya bar bergerak, tiada apa menandakan detik Critical/Ultimate.
+function celebrateCombo(){
+  try{
+    if(!B)return;
+    const diff=DIFFICULTIES[B.diff||'medium'];
+    const s=B.streak||0;
+    let teks=null,warna=null;
+    if(s===diff.ultimateReq){teks='⚡ ULTIMATE!';warna='#FFE066';}
+    else if(s===diff.criticalReq){teks='🔥 CRITICAL!';warna='#FB923C';}
+    else if(s>0&&s%10===0){teks='🌟 COMBO '+s+'!';warna='#A78BFA';}
+    if(!teks)return;
+    const el=document.createElement('div');
+    el.className='combo-burst';
+    el.textContent=teks;
+    el.style.color=warna;
+    (document.getElementById('arena')||document.body).appendChild(el);
+    setTimeout(()=>el.remove(),1100);
+  }catch(e){}
+}
 function updateCombo(){const diff=DIFFICULTIES[B.diff||'medium'];const cf=$('#combo');if(cf){const pct=clamp(B.streak/diff.ultimateReq*100,0,100);cf.style.width=pct+'%';const colors=pct>=100?'#F44336,#FF9800,#FFEB3B':pct>=70?'#FF9800,#FFC107,#FFEB3B':pct>=40?'#4CAF50,#8BC34A,#CDDC39':pct>0?'#2196F3,#03A9F4,#00BCD4':'#888,#999,#aaa';cf.style.background='linear-gradient(90deg,'+colors+')';cf.style.boxShadow=pct>=100?'0 0 16px rgba(244,67,54,.7)':pct>=40?'0 0 10px rgba(76,175,80,.5)':'';}const t=$('#combotxt');if(t)t.textContent=B.streak>=diff.ultimateReq?'🔥 ULTIMATE (x3)':B.streak>=diff.comboReq?'⭐ ATTACK (x2)':B.streak>0?`Combo ${B.streak}`:'';}
 
 // Timer Functions
@@ -4272,7 +4407,7 @@ function answer(idx){
   if(!state.stats.byTopic[chTopic])state.stats.byTopic[chTopic]={c:0,w:0};
   if(correct){
     btns[idx].classList.add('correct');state.stats.correct++;bumpDailyCorrect();state.stats.byTier[tierKey].c++;state.stats.byDiff[diffKey].c++;state.stats.byTopic[chTopic].c++;
-    B.streak++;B.bestStreak=Math.max(B.bestStreak,B.streak);B.correctInStage++;B.recentCorrect++;B.recentWrong=0;
+    B.streak++;celebrateCombo();B.bestStreak=Math.max(B.bestStreak,B.streak);B.correctInStage++;B.recentCorrect++;B.recentWrong=0;
     if(B.recentCorrect>=4){B.tier=clamp(B.tier+1,1,3);B.recentCorrect=0;}
     // 💰 Gold Boost token: +50% gold utk baki bab semasa
     const goldBoostMul=state.goldBoostChapter===(state?.progress?.chapter??0)?1.5:1;
@@ -5074,29 +5209,63 @@ function getSortedOwned(){
 }
 
 // 5. Achievement system
+// 🏆 Senarai pusat pencapaian - dulu ditakrif terus dlm checkAchievement()
+// sahaja, jadi mustahil nak paparkan senarainya. Kini satu sumber, dipakai
+// oleh checkAchievement() DAN skrin Pencapaian.
+const ACHIEVEMENT_DEFS=[
+  {k:'collect3',    ico:'🃏', nama:'Pengumpul Awal',  desc:'Kumpul 3 monster!',                       ok:c=>c.totalMon>=3},
+  {k:'collect10',   ico:'📚', nama:'Master Koleksi',  desc:'Kumpul 10 monster!',                      ok:c=>c.totalMon>=10},
+  {k:'collectAll9', ico:'🌟', nama:'Kolektor Agung',  desc:'Kumpul semua 9 keluarga monster!',        ok:c=>FAMILY_IDS.every(f=>state?.collection?.[f]?.owned)},
+  {k:'correct50',   ico:'📝', nama:'Pelajar Rajin',   desc:'Jawab 50 soalan betul!',                  ok:c=>c.totalCorrect>=50},
+  {k:'correct100',  ico:'🧮', nama:'Ahli Matematik',  desc:'Jawab 100 soalan betul!',                 ok:c=>c.totalCorrect>=100},
+  {k:'combo5',      ico:'🔥', nama:'Pemusnah Combo',  desc:'Capai combo 5x!',                         ok:c=>(state?.leaderboard?.topCombo||0)>=5},
+  {k:'gold500',     ico:'👑', nama:'Sultan Emas',     desc:'Kumpul 500+ emas!',                       ok:c=>(state?.leaderboard?.topGold||0)>=500},
+  {k:'evolveStage3',ico:'💎', nama:'Evolusi Sempurna',desc:'Evolusikan monster ke bentuk Mega!',      ok:c=>c.ownedFams.some(([,x])=>x.stage>=3)},
+  {k:'bossFirst',   ico:'⚔️', nama:'Pembunuh Boss',   desc:'Kalahkan Boss pertama kamu!',             ok:c=>(state?.bossesDefeated||0)>=1},
+  {k:'vsChampion',  ico:'🥇', nama:'Juara VS',        desc:'Menang VS Mode Best of 3!',               ok:c=>(state?.vsWins||0)>=1},
+  {k:'perfectStage',ico:'🎯', nama:'Sempurna!',       desc:'Selesaikan stage tanpa sebarang kesilapan!',ok:c=>!!c.opts.perfectStage},
+  {k:'megaFirst',   ico:'👑', nama:'Pemburu Mega',    desc:'Kalahkan Mega Boss pertama!',             ok:c=>MEGA_BOSS_ORDER.some(id=>state?.megaBossVault?.[MEGA_BOSSES[id].chapterId]?.defeated)},
+  {k:'megaSlayer',  ico:'🏆', nama:'Mega Slayer',     desc:'Kalahkan SEMUA Mega Boss!',               ok:c=>MEGA_BOSS_ORDER.every(id=>state?.megaBossVault?.[MEGA_BOSSES[id].chapterId]?.defeated)},
+];
 function checkAchievement(opts){
   opts=opts||{};
   const a=state.achievements||{};
-  const newAchs=[];
   const ownedFams=Object.entries(state.collection||{}).filter(([,c])=>c?.owned);
-  const totalMon=ownedFams.length;
-  const totalCorrect=state?.stats?.correct||0;
-  if(!a.collect3&&totalMon>=3){a.collect3=true;newAchs.push({name:'Pengumpul Awal',icon:'🃏',desc:'Kumpul 3 monster!'});}
-  if(!a.collect10&&totalMon>=10){a.collect10=true;newAchs.push({name:'Master Koleksi',icon:'📚',desc:'Kumpul 10 monster!'});}
-  if(!a.collectAll9&&FAMILY_IDS.every(f=>state?.collection?.[f]?.owned)){a.collectAll9=true;newAchs.push({name:'Kolektor Agung',icon:'🌟',desc:'Kumpul semua 9 keluarga monster!'});}
-  if(!a.correct50&&totalCorrect>=50){a.correct50=true;newAchs.push({name:'Pelajar Rajin',icon:'📝',desc:'Jawab 50 soalan betul!'});}
-  if(!a.correct100&&totalCorrect>=100){a.correct100=true;newAchs.push({name:'Ahli Matematik',icon:'🧮',desc:'Jawab 100 soalan betul!'});}
-  if(!a.combo5&&(state?.leaderboard?.topCombo||0)>=5){a.combo5=true;newAchs.push({name:'Pemusnah Combo',icon:'🔥',desc:'Capai combo 5x!'});}
-  if(!a.gold500&&(state?.leaderboard?.topGold||0)>=500){a.gold500=true;newAchs.push({name:'Sultan Emas',icon:'👑',desc:'Kumpul 500+ emas!'});}
-  if(!a.evolveStage3&&ownedFams.some(([,c])=>c.stage>=3)){a.evolveStage3=true;newAchs.push({name:'Evolusi Sempurna',icon:'💎',desc:'Evolusikan monster ke bentuk Mega!'});}
-  if(!a.bossFirst&&(state?.bossesDefeated||0)>=1){a.bossFirst=true;newAchs.push({name:'Pembunuh Boss',icon:'⚔️',desc:'Kalahkan Boss pertama kamu!'});}
-  if(!a.vsChampion&&(state?.vsWins||0)>=1){a.vsChampion=true;newAchs.push({name:'Juara VS',icon:'🥇',desc:'Menang VS Mode Best of 3!'});}
-  if(!a.perfectStage&&opts.perfectStage){a.perfectStage=true;newAchs.push({name:'Sempurna!',icon:'🎯',desc:'Selesaikan stage tanpa sebarang kesilapan!'});}
-  if(!a.megaFirst&&MEGA_BOSS_ORDER.some(id=>state?.megaBossVault?.[MEGA_BOSSES[id].chapterId]?.defeated)){a.megaFirst=true;newAchs.push({name:'Pemburu Mega',icon:'👑',desc:'Kalahkan Mega Boss pertama kamu!'});}
-  if(!a.megaSlayer&&MEGA_BOSS_ORDER.every(id=>state?.megaBossVault?.[MEGA_BOSSES[id].chapterId]?.defeated)){a.megaSlayer=true;newAchs.push({name:'Mega Slayer',icon:'🏆',desc:'Kalahkan SEMUA 8 Mega Boss!'});}
+  const ctx={opts, ownedFams, totalMon:ownedFams.length, totalCorrect:state?.stats?.correct||0};
+  const baharu=[];
+  ACHIEVEMENT_DEFS.forEach(d=>{
+    if(a[d.k])return;
+    let lulus=false; try{lulus=!!d.ok(ctx);}catch(e){}
+    if(lulus){a[d.k]=true;baharu.push(d);}
+  });
   state.achievements=a;
-  newAchs.forEach(ach=>setTimeout(()=>showAchievement(ach.name,ach.icon,ach.desc),500));
+  baharu.forEach(d=>setTimeout(()=>showAchievement(d.nama,d.ico,d.desc),500));
   save();
+}
+function renderAchievements(){
+  try{
+    const a=state.achievements||{};
+    const dapat=ACHIEVEMENT_DEFS.filter(d=>a[d.k]).length;
+    const jum=ACHIEVEMENT_DEFS.length;
+    const pct=Math.round(dapat/jum*100);
+    app.innerHTML=topbar()+`<div class="panel">
+      <h2 class="display" style="font-size:18px;margin-bottom:4px">🏆 Pencapaian</h2>
+      <div style="font-size:13px;color:var(--text-soft);font-weight:700;margin-bottom:8px">${dapat} drpd ${jum} dibuka · ${pct}%</div>
+      <div style="height:12px;background:rgba(0,0,0,.28);border-radius:8px;overflow:hidden;border:2px solid rgba(255,255,255,.18);margin-bottom:14px">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--gold-light),var(--gold));border-radius:6px;transition:width .5s"></div>
+      </div>
+      ${ACHIEVEMENT_DEFS.map(d=>{const on=!!a[d.k];return`
+        <div class="${on?'sgroup':''}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:8px;border-radius:14px;${on?'':'background:rgba(0,0,0,.18);border:2px dashed rgba(255,255,255,.14);opacity:.65'}">
+          <div style="font-size:30px;flex:0 0 auto;${on?'':'filter:grayscale(1) opacity(.5)'}">${on?d.ico:'🔒'}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:900;font-size:15px;color:${on?'var(--gold-light)':'var(--text-muted)'}">${esc(d.nama)}</div>
+            <div style="font-size:12px;color:var(--text-soft);line-height:1.4">${esc(d.desc)}</div>
+          </div>
+          ${on?'<div style="font-size:20px;flex:0 0 auto">✅</div>':''}
+        </div>`;}).join('')}
+      <button class="btn btn-primary" style="margin-top:8px" onclick="MMA.route('home')">Kembali</button>
+    </div>`;
+  }catch(e){console.error('renderAchievements error:',e);route('home');}
 }
 function showAchievement(name,icon,desc){
   const ov=document.createElement('div');
@@ -5908,7 +6077,7 @@ function unlockStorageSlot(){
   showToast('🔓','Slot storan dibuka!');renderIncubator();
 }
 
-window.MMA={route,setYear,pickYear,confirmYear,pickStarterSelect,confirmStarter,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,switchProfile,createProfile,deleteProfile,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
+window.MMA={route,setYear,renderAchievements,startPracticeTopic,pickYear,confirmYear,pickStarterSelect,confirmStarter,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,switchProfile,createProfile,deleteProfile,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,nextChapter,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
   startEggHunt,answerEggHunt,quitEggHunt,pickEggChoice,selectIncubatorItem,injectSelectedIncubatorItem,answerIncubatorChallenge,closeIncubatorChallenge,hatchUltraRare,closeHatchOverlay,takeEggFromStorage,unlockStorageSlot,swapActiveMonster};
 
 // Ambient orbs
