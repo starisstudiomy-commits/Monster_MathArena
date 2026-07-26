@@ -313,7 +313,8 @@ body{
 .tc-art::before,.tc-rays{display:none}
 .tc-mon{width:90%;height:90%;position:relative;z-index:3;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));animation:mon-breathe 3s ease-in-out infinite}
 @keyframes mon-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
-.tc-elem{position:absolute;top:4px;right:4px;z-index:4;width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.25)}
+/* 🐛 FIX: ikon elemen ke bawah-kanan - dulu di atas-kanan, bertindih dgn badge Lv */
+.tc-elem{position:absolute;bottom:4px;right:4px;z-index:4;width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.25)}
 .tc-stars{position:absolute;bottom:6px;left:8px;z-index:4;font-size:13px;color:#FFE066;letter-spacing:1px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.4)}
 .tc-stats{display:flex;gap:6px;padding:8px}
 .tc-stat{flex:1;border-radius:10px;padding:5px 0;text-align:center;font-weight:800;font-size:11px;background:rgba(0,0,0,.2);border:2px solid rgba(255,255,255,.15);color:#fff}
@@ -844,6 +845,17 @@ body.theme-custom .mission-banner{
   /* skrin sempit: tunjuk ikon kesukaran sahaja, nama penuh masih ada di Tetapan */
   .topbar .pill .diff-name{display:none}
 }
+
+/* ❓ Album: monster belum dimiliki tunjuk tanda soal (bukan siluet) supaya player rasa ingin tahu */
+.tc.locked .tc-mon{display:none}
+.tc.locked .tc-art::after{
+  content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:58px;font-weight:900;color:rgba(255,255,255,.42);
+  text-shadow:0 3px 0 rgba(0,0,0,.3);z-index:3;
+}
+
+/* 🐛 FIX: bila kad ada badge nombor deck (1/2/3) di atas-kiri, anjak nama monster ke kanan supaya tak tertutup */
+.deck-card-in .tc-name{padding-left:34px}
 </style>
 </head>
 <body>
@@ -2233,7 +2245,15 @@ function save(){
     if(typeof showToast==='function')showToast('⚠️','Gagal simpan! Ruang storan mungkin penuh.');
   }
 }
-function resetAll(){localStorage.removeItem(currentSaveKey());state=defaultState();save();route('welcome');}
+function resetAll(){
+  localStorage.removeItem(currentSaveKey());
+  // 🐛 FIX: dulu cuma save utama dipadam - pertarungan tersimpan, streak & stiker harian
+  // masih tinggal, jadi butang "SAMBUNG PERTARUNGAN" kekal muncul selepas reset.
+  // NOTA: kunci lesen (mma_license/mma_license_valid) TIDAK dipadam - itu bukti pembelian.
+  ['mma_saved_battle','mma_last_login','mma_login_streak','mma_play_days','mma_session_history']
+    .forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+  state=defaultState();save();route('welcome');
+}
 function getMonster(fam){
   const c=state.collection[fam];if(!c||!c.owned)return null;
   const base=FAMILIES[fam]?.stages[c.stage-1];if(!base)return null;
@@ -2531,7 +2551,7 @@ function nextTutorial(){tutorialStep++;if(tutorialStep>=5){state.tutorialDone=tr
 let current='welcome';
 function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='incubator'&&typeof stopIncHeartbeat==='function')stopIncHeartbeat();current=name;save();window.scrollTo(0,0);if(name!=='splash')applyMusicTheme('home');({splash:renderSplash,yearselect:renderYearSelector,welcome:renderWelcome,home:renderHome,deck:renderDeck,album:renderAlbum,shop:renderShop,settings:renderSettings,parentgate:renderParentGate,parent:renderParent,difficulty:renderDifficulty,fusion:renderFusion,leaderboard:renderLeaderboard,megabossarena:renderMegaBossArena,chaptermap:renderChapterMap,incubator:renderIncubator,profiles:renderProfiles}[name]||renderHome)();app.style.animation='none';requestAnimationFrame(()=>{app.style.animation='screenIn .35s cubic-bezier(.2,1.2,.4,1)';});}
 
-function isPro(){ return (typeof localStorage!=='undefined'&&localStorage.getItem('mma_license_valid')==='true') || (state?.license && validateKey(state.license)); }
+function isPro(){ return true; } // 👑 Versi berbayar: pembeli automatik PRO, tiada pengaktifan diperlukan
 
 function renderYearSelector(){
   try{
@@ -2626,6 +2646,14 @@ function renderWelcome(){
 
 function pickStarter(fam){try{state.started=true;state.starter=fam;state.collection[fam]={owned:true,stage:1,correct:0};state.deck=[fam];save();if(!state.tutorialDone){tutorialStep=0;showTutorial();}else route('home');}catch(e){route('home');}}
 
+function contrastOn(hex){
+  try{
+    const h=String(hex||'').replace('#','');
+    if(h.length!==6)return '#FFFFFF';
+    const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+    return ((0.299*r+0.587*g+0.114*b)/255)>0.62 ? '#2A1055' : '#FFFFFF';
+  }catch(e){return '#FFFFFF';}
+}
 function renderChapterIntro(chapter,chapterIdx){
   const bossStage=chapter.stages.find(s=>s.boss)||chapter.stages[chapter.stages.length-1];
   const bossName=ENEMIES[bossStage.enemy]?.name||'???';
@@ -2634,13 +2662,15 @@ function renderChapterIntro(chapter,chapterIdx){
   const story=getChapterStory(chapter.topic);
   const learnList=chapter.stages.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="width:20px;height:20px;border-radius:6px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:10px;flex:0 0 auto">${s.boss?'👑':s.bonus?'🎁':i+1}</span><span style="font-size:12px;color:var(--text-light)">${esc(s.sub||s.name)}</span></div>`).join('');
   app.innerHTML=`<div class="panel" style="text-align:center;border-color:${chapter.color};box-shadow:0 4px 24px ${chapter.color}33">
-    <div style="font-size:11px;letter-spacing:3px;color:${chapter.color};font-weight:700;margin-bottom:4px">BAB ${chapterIdx+1}</div>
-    <h2 class="display" style="font-size:20px;margin-bottom:12px;color:${chapter.color}">${esc(chapter.name)}</h2>
+    ${(()=>{const tc=contrastOn(chapter.color);return`<div style="background:${chapter.color};border:3px solid rgba(255,255,255,.5);border-radius:18px;padding:12px 14px;margin-bottom:14px;box-shadow:0 4px 0 0 rgba(0,0,0,.28)">
+      <div style="font-size:13px;letter-spacing:2px;color:${tc};font-weight:900;opacity:.92;margin-bottom:2px">BAB ${chapterIdx+1}</div>
+      <div style="font-size:21px;font-weight:900;color:${tc};line-height:1.25">${esc(chapter.name)}</div>
+    </div>`;})()}
     <div style="width:96px;height:96px;margin:0 auto 10px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,${chapter.color}22,transparent);border:2px solid ${chapter.color}66">${getArt(bossStage.enemy)}</div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:14px">Kamu akan hadapi <b style="color:${chapter.color}">${esc(bossName)}</b>!</div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:14px">Kamu akan hadapi <b style="color:var(--gold-light)">${esc(bossName)}</b>!</div>
     <p style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:16px">${esc(story)}</p>
     <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:12px 14px;margin-bottom:16px;text-align:left">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:${chapter.color};margin-bottom:8px">📚 APA AKAN DIPELAJARI</div>
+      <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--gold-light);margin-bottom:8px">📚 APA AKAN DIPELAJARI</div>
       ${learnList}
     </div>
     <div class="pill" style="display:inline-flex;margin-bottom:16px">🗺️ ${normalCount} Stage${bonusCount?` + 🎁 ${bonusCount} Bonus`:''} + 👑 1 Boss</div>
@@ -2933,7 +2963,7 @@ function renderDeck(){
     <span style="font-size:9px;color:var(--text-light);align-self:center">|</span>
     <button onclick="MMA.route('fusion')" style="font-family:var(--font);font-size:11px;font-weight:800;padding:7px 14px;border-radius:20px;border:2px solid #FFF4D6;background:linear-gradient(180deg,#FFE066,#F5C542);color:#3B1A5C;cursor:pointer;letter-spacing:.3px;box-shadow:0 3px 0 0 #C99200">⚗️ Fusion</button>
   </div>
-  <div class="cardgrid">${owned.map(f=>{const m=getMonster(f);if(!m)return'';const d=stageData(f,m.stage-1);const deckPos=state.deck.indexOf(f);const inDeck=deckPos>=0;const role=FAMILIES[f]?.role||'';const curHp=inBattle&&B.monHp[f]!==undefined?B.monHp[f]:null;const dShow=curHp!==null?{...d,hp:Math.max(0,curHp)}:d;return`<div onclick="MMA.toggleDeck('${f}')" style="position:relative">${cardHTML(dShow,{tap:true,sel:inDeck,lv:m.level,role})}${inDeck?`<div style="position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:linear-gradient(180deg,#FFE066,#F5C542);color:#3B1A5C;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;z-index:6;box-shadow:0 2px 0 0 #C99200;border:2px solid #FFF4D6">${deckPos+1}</div>`:''}<button style="position:absolute;top:34px;right:6px;width:22px;height:22px;border-radius:6px;border:2px solid #FFF4D6;background:linear-gradient(180deg,#FFF8E7,#FFE8A8);color:#3B1A5C;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:6;font-weight:800" onclick="event.stopPropagation();MMA.showCardPreview('${f}')">🔍</button><div class="cardcap">${inDeck?'✔ Dalam deck':''}${curHp!==null&&curHp<=0?' 💀 <span style=color:var(--danger)>Pengsan</span>':curHp!==null&&curHp<d.hp?` ❤ <span style=color:var(--danger)>${curHp}/${d.hp}</span>`:''}</div></div>`;}).join('')}</div><button class="btn btn-primary" style="margin-top:12px" onclick="MMA.route('home')">Siap</button></div>`;
+  <div class="cardgrid">${owned.map(f=>{const m=getMonster(f);if(!m)return'';const d=stageData(f,m.stage-1);const deckPos=state.deck.indexOf(f);const inDeck=deckPos>=0;const role=FAMILIES[f]?.role||'';const curHp=inBattle&&B.monHp[f]!==undefined?B.monHp[f]:null;const dShow=curHp!==null?{...d,hp:Math.max(0,curHp)}:d;return`<div onclick="MMA.toggleDeck('${f}')" class="${inDeck?'deck-card-in':''}" style="position:relative">${cardHTML(dShow,{tap:true,sel:inDeck,lv:m.level,role})}${inDeck?`<div style="position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:linear-gradient(180deg,#FFE066,#F5C542);color:#3B1A5C;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;z-index:6;box-shadow:0 2px 0 0 #C99200;border:2px solid #FFF4D6">${deckPos+1}</div>`:''}<button style="position:absolute;top:34px;left:6px;width:26px;height:26px;border-radius:6px;border:2px solid #FFF4D6;background:linear-gradient(180deg,#FFF8E7,#FFE8A8);color:#3B1A5C;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:6;font-weight:800" onclick="event.stopPropagation();MMA.showCardPreview('${f}')">🔍</button><div class="cardcap">${inDeck?'✔ Dalam deck':''}${curHp!==null&&curHp<=0?' 💀 <span style=color:var(--danger)>Pengsan</span>':curHp!==null&&curHp<d.hp?` ❤ <span style=color:var(--danger)>${curHp}/${d.hp}</span>`:''}</div></div>`;}).join('')}</div><button class="btn btn-primary" style="margin-top:12px" onclick="MMA.route('home')">Siap</button></div>`;
 }
 function toggleDeck(f){
   const i=state.deck.indexOf(f);
@@ -3085,9 +3115,6 @@ function renderSettings(){
     }).join('')+'</div></div>'+
     (state?.settings?.theme==='custom'?'<div class="statline"><span>🖌️ Warna Kamu</span><input type="color" value="'+(state?.settings?.customColor||'#8B5CF6')+'" oninput="MMA.setCustomColor(this.value)" style="width:44px;height:28px;border-radius:6px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;padding:2px"></div>':'')+
     '<div class="statline"><span>🖼️ Avatar</span><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:140px;justify-content:flex-end">'+['🦁','🐱','🐶','🐼','🦊','🐸','🦄','🐲','🦅','🐙','🦋','🐢'].map(a=>`<button style="width:28px;height:28px;border-radius:6px;border:${(state?.avatar||'🦁')===a?'2px solid var(--gold)':'1px solid var(--glass-border)'};background:${(state?.avatar||'🦁')===a?'var(--glass-heavy)':'transparent'};font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="MMA.setAvatar('${a}')">${a}</button>`).join('')+'</div></div>'+
-    (localStorage.getItem('mma_license_valid')==='true'
-      ? '<div class="statline"><span>👑 PRO</span><span style="color:var(--purple);font-weight:700;font-size:12px">✔ Disahkan (Lesen)</span></div>'
-      : '<div class="statline"><span>'+(isPro()?'👑 PRO':'🔒 FREE')+'</span><button class="btn btn-sm" style="width:auto;padding:6px 12px;background:var(--gold);color:#000" onclick="MMA.activateLicense()">'+(isPro()?'✔ Diaktifkan':'Aktifkan PRO')+'</button></div>')+
     '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--glass-border)">'+
     '<h3 class="display" style="font-size:14px;margin-bottom:8px;color:var(--purple)">👨‍👩‍👧 Kawalan Ibu Bapa</h3>'+
     '<p style="color:var(--text-light);font-size:11px;margin-bottom:12px">Tetapkan bilangan soalan dan kesukaran setiap bab</p>'+
@@ -4377,8 +4404,10 @@ function quitBattle(){
     localStorage.setItem('mma_saved_battle', JSON.stringify({
       chapter: B.chapter, stage: B.i, deck: B.deck, activeIdx: B.activeIdx,
       monHp: B.monHp, enemyHp: B.enemy.hp, enemyMax: B.enemy.max,
+      // 🐛 FIX: simpan id & atk musuh - tanpa ni, sambung semula tak dapat lukis art musuh (crash) & serangan jadi NaN
+      enemyId: B.enemy.id, enemyAtk: B.enemy.atk,
       streak: B.streak, bestStreak: B.bestStreak, tier: B.tier,
-      correctInStage: B.correctInStage, diff: B.diff, ts: Date.now()
+      correctInStage: B.correctInStage, wrongInStage: B.wrongInStage, diff: B.diff, ts: Date.now()
     }));
     route('home');
   }
@@ -4388,19 +4417,26 @@ function resumeBattle(){
   if(!saved) return;
   try{
     const s = JSON.parse(saved);
+    const stg = getChapters()[s.chapter]?.stages[s.stage];
+    const eid = s.enemyId || stg?.enemy || 'slime';
+    const base = ENEMIES[eid] || ENEMIES.slime;
     B = {
       chapter: s.chapter, i: s.stage, deck: s.deck, activeIdx: s.activeIdx,
-      monHp: s.monHp, enemy: ENEMIES[getChapters()[s.chapter]?.stages[s.stage]?.enemy] || ENEMIES.slime,
+      // 🐛 FIX: klon objek musuh + kekalkan id/atk spt startStage - dulu id & atk hilang,
+      // menyebabkan getArt(undefined) crash (butang nampak "tiada respons") & damage NaN.
+      monHp: s.monHp, enemy: {...base, id: eid, hp: s.enemyHp, max: s.enemyMax, atk: s.enemyAtk ?? base.atk},
       streak: s.streak, bestStreak: s.bestStreak, tier: s.tier,
-      correctInStage: s.correctInStage, wrongInStage: 0, recentWrong: 0, recentCorrect: 0,
-      bossPhase: false, locked: false, diff: s.diff || state.difficulty,
-      stage: getChapters()[s.chapter]?.stages[s.stage] || {}
+      correctInStage: s.correctInStage, wrongInStage: s.wrongInStage || 0, recentWrong: 0, recentCorrect: 0,
+      // 🐛 FIX: fasa 50%/25% dikira semula dari HP semasa - kalau sentiasa false,
+      // musuh yg dah bawah 50% trigger skill (cth Slime regen) BERULANG setiap kali sambung.
+      bossPhase: s.enemyHp <= s.enemyMax*0.5, bossEnrage: s.enemyHp <= s.enemyMax*0.25,
+      locked: false, diff: s.diff || state.difficulty,
+      stage: stg || {}
     };
-    B.enemy.hp = s.enemyHp;
-    B.enemy.max = s.enemyMax;
     localStorage.removeItem('mma_saved_battle');
     applyMusicTheme(B.stage.boss?'boss':'battle');
-    showScreen('battle');
+    // 🐛 FIX: showScreen() tak wujud dlm fail ni - dulu ia throw error senyap, jadi butang
+    // SAMBUNG PERTARUNGAN nampak "tiada respons". renderBattle() sendiri dah lukis skrin battle.
     renderBattle();
     nextQuestion();
   }catch(e){ localStorage.removeItem('mma_saved_battle'); }
@@ -4600,7 +4636,7 @@ function showGuide(){
     const itemRows=Object.entries(ITEMS).map(([id,it])=>`<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px"><span style="font-size:18px;flex:0 0 auto">${it.icon}</span><div><div style="font-weight:600;font-size:12px;color:var(--text)">${esc(it.name)}</div><div style="font-size:11px;color:var(--text-light);margin-top:2px">${esc(it.desc)}</div></div></div>`).join('');
     const evoStoneRow=`<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px"><span style="font-size:18px;flex:0 0 auto">💠</span><div><div style="font-weight:600;font-size:12px;color:var(--text)">Evo Stone</div><div style="font-size:11px;color:var(--text-light);margin-top:2px">Ganjaran terhad selepas kalahkan Boss. Guna semasa battle untuk terus evolusikan monster aktif.</div></div></div>`;
     const bonusItemRows=Object.entries(BONUS_ITEMS).map(([id,it])=>`<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px"><span style="font-size:18px;flex:0 0 auto">${it.icon}</span><div><div style="font-weight:600;font-size:12px;color:var(--text)">${esc(it.name)}</div><div style="font-size:11px;color:var(--text-light);margin-top:2px">${esc(it.desc)}</div></div></div>`).join('');
-    listEl.innerHTML=`<div style="margin:14px 0 10px;padding-top:14px;border-top:1px solid var(--glass-border)"><div style="font-weight:700;font-size:13px;color:var(--purple);margin-bottom:10px">🎒 Item Dalam Permainan</div>${itemRows}${evoStoneRow}<p style="font-size:10px;color:var(--text-light);line-height:1.5;margin-top:8px">Beli di 🛒 Kedai Item (gold) atau dapat sebagai ganjaran selepas menang stage. Tekan ikon item di bar bawah semasa battle untuk guna. <b style="color:var(--purple)">Perlu versi PRO.</b></p><div style="font-weight:700;font-size:13px;color:#F59E0B;margin:14px 0 10px">🎁 Ganjaran Bonus Mission</div>${bonusItemRows}<p style="font-size:10px;color:var(--text-light);line-height:1.5;margin-top:4px">Dapat dari stage 🎁 Bonus Mission (10 soalan). 8+/10 = 1 item rawak, 10/10 = Item Rare.</p></div>`;
+    listEl.innerHTML=`<div style="margin:14px 0 10px;padding-top:14px;border-top:1px solid var(--glass-border)"><div style="font-weight:700;font-size:13px;color:var(--purple);margin-bottom:10px">🎒 Item Dalam Permainan</div>${itemRows}${evoStoneRow}<p style="font-size:10px;color:var(--text-light);line-height:1.5;margin-top:8px">Beli di 🛒 Kedai Item (gold) atau dapat sebagai ganjaran selepas menang stage. Tekan ikon item di bar bawah semasa battle untuk guna.</p><div style="font-weight:700;font-size:13px;color:#F59E0B;margin:14px 0 10px">🎁 Ganjaran Bonus Mission</div>${bonusItemRows}<p style="font-size:10px;color:var(--text-light);line-height:1.5;margin-top:4px">Dapat dari stage 🎁 Bonus Mission (10 soalan). 8+/10 = 1 item rawak, 10/10 = Item Rare.</p></div>`;
   }
 }
 function closeGuide(){
