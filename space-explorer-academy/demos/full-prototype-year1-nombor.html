@@ -270,6 +270,37 @@
   .end-screen .big { font-size:44px; }
   .end-screen .rewards { background:rgba(255,255,255,.95); color:var(--ink); border-radius:16px; padding:14px 22px; font-size:14px; font-weight:700; }
 
+  /* HUD Planet Selection */
+  #screen-huddest { background:radial-gradient(ellipse at 50% 38%, #0a2438 0%, #041220 45%, #00060c 100%);
+    align-items:center; justify-content:center; }
+  #screen-huddest .hud-bg-grid { position:absolute; inset:0; background-image:
+      repeating-linear-gradient(0deg, rgba(77,234,255,.12) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(90deg, rgba(77,234,255,.12) 0 1px, transparent 1px 34px);
+    opacity:.5; }
+  .hud-top-readout { position:absolute; top:20px; left:0; right:0; text-align:center; z-index:3; }
+  .hud-t1 { font-weight:800; font-size:15px; letter-spacing:5px; color:#4deaff; text-shadow:0 0 10px rgba(77,234,255,.7); }
+  .hud-t2 { font-size:10px; letter-spacing:1.5px; color:#8fb8c9; margin-top:6px; }
+  .hud-t2 b { color:#4deaff; }
+  .hud-orb-wrap { position:relative; width:150px; height:150px; z-index:2; }
+  .hud-orb { width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:30px; color:#03141c;
+    background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.5), transparent 42%),
+      radial-gradient(circle at 50% 50%, #4deaff, #1c8fa8 75%, #041018 100%);
+    border:2px solid rgba(77,234,255,.7); box-shadow:0 0 30px 6px rgba(77,234,255,.5); }
+  .hud-ring { position:absolute; inset:-16px; border-radius:50%; border:1.5px dashed #4deaff;
+    animation:hudspin 10s linear infinite; box-shadow:0 0 16px rgba(77,234,255,.35); }
+  .hud-ring2 { position:absolute; inset:-30px; border-radius:50%; border:1px solid rgba(77,234,255,.35); }
+  @keyframes hudspin { from{transform:rotate(0);} to{transform:rotate(360deg);} }
+  .hud-bracket { position:absolute; width:22px; height:22px; }
+  .hud-bracket::before, .hud-bracket::after { content:''; position:absolute; background:#4deaff; box-shadow:0 0 6px #4deaff; }
+  .hud-bracket.tl { top:-38px; left:-38px; } .hud-bracket.tr { top:-38px; right:-38px; transform:scaleX(-1); }
+  .hud-bracket.bl { bottom:-38px; left:-38px; transform:scaleY(-1); } .hud-bracket.br { bottom:-38px; right:-38px; transform:scale(-1,-1); }
+  .hud-bracket::before { width:100%; height:2px; top:0; left:0; } .hud-bracket::after { width:2px; height:100%; top:0; left:0; }
+  .hud-label { margin-top:22px; font-weight:800; font-size:15px; letter-spacing:2px; color:#fff;
+    text-shadow:0 0 10px rgba(77,234,255,.6); z-index:2; }
+  .hud-bottom { position:absolute; bottom:36px; left:0; right:0; text-align:center; z-index:3; }
+  .hud-status { font-size:11px; letter-spacing:2px; color:#5cffb0; text-shadow:0 0 8px rgba(92,255,176,.6); margin-bottom:14px; }
+
 </style>
 
 <div id="app">
@@ -305,6 +336,27 @@
       <div class="hero-title" id="galaxyTitle" style="position:relative;z-index:5">GALAXY MATEMATIK</div>
       <div class="hero-sub" id="galaxyCaption" style="position:relative;z-index:5">Bersedia untuk berlepas...</div>
       <button class="btn" id="btnWarp" style="position:relative;z-index:5">🌌 LANCAR TIME WARP</button>
+    </div>
+  </div>
+
+  <!-- HUD PLANET SELECTION -->
+  <div class="screen" id="screen-huddest">
+    <div class="hud-bg-grid"></div>
+    <div class="hud-top-readout">
+      <div class="hud-t1">NAVIGATION SYSTEM</div>
+      <div class="hud-t2">SECTOR <b>MATH-01</b> &nbsp; TARGETS <b>1</b></div>
+    </div>
+    <div class="hud-orb-wrap">
+      <div class="hud-ring"></div>
+      <div class="hud-ring2"></div>
+      <div class="hud-bracket tl"></div><div class="hud-bracket tr"></div>
+      <div class="hud-bracket bl"></div><div class="hud-bracket br"></div>
+      <div class="hud-orb">01</div>
+    </div>
+    <div class="hud-label">PLANET NOMBOR</div>
+    <div class="hud-bottom">
+      <div class="hud-status">STATUS: UNLOCKED</div>
+      <button class="btn" id="btnConfirmDest">▶ CONFIRM DESTINATION</button>
     </div>
   </div>
 
@@ -587,7 +639,7 @@ function galaxyArrival() {
     f.style.opacity = '0';
     $('galaxyTitle').style.opacity = '0';
   }, 2400);
-  setTimeout(() => { warpPhase = 'idle'; go('planetdetail'); }, 3400);
+  setTimeout(() => { warpPhase = 'idle'; go('huddest'); }, 3400);
 }
 function warpTick(now) {
   if (!$('screen-galaxy').classList.contains('active')) { requestAnimationFrame(warpTick); return; }
@@ -621,6 +673,7 @@ function warpTick(now) {
 }
 
 /* ---------------- PLANET DETAIL / PRE-FLIGHT / WORKSHOP ---------------- */
+$('btnConfirmDest').onclick = () => go('planetdetail');
 $('backToGalaxy').onclick = () => go('galaxy', initGalaxy);
 $('btnTeruskanMisi').onclick = () => go('preflight', renderPreflight);
 
