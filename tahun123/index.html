@@ -2449,7 +2449,7 @@ function deleteProfile(id){
 let state=null;
 function defaultState(){return{
   started:false,starter:null,collection:{},deck:[],gold:0,gems:0,playerName:'Aydan',avatar:'🦁',
-  selectedYear:1,progress:{chapter:0,stage:0},tutorialDone:false,difficulty:'medium',
+  selectedYear:1,progress:{chapter:0,stage:0},yearProgress:{},tutorialDone:false,difficulty:'medium',
   stats:{correct:0,wrong:0,byTier:{1:{c:0,w:0},2:{c:0,w:0},3:{c:0,w:0}},byDiff:{easy:{c:0,w:0},medium:{c:0,w:0},hard:{c:0,w:0}},byTopic:{},questions:0,playSeconds:0},
   settings:{music:true,sound:true,sfxVolume:1.0,practiceMode:false,theme:'default',customColor:'#8B5CF6',hpDrainRate:1.0},parentPin:null,
   leaderboard:{topGold:0,topCombo:0,topMonsters:0},achievements:{},
@@ -2489,6 +2489,17 @@ function load(){
       if(!state.incubatorItems)state.incubatorItems={nutrient:0,vitamin:0,serum:0};
       if(!state.journal)state.journal=[];
       if(state.selectedYear===undefined)state.selectedYear=1;
+      // 🐛 FIX: kemajuan dulu global - tukar tahun buat pemain terus melompat ke bab
+      // yg sama nombornya dlm tahun lain (cth habis separuh Tahun 1 -> terus Bab 5
+      // Tahun 2 tanpa main Bab 1-4). Kini kemajuan disimpan ASING ikut tahun.
+      // Save lama: kemajuan sedia ada diambil sbg milik tahun yg sedang dipilih.
+      if(!state.yearProgress){
+        state.yearProgress={};
+        state.yearProgress[state.selectedYear]={
+          progress:{chapter:state.progress?.chapter||0,stage:state.progress?.stage||0},
+          chapterProgress:Object.assign({},state.chapterProgress||{})
+        };
+      }
       // extend parentConfig for year 2 & 3 topics
       const y2topics=['nombor2','tambah2','tolak2','darab2','bahagi2','pecahan2','wang2','ukuran2'];
       const y3topics=['nombor3','tambah3','tolak3','darab3','bahagi3','pecahan3','wang3','masa3','ukuran3','bentuk3','data3'];
@@ -2520,6 +2531,15 @@ function load(){
   }catch(e){state=defaultState();}
 }
 function save(){
+  // pastikan simpanan per-tahun sentiasa selari dgn kemajuan semasa
+  try{
+    if(state&&state.yearProgress){
+      state.yearProgress[state.selectedYear||1]={
+        progress:{chapter:state.progress?.chapter||0,stage:state.progress?.stage||0},
+        chapterProgress:Object.assign({},state.chapterProgress||{})
+      };
+    }
+  }catch(e){}
   try{
     const json=JSON.stringify(state);
     localStorage.setItem(currentSaveKey(),json);
@@ -2862,6 +2882,12 @@ function renderYearSelector(){
         <div style="font-size:22px;font-weight:800">${o.ico} ${o.nama}</div>
         <div style="font-size:13px;color:var(--text-light);margin-top:4px;padding-right:34px">${o.desc}</div>
         <div style="font-size:10px;color:var(--text-muted);margin-top:4px">${o.bab.length} bab · ${o.bab.reduce((t,c)=>t+c.stages.length,0)} stage</div>
+        ${(()=>{ // kemajuan tersimpan bagi tahun ini (kemajuan tahun semasa diambil terus drpd state)
+          const yp=(o.n===state.selectedYear)?{progress:state.progress}:((state.yearProgress||{})[o.n]);
+          const bab=yp?.progress?.chapter||0, stage=yp?.progress?.stage||0;
+          const mula=bab>0||stage>0;
+          return `<div style="font-size:11px;font-weight:800;margin-top:5px;color:${mula?'var(--gold-light)':'var(--text-muted)'}">${mula?`📍 Kemajuan: Bab ${bab+1} drpd ${o.bab.length}`:'✨ Belum bermula'}</div>`;
+        })()}
       </div>`;}).join('')}
     </div>
     <button class="btn btn-cta" style="margin-top:16px" onclick="MMA.confirmYear()">Teruskan dengan ${info.find(o=>o.n===sel).nama} →</button>
@@ -2870,10 +2896,32 @@ function renderYearSelector(){
   </div>`;
   }catch(e){console.error('renderYearSelector error:',e);route('welcome');}
 }
+// 📚 Kemajuan disimpan ASING ikut tahun. Emas, gem, monster, deck, item,
+// inkubator & statistik sengaja DIKONGSI - satu akaun, satu dompet, satu koleksi.
+function stashYearProgress(){
+  try{
+    if(!state.yearProgress)state.yearProgress={};
+    state.yearProgress[state.selectedYear||1]={
+      progress:{chapter:state.progress?.chapter||0,stage:state.progress?.stage||0},
+      chapterProgress:Object.assign({},state.chapterProgress||{})
+    };
+  }catch(e){}
+}
+function applyYearProgress(yr){
+  try{
+    const y=(state.yearProgress||{})[yr];
+    state.progress=y?{chapter:y.progress.chapter||0,stage:y.progress.stage||0}:{chapter:0,stage:0};
+    state.chapterProgress=y?Object.assign({},y.chapterProgress||{}):{};
+  }catch(e){state.progress={chapter:0,stage:0};state.chapterProgress={};}
+}
 function setYear(yr){
   try{
   pendingYear=null;
-  state.selectedYear=yr;save();
+  if(yr===state.selectedYear){route(state.started?'home':'welcome');return;}
+  stashYearProgress();          // simpan kemajuan tahun yg ditinggalkan
+  state.selectedYear=yr;
+  applyYearProgress(yr);        // muat kemajuan tahun yg dipilih (kosong kalau baru)
+  save();
   route(state.started?'home':'welcome');
   }catch(e){console.error('setYear error:',e);route('welcome');}
 }
