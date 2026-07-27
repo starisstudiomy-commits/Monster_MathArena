@@ -832,14 +832,6 @@ body.theme-custom .mission-banner{
 /* 🐛 FIX: bila kad ada badge nombor deck (1/2/3) di atas-kiri, anjak nama monster ke kanan supaya tak tertutup */
 .deck-card-in .tc-name{padding-left:34px}
 
-/* ❓ Album: monster belum dimiliki tunjuk tanda soal (bukan siluet) supaya player rasa ingin tahu */
-.tc.locked .tc-mon{display:none}
-.tc.locked .tc-art::after{
-  content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-family:var(--display);font-size:58px;font-weight:900;color:rgba(255,255,255,.42);
-  text-shadow:0 3px 0 rgba(0,0,0,.3);z-index:3;
-}
-
 /* ============================================================
    ✨ ANIMASI EVOLUSI (dipulihkan)
    Blok ni hilang sepenuhnya semasa CSS ditulis semula utk versi kids -
@@ -1054,6 +1046,31 @@ body.theme-custom .mission-banner{
 /* Baris terakhir dlm kumpulan tak perlu garis bawah */
 .sgroup .statline:last-child{border-bottom:none}
 .sgroup .statline{border-bottom-color:rgba(255,255,255,.10)}
+
+/* ============================================================
+   ❓ ALBUM: kad monster yang BELUM dikumpul
+   Tunjuk tanda soal sahaja - TIADA siluet/bayangan monster, supaya
+   rupa monster betul-betul jadi kejutan.
+   (Nota: blok ni pernah terpadam tanpa sengaja dlm commit c58085c
+   semasa blok CSS header pendua dibuang ikut julat baris.)
+   ============================================================ */
+.tc.locked .tc-mon{display:none!important}
+.tc.locked .tc-art{
+  background:var(--bg-panel-dark,#3B1A6A)!important;   /* rata, tiada kilauan bentuk monster */
+  position:relative;
+}
+.tc.locked .tc-art::before,
+.tc.locked .tc-rays{display:none!important}            /* buang sinaran/bayang latar */
+.tc.locked .tc-art::after{
+  content:"?";position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:58px;font-weight:900;
+  color:rgba(255,255,255,.40);
+  text-shadow:0 3px 0 rgba(0,0,0,.28);
+  z-index:3;pointer-events:none;
+}
+/* elemen & bintang disembunyikan juga - ia membocorkan jenis monster */
+.tc.locked .tc-elem,.tc.locked .tc-stars{display:none!important}
 </style>
 </head>
 <body>

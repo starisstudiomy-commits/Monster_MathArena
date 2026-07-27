@@ -1106,6 +1106,31 @@ body.theme-custom .mission-banner{
 @media (orientation:landscape) and (max-height:520px){
   #app{padding-top:6px;padding-bottom:10px}
 }
+
+/* ============================================================
+   ❓ ALBUM: kad monster yang BELUM dikumpul
+   Tunjuk tanda soal sahaja - TIADA siluet/bayangan monster, supaya
+   rupa monster betul-betul jadi kejutan.
+   (Nota: blok ni pernah terpadam tanpa sengaja dlm commit c58085c
+   semasa blok CSS header pendua dibuang ikut julat baris.)
+   ============================================================ */
+.tc.locked .tc-mon{display:none!important}
+.tc.locked .tc-art{
+  background:var(--bg-panel-dark,#3B1A6A)!important;   /* rata, tiada kilauan bentuk monster */
+  position:relative;
+}
+.tc.locked .tc-art::before,
+.tc.locked .tc-rays{display:none!important}            /* buang sinaran/bayang latar */
+.tc.locked .tc-art::after{
+  content:"?";position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:58px;font-weight:900;
+  color:rgba(255,255,255,.40);
+  text-shadow:0 3px 0 rgba(0,0,0,.28);
+  z-index:3;pointer-events:none;
+}
+/* elemen & bintang disembunyikan juga - ia membocorkan jenis monster */
+.tc.locked .tc-elem,.tc.locked .tc-stars{display:none!important}
 </style>
 </head>
 <body>
