@@ -1,13 +1,13 @@
 {
-  "name": "Monster MathArena PRO",
-  "short_name": "MathArena Pro",
-  "description": "Permainan matematik pertarungan monster untuk murid Tahun 1 - versi lesen.",
+  "name": "Monster MathArena - Tahun 1·2·3",
+  "short_name": "MathArena T123",
+  "description": "Permainan matematik pertarungan monster - Tahun 1, 2 & 3 (KSSR Semakan)",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0A0A0A",
-  "theme_color": "#0A0A0A",
+  "orientation": "any",
+  "background_color": "#3B1A8A",
+  "theme_color": "#3B1A8A",
   "lang": "ms",
   "icons": [
     {
