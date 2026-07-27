@@ -1131,6 +1131,102 @@ body.theme-custom .mission-banner{
 }
 /* elemen & bintang disembunyikan juga - ia membocorkan jenis monster */
 .tc.locked .tc-elem,.tc.locked .tc-stars{display:none!important}
+
+/* ============================================================
+   🧩 CSS YANG HILANG SEMASA STYLESHEET DITULIS SEMULA UTK VERSI KIDS
+   Punca sama spt animasi evolusi dulu: JS masih rujuk kelas ini tetapi
+   takrifannya tiada, jadi elemen terpapar tanpa gaya.
+     .bi-*         -> skrin Intro Boss (showBossIntro)
+     .boss-overlay -> kesan merah arena semasa lawan Boss
+     .golem-*      -> animasi skill Geometri Golem
+     .inc-wobble   -> goyangan pod inkubator
+   Kelas lain yg turut tiada SENGAJA dibiarkan:
+     .orb / .tc-rays -> memang disembunyikan dlm tema kids (latar rata)
+     .titan-grow, .progress-line, .subs -> tiada rujukan langsung (kod mati)
+   ============================================================ */
+.bi-alertText{
+  position:absolute;top:14%;
+  font-family:var(--display);
+  font-size:14px;font-weight:800;letter-spacing:2px;
+  color:#EF4444;
+  opacity:0;
+  transition:opacity .3s ease;
+}
+.bi-alertText.on{opacity:1}
+.bi-bossImg{
+  width:260px;height:260px;
+  max-width:74vw;max-height:74vw;
+  display:block;
+  opacity:0;
+  transition:opacity .6s ease, filter .5s ease, transform .5s ease;
+  filter:brightness(.05) drop-shadow(0 0 25px #EF4444);
+  transform:scale(.9);
+}
+.bi-bossImg.show{opacity:1}
+.bi-bossImg.revealed{
+  filter:brightness(1) drop-shadow(0 0 30px rgba(239,68,68,.6));
+  transform:scale(1);
+}
+.bi-bossImg.shaking{animation:bi-simpleShake .5s ease}
+.bi-flash{
+  position:fixed;inset:0;
+  background:#fff;
+  opacity:0;
+  pointer-events:none;
+  z-index:210;
+  transition:opacity .35s ease-out;
+}
+.bi-flash.on{opacity:.85;transition:opacity .05s ease-out}
+.bi-info{
+  position:absolute;bottom:10%;
+  width:90%;
+  text-align:center;
+  opacity:0;
+  transition:opacity .5s ease;
+}
+.bi-info.on{opacity:1}
+.bi-name{font-family:var(--display);font-size:22px;font-weight:900;letter-spacing:2px;margin-bottom:6px;color:#fff}
+.bi-redOverlay{
+  position:absolute;inset:0;
+  background:rgba(239,68,68,.15);
+  opacity:0;
+  transition:opacity .4s ease;
+  pointer-events:none;
+}
+.bi-redOverlay.on{opacity:1}
+.bi-startBtn{
+  padding:12px 36px;border:none;border-radius:12px;
+  background:#EF4444;color:#fff;
+  font-family:var(--font);font-weight:800;font-size:13px;letter-spacing:2px;
+  cursor:pointer;opacity:0;
+  transition:opacity .5s ease;
+}
+.bi-startBtn.on{opacity:1}
+.bi-sub{font-size:12px;color:var(--text-secondary);margin-bottom:16px}
+.bi-title{font-family:var(--display);font-size:11px;letter-spacing:3px;color:#F87171;font-weight:700;margin-bottom:6px}
+.boss-overlay{
+  position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:radial-gradient(ellipse at 50% 0%, rgba(244,67,54,.15), transparent 60%);
+}
+.golem-bar-flex{animation:barFlex .9s ease;transform-origin:center}
+.golem-reshape{animation:golemReshape .8s ease}
+.inc-wobble{animation:incPodWobble .6s ease}
+@keyframes bi-simpleShake{
+  0%{transform:scale(1) translateX(0) rotate(0)}
+  10%{transform:scale(1.08) translateX(-14px) rotate(-4deg)}
+  20%{transform:scale(1.08) translateX(13px) rotate(4deg)}
+  30%{transform:scale(1.06) translateX(-11px) rotate(-3deg)}
+  40%{transform:scale(1.06) translateX(10px) rotate(3deg)}
+  50%{transform:scale(1.04) translateX(-8px) rotate(-2deg)}
+  60%{transform:scale(1.04) translateX(7px) rotate(2deg)}
+  70%{transform:scale(1.02) translateX(-5px) rotate(-1deg)}
+  80%{transform:scale(1.02) translateX(4px) rotate(1deg)}
+  90%{transform:scale(1.01) translateX(-2px) rotate(0)}
+  100%{transform:scale(1) translateX(0) rotate(0)}
+}
+@keyframes golemReshape{to{transform:rotate(360deg)}}
+@keyframes barFlex{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.5)}}
+@keyframes incPodWobble{0%,100%{transform:rotate(0)}20%{transform:rotate(-3deg)}40%{transform:rotate(3deg)}60%{transform:rotate(-2deg)}80%{transform:rotate(2deg)}}
 </style>
 </head>
 <body>
