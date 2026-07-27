@@ -1,8 +1,8 @@
-// Monster MathArena PRO (versi lesen) - Service Worker
-// Sama strategi macam versi percuma: cache-first + runtime caching.
-// Selamat cache index.html sebab gate lesen disemak secara client-side (localStorage)
-// setiap kali app dibuka, bukan bergantung pada respons rangkaian.
-const CACHE_NAME = 'mma-licensed-cache-v20';
+// Monster MathArena - Service Worker
+// Cache-first + runtime caching: precache "app shell" (HTML/manifest/splash/icons),
+// lepas tu setiap asset (monster/effect/enemy PNG dll.) di-cache automatik bila
+// pertama kali di-fetch semasa main. Selepas itu, semua boleh dimuatkan offline.
+const CACHE_NAME = 'mma-licensed-cache-v21';
 const CORE_ASSETS = [
   './index.html',
   './license.html',
@@ -36,8 +36,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
-  // Cuma cache same-origin (assets/HTML sendiri) - elak isu opaque-response utk font CDN luar,
-  // dan elak cache /api/validate-license (POST sahaja pun dah exclude di atas).
+  // Cuma cache same-origin (assets/HTML sendiri) - elak isu opaque-response utk font CDN luar
   if (url.origin !== location.origin) return;
 
   // 🐛 FIX: dulu cache-first utk SEMUA - termasuk index.html. Pemain hanya
