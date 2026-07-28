@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Agama D1">
+<meta name="theme-color" content="#0B4F3F">
+<title>e-Learning Sekolah Agama — Darjah 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   e-LEARNING SEKOLAH AGAMA — DARJAH 1
+   Rujukan silabus: Sekolah Agama Kerajaan Negeri Johor
+   6 subjek: Tauhid, Sirah, Akhlak, Arab, Ibadat, Jawi
+
+   Konsep: murid jawab soalan, dapat markah. Tiada permainan,
+   tiada lawan monster, tiada lencana — fokus pada pencapaian
+   markah setiap pelajaran supaya guru/ibu bapa boleh pantau.
+   ============================================================ */
+:root{
+  --font:"Fredoka","Nunito","Scheherazade New",system-ui,sans-serif;
+  --read:"Nunito",system-ui,sans-serif;
+  --arab:"Scheherazade New",serif;
+
+  --bg-deep:#062D24;
+  --bg-mid:#0B4F3F;
+  --panel-a:#12705A;
+  --panel-b:#0C5544;
+
+  --gold:#F5C542;
+  --gold-light:#FFE066;
+  --gold-deep:#C99200;
+  --cream:#FFF4D6;
+
+  --text:#FFFFFF;
+  --text-soft:#CDEBE0;
+  --text-muted:#8FBFAE;
+  --text-dark:#0A3A2E;
+
+  --green:#4ADE80;
+  --red:#F87171;
+
+  --radius:20px;
+  --radius-sm:15px;
+  --radius-pill:999px;
+  --shadow-card:0 5px 0 0 rgba(0,0,0,.2), 0 10px 24px rgba(0,0,0,.26);
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;touch-action:manipulation}
+/* JANGAN letak height:100% pada body bersama overflow-x:hidden — body akan jadi
+   scroll container setinggi viewport & kandungan panjang tak boleh ditatal. */
+html,body{overflow-x:hidden}
+body{
+  font-family:var(--font);font-weight:600;color:var(--text);
+  background:var(--bg-deep);min-height:100dvh;
+  overscroll-behavior-x:none;user-select:none;-webkit-user-select:none;
+}
+
+#bg{
+  position:fixed;inset:0;z-index:-2;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(74,222,128,.24), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 85%, rgba(245,197,66,.12), transparent 50%),
+    linear-gradient(180deg,#0B4F3F 0%,#083A2F 45%,#052019 100%);
+}
+#bg::before{
+  content:"";position:absolute;inset:0;opacity:.13;pointer-events:none;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.5) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.5) 0 1px, transparent 1px 34px);
+}
+
+#app{max-width:480px;margin:0 auto;min-height:100dvh;padding:12px 12px calc(26px + env(safe-area-inset-bottom));position:relative}
+.screen{animation:screenIn .25s ease}
+@keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.panel{
+  background:linear-gradient(180deg,var(--panel-a) 0%,var(--panel-b) 100%);
+  border:3px solid rgba(255,255,255,.15);
+  border-radius:var(--radius);padding:16px;
+  box-shadow:var(--shadow-card);margin-bottom:12px;
+}
+
+/* ---- BUTANG ---- */
+.btn{
+  font-family:var(--font);font-weight:700;font-size:14px;
+  color:var(--text-dark);border:none;border-radius:var(--radius-sm);
+  padding:14px 18px;cursor:pointer;width:100%;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .12s ease;letter-spacing:.3px;
+}
+.btn:active{transform:translateY(3px)}
+.btn-primary{
+  background:linear-gradient(180deg,#FFE066 0%,#F5C542 45%,#E0A800 100%);
+  color:var(--text-dark);border:3px solid var(--cream);
+  box-shadow:0 5px 0 0 var(--gold-deep), inset 0 2px 0 rgba(255,255,255,.5);
+}
+.btn-primary:active{box-shadow:0 2px 0 0 var(--gold-deep)}
+.btn-secondary{
+  background:linear-gradient(180deg,rgba(255,255,255,.19),rgba(255,255,255,.08));
+  border:3px solid rgba(255,255,255,.26);color:#fff;
+  box-shadow:0 4px 0 0 rgba(0,0,0,.2);
+}
+.btn-sm{font-size:12px;padding:10px 14px;border-radius:13px}
+
+/* ---- TOPBAR ---- */
+.topbar{display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.pill{
+  background:linear-gradient(180deg,#FFF8E7 0%,#FFE8A8 100%);
+  border:2.5px solid var(--cream);border-radius:var(--radius-pill);
+  padding:6px 12px;font-weight:800;font-size:12px;
+  display:flex;align-items:center;gap:5px;color:var(--text-dark);
+  box-shadow:0 3px 0 0 rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.7);
+  white-space:nowrap;
+}
+.iconbtn{
+  width:40px;height:40px;flex:0 0 auto;border-radius:13px;font-size:17px;padding:0;
+  background:linear-gradient(180deg,#FFF8E7 0%,#FFE8A8 100%);
+  border:2.5px solid var(--cream);color:var(--text-dark);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 0 0 rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.7);
+  transition:transform .12s;
+}
+.iconbtn:active{transform:translateY(2px)}
+
+/* ---- KEPALA ---- */
+.head{text-align:center;margin:6px 0 4px;line-height:1.1}
+.head .l1{font-size:12px;font-weight:700;letter-spacing:4px;color:var(--gold-light);display:block;margin-bottom:5px}
+.head .l2{font-size:25px;font-weight:700;display:block;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.25)}
+.subtitle{color:var(--text-soft);text-align:center;margin:7px 0 15px;font-size:11.5px;font-weight:600;letter-spacing:.8px;font-family:var(--read)}
+.section-label{font-size:11px;letter-spacing:2.2px;font-weight:800;color:var(--gold-light);margin:6px 0 10px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,rgba(245,197,66,.45),transparent);border-radius:2px}
+
+/* ---- SENARAI SUBJEK ---- */
+.subj{
+  display:flex;align-items:center;gap:12px;padding:13px;border-radius:var(--radius-sm);
+  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
+  border:3px solid rgba(255,255,255,.16);box-shadow:0 4px 0 0 rgba(0,0,0,.2);
+  margin-bottom:9px;cursor:pointer;transition:transform .12s;
+}
+.subj:active{transform:translateY(3px)}
+.subj .ico{
+  width:46px;height:46px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;
+  font-size:21px;color:#fff;border:3px solid rgba(255,255,255,.5);
+  font-family:var(--arab);line-height:1;
+}
+.subj .t{flex:1;min-width:0}
+.subj .t b{display:block;font-size:15px;font-weight:700;letter-spacing:.4px}
+.subj .t span{display:block;font-size:10.5px;color:var(--text-muted);margin-top:3px;font-weight:700;font-family:var(--read)}
+.subj .sk{
+  flex:0 0 auto;text-align:right;font-family:var(--read);
+}
+.subj .sk b{display:block;font-size:15px;font-weight:900;color:var(--gold-light)}
+.subj .sk span{display:block;font-size:9px;color:var(--text-muted);font-weight:800;letter-spacing:.5px}
+
+/* ---- SENARAI PELAJARAN ---- */
+.pel{
+  display:flex;align-items:center;gap:11px;padding:12px;border-radius:var(--radius-sm);
+  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
+  border:3px solid rgba(255,255,255,.16);box-shadow:0 4px 0 0 rgba(0,0,0,.2);
+  margin-bottom:9px;cursor:pointer;transition:transform .12s;
+}
+.pel:active{transform:translateY(3px)}
+.pel .n{
+  width:34px;height:34px;flex:0 0 auto;border-radius:11px;display:grid;place-items:center;
+  font-size:13px;font-weight:800;color:var(--text-dark);
+  background:linear-gradient(180deg,#FFF8E7,#FFE8A8);border:2px solid var(--cream);
+  font-family:var(--read);
+}
+.pel .t{flex:1;min-width:0}
+.pel .t b{display:block;font-size:13.5px;font-weight:700}
+.pel .t span{display:block;font-size:10.5px;color:var(--text-muted);margin-top:2px;font-weight:700;font-family:var(--read)}
+.pel .mk{flex:0 0 auto;font-size:12px;font-weight:900;font-family:var(--read);color:var(--gold-light)}
+
+/* ---- BAR PROGRES ---- */
+.pbar{height:11px;border-radius:var(--radius-pill);background:rgba(0,0,0,.3);overflow:hidden;border:2px solid rgba(255,255,255,.16)}
+.pbar>i{display:block;height:100%;border-radius:var(--radius-pill);background:linear-gradient(180deg,#FFE066,#E0A800);transition:width .35s ease}
+
+/* ---- KUIZ ---- */
+.qcard{
+  background:linear-gradient(180deg,#FFF8E7 0%,#FFE8A8 100%);
+  border:4px solid var(--cream);border-radius:var(--radius);
+  padding:20px 16px;text-align:center;color:var(--text-dark);
+  box-shadow:var(--shadow-card);margin-bottom:14px;
+}
+.qcard .qno{font-size:10px;font-weight:900;letter-spacing:2px;color:#0A3A2E;opacity:.55;font-family:var(--read)}
+.qcard .qtext{font-size:16.5px;font-weight:700;line-height:1.5;margin-top:7px}
+.qcard .qar{font-family:var(--arab);font-size:34px;line-height:1.8;direction:rtl;unicode-bidi:isolate;margin-top:9px;font-weight:700}
+
+.choice{
+  width:100%;font-family:var(--font);font-size:14.5px;font-weight:700;text-align:left;
+  padding:13px 15px;margin-bottom:9px;border-radius:var(--radius-sm);cursor:pointer;
+  background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.05));
+  border:3px solid rgba(255,255,255,.24);color:#fff;
+  box-shadow:0 4px 0 0 rgba(0,0,0,.22);
+  display:flex;align-items:center;gap:11px;transition:transform .12s;
+}
+.choice:active{transform:translateY(3px)}
+.choice .k{
+  width:25px;height:25px;flex:0 0 auto;border-radius:8px;display:grid;place-items:center;
+  font-size:12px;font-weight:900;color:var(--text-dark);font-family:var(--read);
+  background:linear-gradient(180deg,#FFF8E7,#FFE8A8);
+}
+.choice.ar .v{font-family:var(--arab);font-size:22px;direction:rtl;unicode-bidi:isolate;line-height:1.7}
+.choice.ok{background:linear-gradient(180deg,#86EFAC,#22C55E);border-color:#BBF7D0;box-shadow:0 4px 0 0 #15803D;color:#052E16}
+.choice.ok .k{background:#052E16;color:#BBF7D0}
+.choice.no{background:linear-gradient(180deg,#FCA5A5,#EF4444);border-color:#FECACA;box-shadow:0 4px 0 0 #B91C1C;color:#450A0A;animation:shake .32s ease}
+.choice.no .k{background:#450A0A;color:#FECACA}
+.choice[disabled]{cursor:default;transform:none!important}
+.choice.dim{opacity:.38}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.why{
+  border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:11px;font-size:13px;line-height:1.6;
+  border:3px solid rgba(255,255,255,.22);animation:screenIn .22s ease;font-weight:600;font-family:var(--read);
+}
+.why.ok{background:linear-gradient(180deg,rgba(74,222,128,.22),rgba(34,197,94,.12));border-color:rgba(134,239,172,.5)}
+.why.no{background:linear-gradient(180deg,rgba(248,113,113,.22),rgba(239,68,68,.12));border-color:rgba(252,165,165,.5)}
+.why b.h{display:block;margin-bottom:5px;font-size:13.5px;font-weight:900}
+.arab{font-family:var(--arab);font-size:20px;line-height:1.9;direction:rtl;unicode-bidi:isolate}
+
+/* ---- KEPUTUSAN ---- */
+.gred{
+  width:104px;height:104px;margin:4px auto 0;border-radius:50%;display:grid;place-items:center;
+  font-size:44px;font-weight:900;font-family:var(--read);color:var(--text-dark);
+  border:5px solid var(--cream);box-shadow:0 5px 0 0 rgba(0,0,0,.25);
+  animation:gredIn .45s cubic-bezier(.2,1.4,.4,1) both;
+}
+@keyframes gredIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+.g-A{background:linear-gradient(160deg,#FFF1A8,#F5C542 55%,#B98400)}
+.g-B{background:linear-gradient(160deg,#BBF7D0,#4ADE80 55%,#15803D)}
+.g-C{background:linear-gradient(160deg,#BFDBFE,#60A5FA 55%,#1D4ED8);color:#fff}
+.g-D{background:linear-gradient(160deg,#FED7AA,#FB923C 55%,#C2410C);color:#fff}
+
+.markah-besar{font-size:40px;font-weight:900;font-family:var(--read);color:var(--gold-light);line-height:1}
+.markah-besar span{font-size:19px;color:var(--text-soft)}
+
+/* ---- LAPORAN ---- */
+.lap-row{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.09)}
+.lap-row:last-child{border-bottom:none}
+.lap-row .t{flex:1;min-width:0}
+.lap-row .t b{display:block;font-size:12.5px;font-weight:700}
+.lap-row .t span{display:block;font-size:10px;color:var(--text-muted);margin-top:1px;font-weight:700;font-family:var(--read)}
+.lap-row .m{font-size:13px;font-weight:900;font-family:var(--read);color:var(--gold-light);white-space:nowrap}
+
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:300;
+  background:linear-gradient(180deg,#FFF8E7,#FFE8A8);color:var(--text-dark);
+  border:3px solid var(--cream);border-radius:var(--radius-pill);
+  padding:10px 18px;font-size:13px;font-weight:800;box-shadow:var(--shadow-card);
+  opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;max-width:88vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.note{font-size:10.5px;color:var(--text-muted);line-height:1.65;font-weight:600;text-align:center;margin-top:14px;font-family:var(--read)}
+.kosong{font-size:12px;color:var(--text-muted);text-align:center;padding:18px 10px;line-height:1.6;font-family:var(--read);font-weight:600}
+
+@media(max-width:340px){
+  .head .l2{font-size:21px}
+  .qcard .qtext{font-size:15px}
+}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="app"></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   1) KANDUNGAN
+   ------------------------------------------------------------
+   Silabus rujukan: Sekolah Agama Kerajaan Negeri Johor, Darjah 1.
+   `julat` = julat pelajaran rasmi seperti dalam sukatan.
+
+   PENTING — medan `no` (nombor pelajaran spt "1.1") sengaja
+   dibiarkan null. Julat dalam sukatan hanya menunjukkan mula &
+   akhir, bukan senarai penuh, dan senarai tajuk sebenar tidak
+   dapat disahkan dari sumber terbuka. Isi `no` selepas merujuk
+   halaman ISI KANDUNGAN kitab supaya penomboran tepat.
+
+   Setiap soalan:
+     q        - teks soalan (Melayu)
+     qar      - teks Arab/Jawi besar di bawah soalan (pilihan)
+     pilihan  - array jawapan, indeks 0 = jawapan betul
+     ar       - true jika pilihan ditulis dalam tulisan Arab/Jawi
+     why      - penjelasan ringkas selepas murid menjawab
+   ============================================================ */
+const SUBJECTS = [
+  {id:'tauhid', nama:'Tauhid', ico:'ﷲ', warna:'#4ADE80', julat:'Pelajaran 1.1 – 6.5', pelajaran:[
+    {id:'th-rukuniman', no:null, tajuk:'Rukun Iman', soalan:[
+      {q:'Berapakah bilangan Rukun Iman?', pilihan:['Enam','Lima','Empat'],
+       why:'Rukun Iman ada <b>enam</b> perkara yang wajib kita percaya.'},
+      {q:'Apakah Rukun Iman yang pertama?', pilihan:['Beriman kepada Allah','Beriman kepada Malaikat','Beriman kepada Rasul'],
+       why:'Rukun Iman pertama ialah beriman kepada Allah — percaya bahawa Allah itu Esa dan Tuhan yang menciptakan segala sesuatu.'},
+      {q:'Apakah Rukun Iman yang kedua?', pilihan:['Beriman kepada Malaikat','Beriman kepada Kitab','Beriman kepada Hari Akhirat'],
+       why:'Rukun Iman kedua ialah beriman kepada malaikat-malaikat Allah.'},
+      {q:'Apakah maksud perkataan "iman"?', pilihan:['Percaya','Bersih','Berdoa'],
+       why:'Iman bermaksud <b>percaya</b> dengan hati, diucap dengan lisan dan dibuktikan dengan amalan.'},
+      {q:'Malaikat diciptakan oleh Allah daripada apa?', pilihan:['Cahaya (nur)','Tanah','Api'],
+       why:'Malaikat dicipta daripada cahaya, manusia daripada tanah, dan iblis daripada api.'},
+      {q:'Beriman kepada kitab-kitab Allah adalah Rukun Iman yang ke berapa?', pilihan:['Ketiga','Pertama','Keenam'],
+       why:'Rukun Iman ketiga ialah beriman kepada kitab-kitab yang diturunkan oleh Allah.'},
+      {q:'Kitab yang diturunkan kepada Nabi Muhammad ﷺ ialah?', pilihan:['Al-Quran','Taurat','Injil'],
+       why:'Al-Quran diturunkan kepada Nabi Muhammad ﷺ sebagai kitab yang terakhir dan panduan hidup kita.'},
+      {q:'Apakah Rukun Iman yang keempat?', pilihan:['Beriman kepada Rasul-rasul','Beriman kepada Malaikat','Beriman kepada Qada dan Qadar'],
+       why:'Rukun Iman keempat ialah beriman kepada rasul-rasul yang diutuskan oleh Allah.'},
+      {q:'Apakah Rukun Iman yang kelima?', pilihan:['Beriman kepada Hari Akhirat','Beriman kepada Allah','Beriman kepada Kitab'],
+       why:'Rukun Iman kelima ialah beriman kepada Hari Akhirat — hari pembalasan bagi setiap amalan kita.'},
+      {q:'Apakah Rukun Iman yang keenam dan terakhir?', pilihan:['Beriman kepada Qada dan Qadar','Beriman kepada Rasul','Beriman kepada Malaikat'],
+       why:'Rukun Iman keenam ialah beriman kepada Qada dan Qadar, iaitu ketentuan Allah ke atas setiap makhluk.'},
+    ]},
+    {id:'th-rukunislam', no:null, tajuk:'Rukun Islam', soalan:[
+      {q:'Berapakah bilangan Rukun Islam?', pilihan:['Lima','Enam','Empat'],
+       why:'Rukun Islam ada <b>lima</b> perkara.'},
+      {q:'Apakah Rukun Islam yang pertama?', pilihan:['Mengucap dua kalimah syahadah','Mendirikan solat','Berpuasa'],
+       why:'Rukun Islam pertama ialah mengucap dua kalimah syahadah sebagai pengakuan kita seorang Islam.'},
+      {q:'Apakah Rukun Islam yang kedua?', pilihan:['Mendirikan solat','Menunaikan zakat','Mengerjakan haji'],
+       why:'Rukun Islam kedua ialah mendirikan solat lima waktu setiap hari.'},
+      {q:'Apakah Rukun Islam yang ketiga?', pilihan:['Menunaikan zakat','Berpuasa di bulan Ramadan','Mengucap syahadah'],
+       why:'Rukun Islam ketiga ialah menunaikan zakat kepada mereka yang berhak menerimanya.'},
+      {q:'Apakah Rukun Islam yang keempat?', pilihan:['Berpuasa di bulan Ramadan','Mengerjakan haji','Mendirikan solat'],
+       why:'Rukun Islam keempat ialah berpuasa pada bulan Ramadan.'},
+      {q:'Apakah Rukun Islam yang kelima?', pilihan:['Mengerjakan haji bagi yang berkemampuan','Menunaikan zakat','Berpuasa'],
+       why:'Rukun Islam kelima ialah mengerjakan haji ke Baitullah bagi yang berkemampuan.'},
+      {q:'Berapa kali kita menunaikan solat fardu dalam sehari semalam?', pilihan:['Lima kali','Tiga kali','Enam kali'],
+       why:'Solat fardu ialah lima waktu sehari semalam: Subuh, Zohor, Asar, Maghrib dan Isyak.'},
+      {q:'Umat Islam wajib berpuasa pada bulan apa?', pilihan:['Ramadan','Syawal','Rejab'],
+       why:'Puasa wajib dilakukan sepanjang bulan Ramadan.'},
+      {q:'Ibadah haji dikerjakan di kota mana?', pilihan:['Mekah','Madinah','Baitulmaqdis'],
+       why:'Haji dikerjakan di Mekah, iaitu di Baitullah (Kaabah) dan tempat-tempat berhampiran.'},
+      {q:'Apakah bunyi kalimah syahadah yang pertama?', qar:'أَشْهَدُ أَنْ لَا إِلٰهَ إِلَّا اللهُ',
+       pilihan:['Tiada Tuhan melainkan Allah','Muhammad itu pesuruh Allah','Allah Maha Besar'],
+       why:'Kalimah syahadah pertama bermaksud "Aku bersaksi bahawa tiada Tuhan melainkan Allah".'},
+    ]},
+  ]},
+
+  {id:'sirah', nama:'Sirah', ico:'🕌', warna:'#60A5FA', julat:'Pelajaran 1.1 – 3.2', pelajaran:[
+    {id:'sr-kelahiran', no:null, tajuk:'Kelahiran Nabi Muhammad ﷺ', soalan:[
+      {q:'Nabi Muhammad ﷺ dilahirkan di kota mana?', pilihan:['Mekah','Madinah','Taif'],
+       why:'Nabi Muhammad ﷺ dilahirkan di kota Mekah.'},
+      {q:'Nabi Muhammad ﷺ dilahirkan pada hari apa?', pilihan:['Isnin','Jumaat','Ahad'],
+       why:'Baginda dilahirkan pada hari Isnin, 12 Rabiulawal.'},
+      {q:'Nabi Muhammad ﷺ dilahirkan pada bulan apa?', pilihan:['Rabiulawal','Ramadan','Syawal'],
+       why:'Baginda dilahirkan pada bulan Rabiulawal.'},
+      {q:'Tahun kelahiran Nabi Muhammad ﷺ dikenali sebagai tahun apa?', pilihan:['Tahun Gajah','Tahun Hijrah','Tahun Unta'],
+       why:'Dinamakan Tahun Gajah kerana pada tahun itu tentera bergajah Abrahah datang untuk meruntuhkan Kaabah.'},
+      {q:'Siapakah nama bapa Nabi Muhammad ﷺ?', pilihan:['Abdullah','Abu Talib','Abdul Muttalib'],
+       why:'Bapa baginda ialah Abdullah bin Abdul Muttalib.'},
+      {q:'Siapakah nama ibu Nabi Muhammad ﷺ?', pilihan:['Aminah','Khadijah','Halimah'],
+       why:'Ibu baginda ialah Aminah binti Wahab.'},
+      {q:'Bila bapa Nabi Muhammad ﷺ meninggal dunia?', pilihan:['Sebelum baginda dilahirkan','Selepas baginda dewasa','Semasa baginda berumur 10 tahun'],
+       why:'Bapa baginda, Abdullah, meninggal dunia semasa baginda masih dalam kandungan ibunya.'},
+      {q:'Siapakah nama datuk yang memelihara Nabi Muhammad ﷺ?', pilihan:['Abdul Muttalib','Abu Talib','Hamzah'],
+       why:'Datuk baginda, Abdul Muttalib, memelihara baginda selepas ibunya meninggal dunia.'},
+      {q:'Siapakah ibu susuan Nabi Muhammad ﷺ?', pilihan:['Halimatus Saadiah','Aminah','Khadijah'],
+       why:'Baginda disusukan oleh Halimatus Saadiah dari Bani Saad.'},
+      {q:'Nabi Muhammad ﷺ berasal daripada keturunan mana?', pilihan:['Arab Quraisy','Arab Yaman','Parsi'],
+       why:'Baginda berasal daripada keluarga Bani Hasyim, dalam suku Quraisy di Mekah.'},
+    ]},
+    {id:'sr-keluarga', no:null, tajuk:'Keluarga Nabi Muhammad ﷺ', soalan:[
+      {q:'Siapakah bapa saudara yang memelihara Nabi ﷺ selepas datuknya meninggal dunia?', pilihan:['Abu Talib','Hamzah','Abbas'],
+       why:'Bapa saudara baginda, Abu Talib, memelihara dan melindungi baginda.'},
+      {q:'Siapakah isteri pertama Nabi Muhammad ﷺ?', pilihan:['Khadijah binti Khuwailid','Aisyah','Hafsah'],
+       why:'Isteri pertama baginda ialah Saidatina Khadijah binti Khuwailid.'},
+      {q:'Berapakah umur Nabi ﷺ semasa ibunya meninggal dunia?', pilihan:['Enam tahun','Lapan tahun','Sepuluh tahun'],
+       why:'Ibu baginda, Aminah, meninggal dunia ketika baginda berumur enam tahun.'},
+      {q:'Berapakah umur Nabi ﷺ semasa datuknya meninggal dunia?', pilihan:['Lapan tahun','Enam tahun','Dua belas tahun'],
+       why:'Datuk baginda, Abdul Muttalib, meninggal dunia ketika baginda berumur lapan tahun.'},
+      {q:'Siapakah anak perempuan Nabi ﷺ yang paling bongsu?', pilihan:['Fatimah','Zainab','Ruqayyah'],
+       why:'Fatimah az-Zahra ialah anak perempuan baginda yang paling bongsu.'},
+      {q:'Siapakah bapa saudara Nabi ﷺ yang digelar "Singa Allah"?', pilihan:['Hamzah','Abu Talib','Abu Lahab'],
+       why:'Hamzah bin Abdul Muttalib digelar Singa Allah kerana keberaniannya.'},
+      {q:'Nabi Muhammad ﷺ termasuk dalam keluarga apa?', pilihan:['Bani Hasyim','Bani Umaiyah','Bani Israil'],
+       why:'Baginda berasal daripada keluarga Bani Hasyim.'},
+      {q:'Nabi Ismail a.s. ialah datuk nenek moyang Nabi Muhammad ﷺ. Siapakah bapa Nabi Ismail?', pilihan:['Nabi Ibrahim a.s.','Nabi Musa a.s.','Nabi Isa a.s.'],
+       why:'Nabi Ismail a.s. ialah anak Nabi Ibrahim a.s., dan Nabi Muhammad ﷺ daripada keturunan baginda.'},
+      {q:'Siapakah yang menyusukan Nabi ﷺ selain ibunya sendiri?', pilihan:['Halimatus Saadiah','Fatimah','Sumayyah'],
+       why:'Halimatus Saadiah menyusu dan memelihara baginda semasa kecil di kampung Bani Saad.'},
+      {q:'Nabi Muhammad ﷺ digelar "al-Amin". Apakah maksudnya?', pilihan:['Yang dipercayai','Yang berani','Yang kaya'],
+       why:'Al-Amin bermaksud "yang dipercayai" kerana baginda sangat jujur dan amanah.'},
+    ]},
+  ]},
+
+  {id:'akhlak', nama:'Akhlak', ico:'❤️', warna:'#F472B6', julat:'Pelajaran 1.1 – 3.3', pelajaran:[
+    {id:'ak-ibubapa', no:null, tajuk:'Adab kepada Ibu Bapa', soalan:[
+      {q:'Bagaimanakah cara kita bercakap dengan ibu bapa?', pilihan:['Dengan lembut dan sopan','Dengan suara yang kuat','Sambil membelakangkan mereka'],
+       why:'Islam mengajar kita bercakap dengan ibu bapa secara lembut, sopan dan penuh hormat.'},
+      {q:'Apabila ibu memanggil kita, apakah yang patut kita lakukan?', pilihan:['Segera menyahut dan datang','Buat-buat tidak dengar','Menyuruh adik pergi'],
+       why:'Menyahut panggilan ibu bapa dengan segera menunjukkan kita menghormati mereka.'},
+      {q:'Bolehkah kita meninggikan suara kepada ibu bapa?', pilihan:['Tidak boleh','Boleh kalau kita marah','Boleh kalau mereka salah'],
+       why:'Allah melarang kita meninggikan suara atau berkata kasar kepada ibu bapa.'},
+      {q:'Sebelum keluar dari rumah, apakah yang patut kita lakukan?', pilihan:['Memberi salam dan minta izin','Terus keluar','Keluar melalui pintu belakang'],
+       why:'Memberi salam dan meminta izin adalah adab supaya ibu bapa tahu ke mana kita pergi.'},
+      {q:'Apakah yang patut kita lakukan untuk ibu bapa setiap hari?', pilihan:['Mendoakan mereka','Meminta wang','Mendiamkan diri'],
+       why:'Mendoakan ibu bapa adalah amalan yang sangat dituntut dalam Islam.'},
+      {q:'Ibu meminta kamu mengemas bilik. Apakah yang patut kamu buat?', pilihan:['Lakukan dengan rela hati','Merungut dahulu','Tunggu sampai ibu marah'],
+       why:'Menurut perintah ibu bapa dalam perkara yang baik adalah tanda anak yang soleh.'},
+      {q:'Apabila menerima sesuatu daripada ibu bapa, apa yang patut kita ucapkan?', pilihan:['Terima kasih','Tak nak','Diam sahaja'],
+       why:'Mengucapkan terima kasih menunjukkan kita menghargai pemberian mereka.'},
+      {q:'Apabila ibu bapa sakit, apakah yang patut kita lakukan?', pilihan:['Menjaga dan mendoakan mereka','Bermain di luar rumah','Membiarkan sahaja'],
+       why:'Menjaga dan mendoakan ibu bapa yang sakit adalah tanggungjawab seorang anak.'},
+      {q:'Lengkapkan hadis: "Syurga itu di bawah tapak kaki ___"', pilihan:['ibu','bapa','guru'],
+       why:'Hadis ini menunjukkan betapa tingginya kedudukan seorang ibu dalam Islam.'},
+      {q:'Apabila bersalaman dengan ibu bapa, apakah yang biasa kita lakukan?', pilihan:['Mencium tangan mereka','Menepuk bahu mereka','Melambai sahaja'],
+       why:'Mencium tangan ibu bapa adalah tanda kasih sayang dan penghormatan.'},
+    ]},
+    {id:'ak-makan', no:null, tajuk:'Adab Makan dan Minum', soalan:[
+      {q:'Apakah yang kita baca sebelum mula makan?', pilihan:['Bismillah','Alhamdulillah','Astaghfirullah'],
+       why:'Sebelum makan kita baca <span class="arab">بِسْمِ اللهِ</span> (Bismillah) — bermaksud "dengan nama Allah".'},
+      {q:'Tangan yang manakah kita gunakan untuk makan?', pilihan:['Tangan kanan','Tangan kiri','Dua-dua tangan serentak'],
+       why:'Nabi Muhammad ﷺ mengajar kita makan dan minum menggunakan tangan kanan.'},
+      {q:'Apakah yang kita baca selepas habis makan?', pilihan:['Alhamdulillah','Bismillah','Insya-Allah'],
+       why:'<span class="arab">الْحَمْدُ لِلّٰهِ</span> (Alhamdulillah) bermaksud segala puji bagi Allah — tanda kita bersyukur.'},
+      {q:'Sebelum makan, apakah yang perlu kita lakukan dahulu?', pilihan:['Basuh tangan','Terus makan','Main dulu sekejap'],
+       why:'Tangan yang bersih menjaga kesihatan kita. Islam sangat menyukai kebersihan.'},
+      {q:'Bagaimanakah cara yang betul semasa makan?', pilihan:['Duduk dengan elok','Makan sambil berlari','Makan sambil baring'],
+       why:'Duduk elok di tempat makan supaya kita tidak tercekik dan tidak menumpahkan makanan.'},
+      {q:'Ali mengambil nasi yang banyak, tetapi membuang separuh ke dalam tong sampah. Betul atau salah?', pilihan:['Salah, kita tidak boleh membazir','Betul, tidak mengapa','Betul, kalau dia dah kenyang'],
+       why:'Allah tidak suka orang yang membazir. Ambil sedikit dahulu, tambah kemudian jika masih lapar.'},
+      {q:'Bolehkah kita bercakap kuat semasa mulut penuh dengan makanan?', pilihan:['Tidak boleh','Boleh sahaja','Boleh kalau dengan kawan'],
+       why:'Kunyah dan telan dahulu, kemudian baru bercakap. Itu adab yang sopan dan lebih selamat.'},
+      {q:'Nabi Muhammad ﷺ mengajar kita mengambil makanan dari bahagian yang mana?', pilihan:['Yang paling dekat dengan kita','Yang paling jauh','Dari mana-mana sahaja'],
+       why:'Nabi ﷺ mengajar supaya kita makan makanan yang berada dekat dengan kita.'},
+      {q:'Apakah cara yang terbaik semasa minum?', pilihan:['Duduk dan minum perlahan-lahan','Berdiri dan minum laju-laju','Minum sambil berlari'],
+       why:'Duduk dan minum perlahan-lahan dalam beberapa teguk adalah lebih baik untuk badan kita.'},
+      {q:'Kakak memberi kamu sepinggan kuih. Apakah yang patut kamu katakan?', pilihan:['Terima kasih','Tak nak!','Diam sahaja'],
+       why:'Berterima kasih kepada orang yang memberi adalah akhlak yang mulia.'},
+    ]},
+  ]},
+
+  {id:'arab', nama:'Bahasa Arab', ico:'ع', warna:'#FBBF24', julat:'Pelajaran 1.3 – 5.3', pelajaran:[
+    {id:'ar-salam', no:null, tajuk:'Salam dan Perkenalan', soalan:[
+      {q:'Apakah maksud ucapan ini?', qar:'اَلسَّلَامُ عَلَيْكُمْ',
+       pilihan:['Selamat sejahtera ke atas kamu','Selamat tinggal','Terima kasih'],
+       why:'Assalamualaikum bermaksud "selamat sejahtera ke atas kamu" — ucapan salam sesama Muslim.'},
+      {q:'Apakah jawapan bagi ucapan "Assalamualaikum"?',
+       pilihan:['وَعَلَيْكُمُ السَّلَامُ','اَلسَّلَامُ عَلَيْكُمْ','مَعَ السَّلَامَةِ'], ar:true,
+       why:'Jawapannya ialah <span class="arab">وَعَلَيْكُمُ السَّلَامُ</span> (Waalaikumussalam).'},
+      {q:'Apakah maksud perkataan ini?', qar:'صَبَاحُ الْخَيْرِ',
+       pilihan:['Selamat pagi','Selamat petang','Selamat malam'],
+       why:'<span class="arab">صَبَاحُ الْخَيْرِ</span> bermaksud selamat pagi.'},
+      {q:'Apakah maksud perkataan ini?', qar:'مَسَاءُ الْخَيْرِ',
+       pilihan:['Selamat petang','Selamat pagi','Selamat datang'],
+       why:'<span class="arab">مَسَاءُ الْخَيْرِ</span> bermaksud selamat petang.'},
+      {q:'Bagaimanakah cara bertanya "Siapakah nama kamu?" dalam Bahasa Arab?',
+       pilihan:['مَا اسْمُكَ؟','كَيْفَ حَالُكَ؟','مِنْ أَيْنَ أَنْتَ؟'], ar:true,
+       why:'<span class="arab">مَا اسْمُكَ؟</span> bermaksud "siapakah nama kamu?".'},
+      {q:'Apakah maksud perkataan ini?', qar:'اِسْمِي',
+       pilihan:['Nama saya','Rumah saya','Kawan saya'],
+       why:'<span class="arab">اِسْمِي</span> bermaksud "nama saya".'},
+      {q:'Apakah maksud perkataan ini?', qar:'شُكْرًا',
+       pilihan:['Terima kasih','Maafkan saya','Selamat tinggal'],
+       why:'<span class="arab">شُكْرًا</span> bermaksud terima kasih.'},
+      {q:'Apakah maksud perkataan ini?', qar:'عَفْوًا',
+       pilihan:['Sama-sama','Terima kasih','Selamat pagi'],
+       why:'<span class="arab">عَفْوًا</span> ialah jawapan kepada terima kasih, bermaksud "sama-sama".'},
+      {q:'Apakah maksud soalan ini?', qar:'كَيْفَ حَالُكَ؟',
+       pilihan:['Apa khabar?','Berapa umur kamu?','Di mana rumah kamu?'],
+       why:'<span class="arab">كَيْفَ حَالُكَ؟</span> bermaksud "apa khabar?".'},
+      {q:'Apakah maksud jawapan ini?', qar:'بِخَيْرٍ',
+       pilihan:['Khabar baik','Saya sakit','Saya lapar'],
+       why:'<span class="arab">بِخَيْرٍ</span> bermaksud "khabar baik" atau "sihat".'},
+    ]},
+    {id:'ar-nombor', no:null, tajuk:'Nombor ١ hingga ١٠', soalan:[
+      {q:'Apakah nombor ini dalam angka biasa?', qar:'٣',
+       pilihan:['3','2','7'],
+       why:'Angka Arab <span class="arab">٣</span> ialah nombor 3.'},
+      {q:'Apakah nombor ini dalam angka biasa?', qar:'٧',
+       pilihan:['7','6','8'],
+       why:'Angka Arab <span class="arab">٧</span> ialah nombor 7.'},
+      {q:'Apakah maksud perkataan ini?', qar:'وَاحِدٌ',
+       pilihan:['Satu','Dua','Tiga'],
+       why:'<span class="arab">وَاحِدٌ</span> bermaksud satu.'},
+      {q:'Apakah maksud perkataan ini?', qar:'اِثْنَانِ',
+       pilihan:['Dua','Empat','Lima'],
+       why:'<span class="arab">اِثْنَانِ</span> bermaksud dua.'},
+      {q:'Apakah maksud perkataan ini?', qar:'ثَلَاثَةٌ',
+       pilihan:['Tiga','Enam','Sembilan'],
+       why:'<span class="arab">ثَلَاثَةٌ</span> bermaksud tiga.'},
+      {q:'Apakah maksud perkataan ini?', qar:'خَمْسَةٌ',
+       pilihan:['Lima','Empat','Lapan'],
+       why:'<span class="arab">خَمْسَةٌ</span> bermaksud lima.'},
+      {q:'Apakah perkataan Arab bagi nombor "empat"?',
+       pilihan:['أَرْبَعَةٌ','سِتَّةٌ','عَشَرَةٌ'], ar:true,
+       why:'<span class="arab">أَرْبَعَةٌ</span> bermaksud empat.'},
+      {q:'Apakah perkataan Arab bagi nombor "enam"?',
+       pilihan:['سِتَّةٌ','سَبْعَةٌ','تِسْعَةٌ'], ar:true,
+       why:'<span class="arab">سِتَّةٌ</span> bermaksud enam.'},
+      {q:'Apakah maksud perkataan ini?', qar:'ثَمَانِيَةٌ',
+       pilihan:['Lapan','Tujuh','Sepuluh'],
+       why:'<span class="arab">ثَمَانِيَةٌ</span> bermaksud lapan.'},
+      {q:'Apakah maksud perkataan ini?', qar:'عَشَرَةٌ',
+       pilihan:['Sepuluh','Sembilan','Enam'],
+       why:'<span class="arab">عَشَرَةٌ</span> bermaksud sepuluh.'},
+    ]},
+  ]},
+
+  {id:'ibadat', nama:'Ibadat', ico:'🕋', warna:'#A78BFA', julat:'Pelajaran 2.1 – 4.7', pelajaran:[
+    {id:'ib-wuduk', no:null, tajuk:'Bersuci dan Wuduk', soalan:[
+      {q:'Sebelum menunaikan solat, apakah yang wajib kita lakukan?', pilihan:['Berwuduk','Bersarapan','Berlari'],
+       why:'Wuduk wajib dilakukan sebelum solat untuk menghilangkan hadas kecil.'},
+      {q:'Apakah yang kita baca sebelum mula berwuduk?', pilihan:['Bismillah','Alhamdulillah','Takbir'],
+       why:'Kita memulakan wuduk dengan membaca Bismillah.'},
+      {q:'Anggota manakah yang dibasuh dahulu dalam rukun wuduk?', pilihan:['Muka','Kaki','Kepala'],
+       why:'Selepas niat, rukun wuduk seterusnya ialah membasuh muka.'},
+      {q:'Selepas membasuh muka, anggota apakah yang dibasuh?', pilihan:['Dua tangan hingga siku','Dua kaki','Telinga'],
+       why:'Selepas muka, kita membasuh kedua-dua tangan hingga ke siku.'},
+      {q:'Selepas membasuh tangan, apakah rukun wuduk yang seterusnya?', pilihan:['Menyapu sebahagian kepala','Membasuh kaki','Berkumur'],
+       why:'Rukun seterusnya ialah menyapu sebahagian daripada kepala dengan air.'},
+      {q:'Anggota manakah yang dibasuh paling akhir dalam wuduk?', pilihan:['Dua kaki hingga buku lali','Muka','Tangan'],
+       why:'Rukun terakhir sebelum tertib ialah membasuh kedua-dua kaki hingga ke buku lali.'},
+      {q:'Berapakah bilangan rukun wuduk?', pilihan:['Enam','Empat','Lapan'],
+       why:'Rukun wuduk ada enam: niat, basuh muka, basuh tangan hingga siku, sapu kepala, basuh kaki hingga buku lali, dan tertib.'},
+      {q:'Air yang bagaimanakah boleh digunakan untuk berwuduk?', pilihan:['Air yang suci dan menyucikan','Air yang berwarna','Air yang bercampur sabun'],
+       why:'Wuduk mesti menggunakan air mutlak, iaitu air yang suci lagi menyucikan seperti air paip, air sungai dan air hujan.'},
+      {q:'Selepas membuang air kecil, apakah yang perlu kita lakukan?', pilihan:['Beristinjak','Terus solat','Berwuduk sahaja tanpa membasuh'],
+       why:'Istinjak ialah membersihkan tempat keluar najis dengan air atau batu sebelum berwuduk.'},
+      {q:'Antara berikut, manakah yang membatalkan wuduk?', pilihan:['Membuang air kecil','Membaca Al-Quran','Memberi salam'],
+       why:'Keluar sesuatu daripada dua jalan (qubul dan dubur) membatalkan wuduk.'},
+    ]},
+    {id:'ib-solat', no:null, tajuk:'Solat Lima Waktu', soalan:[
+      {q:'Berapakah bilangan waktu solat fardu dalam sehari semalam?', pilihan:['Lima','Empat','Enam'],
+       why:'Solat fardu ada lima waktu: Subuh, Zohor, Asar, Maghrib dan Isyak.'},
+      {q:'Berapakah bilangan rakaat solat Subuh?', pilihan:['Dua rakaat','Tiga rakaat','Empat rakaat'],
+       why:'Solat Subuh ialah dua rakaat.'},
+      {q:'Berapakah bilangan rakaat solat Zohor?', pilihan:['Empat rakaat','Dua rakaat','Tiga rakaat'],
+       why:'Solat Zohor ialah empat rakaat.'},
+      {q:'Berapakah bilangan rakaat solat Asar?', pilihan:['Empat rakaat','Tiga rakaat','Dua rakaat'],
+       why:'Solat Asar ialah empat rakaat.'},
+      {q:'Berapakah bilangan rakaat solat Maghrib?', pilihan:['Tiga rakaat','Empat rakaat','Dua rakaat'],
+       why:'Solat Maghrib ialah tiga rakaat.'},
+      {q:'Berapakah bilangan rakaat solat Isyak?', pilihan:['Empat rakaat','Tiga rakaat','Dua rakaat'],
+       why:'Solat Isyak ialah empat rakaat.'},
+      {q:'Solat manakah yang dilakukan sebelum matahari terbit?', pilihan:['Subuh','Maghrib','Asar'],
+       why:'Waktu Subuh bermula dari terbit fajar sadiq sehingga terbit matahari.'},
+      {q:'Ke arah manakah kita mengadap semasa solat?', pilihan:['Kaabah di Mekah','Matahari terbit','Arah utara'],
+       why:'Umat Islam mengadap kiblat, iaitu Kaabah di Masjidil Haram, Mekah.'},
+      {q:'Berapakah jumlah rakaat semua solat fardu dalam sehari semalam?', pilihan:['Tujuh belas rakaat','Lima belas rakaat','Dua puluh rakaat'],
+       why:'2 + 4 + 4 + 3 + 4 = 17 rakaat sehari semalam.'},
+      {q:'Antara syarat sah solat, apakah yang wajib kita lakukan pada pakaian kita?', pilihan:['Menutup aurat','Memakai baju baharu','Memakai baju berwarna putih'],
+       why:'Menutup aurat ialah salah satu syarat sah solat.'},
+    ]},
+  ]},
+
+  {id:'jawi', nama:'Jawi', ico:'ابت', warna:'#22D3EE', julat:'Pelajaran 1.3 – 5.1', pelajaran:[
+    {id:'jw-huruf', no:null, tajuk:'Huruf Jawi', soalan:[
+      {q:'Tulisan Jawi ditulis dari arah mana?', pilihan:['Kanan ke kiri','Kiri ke kanan','Atas ke bawah'],
+       why:'Tulisan Jawi menggunakan huruf Arab, jadi ditulis dari kanan ke kiri.'},
+      {q:'Apakah bunyi huruf Jawi ini?', qar:'ب',
+       pilihan:['ba','ta','na'],
+       why:'Huruf <span class="arab">ب</span> berbunyi "ba".'},
+      {q:'Apakah bunyi huruf Jawi ini?', qar:'چ',
+       pilihan:['ca','ja','ha'],
+       why:'Huruf <span class="arab">چ</span> berbunyi "ca" — salah satu huruf tambahan Jawi.'},
+      {q:'Apakah bunyi huruf Jawi ini?', qar:'ڠ',
+       pilihan:['nga','ain','ghain'],
+       why:'Huruf <span class="arab">ڠ</span> berbunyi "nga" — huruf tambahan Jawi.'},
+      {q:'Apakah bunyi huruf Jawi ini?', qar:'ڤ',
+       pilihan:['pa','fa','qa'],
+       why:'Huruf <span class="arab">ڤ</span> berbunyi "pa" — huruf tambahan Jawi.'},
+      {q:'Apakah bunyi huruf Jawi ini?', qar:'ݢ',
+       pilihan:['ga','kaf','lam'],
+       why:'Huruf <span class="arab">ݢ</span> berbunyi "ga" — huruf tambahan Jawi.'},
+      {q:'Apakah bunyi huruf Jawi ini?', qar:'ڽ',
+       pilihan:['nya','na','ya'],
+       why:'Huruf <span class="arab">ڽ</span> berbunyi "nya" — huruf tambahan Jawi.'},
+      {q:'Apakah huruf Jawi bagi bunyi "va"?',
+       pilihan:['ۏ','و','ف'], ar:true,
+       why:'Huruf <span class="arab">ۏ</span> berbunyi "va" — huruf tambahan Jawi.'},
+      {q:'Berapakah bilangan huruf tambahan dalam tulisan Jawi yang tiada dalam huruf Arab?', pilihan:['Enam','Empat','Lapan'],
+       why:'Enam huruf tambahan Jawi ialah <span class="arab">چ ڠ ڤ ݢ ڽ ۏ</span>.'},
+      {q:'Apakah bunyi huruf Jawi ini?', qar:'ت',
+       pilihan:['ta','ba','tha'],
+       why:'Huruf <span class="arab">ت</span> berbunyi "ta".'},
+    ]},
+    {id:'jw-perkataan', no:null, tajuk:'Membaca Perkataan Jawi', soalan:[
+      {q:'Bagaimanakah perkataan Jawi ini dibaca?', qar:'ساي',
+       pilihan:['saya','sayu','sari'],
+       why:'<span class="arab">ساي</span> dibaca "saya".'},
+      {q:'Bagaimanakah perkataan Jawi ini dibaca?', qar:'بودق',
+       pilihan:['budak','bodoh','badak'],
+       why:'<span class="arab">بودق</span> dibaca "budak".'},
+      {q:'Bagaimanakah perkataan Jawi ini dibaca?', qar:'ماکن',
+       pilihan:['makan','minum','makin'],
+       why:'<span class="arab">ماکن</span> dibaca "makan".'},
+      {q:'Bagaimanakah perkataan Jawi ini dibaca?', qar:'بوکو',
+       pilihan:['buku','baku','bakul'],
+       why:'<span class="arab">بوکو</span> dibaca "buku".'},
+      {q:'Bagaimanakah perkataan Jawi ini dibaca?', qar:'رومه',
+       pilihan:['rumah','ramah','rimau'],
+       why:'<span class="arab">رومه</span> dibaca "rumah".'},
+      {q:'Bagaimanakah perkataan Jawi ini dibaca?', qar:'ايکن',
+       pilihan:['ikan','ikat','akan'],
+       why:'<span class="arab">ايکن</span> dibaca "ikan".'},
+      {q:'Bagaimanakah perkataan Jawi ini dibaca?', qar:'نام',
+       pilihan:['nama','nasi','nanas'],
+       why:'<span class="arab">نام</span> dibaca "nama".'},
+      {q:'Bagaimanakah perkataan Jawi ini dibaca?', qar:'باڤ',
+       pilihan:['bapa','bagi','bawa'],
+       why:'<span class="arab">باڤ</span> dibaca "bapa".'},
+      {q:'Bagaimanakah perkataan Jawi ini dibaca?', qar:'کيت',
+       pilihan:['kita','kati','kuat'],
+       why:'<span class="arab">کيت</span> dibaca "kita".'},
+      {q:'Apakah tulisan Jawi bagi perkataan "emak"?',
+       pilihan:['امق','اما','عمق'], ar:true,
+       why:'"Emak" ditulis <span class="arab">امق</span> dalam tulisan Jawi.'},
+    ]},
+  ]},
+];
+
+/* ============================================================
+   2) STATE & SIMPANAN
+   ============================================================ */
+const SAVE_KEY='agama_d1_v2';
+let state=null;
+
+function baseState(){
+  return {
+    v:2,
+    nama:'',            // nama murid (pilihan)
+    markah:{},          // pelajaranId -> {betul, jumlah, peratus, cubaan, terakhir}
+    bunyi:true,
+  };
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    state = raw ? Object.assign(baseState(), JSON.parse(raw)) : baseState();
+  }catch(e){ state=baseState(); }
+}
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){} }
+
+/* ---- util ---- */
+const $=(id)=>document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function shuffle(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; }
+function cariSubjek(id){ return SUBJECTS.find(s=>s.id===id); }
+function cariPelajaran(pid){
+  for(const s of SUBJECTS){ const p=s.pelajaran.find(x=>x.id===pid); if(p) return {subjek:s, pelajaran:p}; }
+  return null;
+}
+function semuaPelajaran(){ return SUBJECTS.flatMap(s=>s.pelajaran.map(p=>({subjek:s,pelajaran:p}))); }
+
+let toastT=null;
+function toast(msg){
+  const el=$('toast'); el.innerHTML=msg; el.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1800);
+}
+
+/* ---- bunyi ringkas guna WebAudio (tiada fail aset diperlukan) ---- */
+let actx=null;
+function beep(freqs, dur){
+  if(!state.bunyi) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended') actx.resume();
+    freqs.forEach((f,i)=>{
+      const o=actx.createOscillator(), g=actx.createGain();
+      o.type='sine'; o.frequency.value=f;
+      const t0=actx.currentTime + i*(dur*0.7);
+      g.gain.setValueAtTime(0.0001,t0);
+      g.gain.exponentialRampToValueAtTime(0.14,t0+0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(t0); o.stop(t0+dur+0.02);
+    });
+  }catch(e){}
+}
+const sfxBetul=()=>beep([660,880],0.15);
+const sfxSalah=()=>beep([220,165],0.19);
+
+/* ---- gred ---- */
+function gredBagi(peratus){
+  if(peratus>=80) return {g:'A', kata:'Cemerlang'};
+  if(peratus>=60) return {g:'B', kata:'Baik'};
+  if(peratus>=40) return {g:'C', kata:'Sederhana'};
+  return {g:'D', kata:'Perlu Ulang Kaji'};
+}
+
+/* ============================================================
+   3) SKRIN
+   ============================================================ */
+function render(html){ $('app').innerHTML='<div class="screen">'+html+'</div>'; window.scrollTo(0,0); }
+
+function topbar(kiri){
+  return `<div class="topbar">
+    ${kiri||''}
+    <div style="flex:1"></div>
+    <button class="iconbtn" onclick="EL.laporan()" title="Laporan Markah">📊</button>
+    <button class="iconbtn" onclick="EL.tetapan()" title="Tetapan">⚙️</button>
+  </div>`;
+}
+
+/* markah terbaik bagi satu subjek: purata peratus pelajaran yang dah dijawab */
+function ringkasanSubjek(s){
+  const dijawab=s.pelajaran.filter(p=>state.markah[p.id]);
+  if(!dijawab.length) return null;
+  const purata=Math.round(dijawab.reduce((j,p)=>j+state.markah[p.id].peratus,0)/dijawab.length);
+  return {bil:dijawab.length, jumlah:s.pelajaran.length, purata};
+}
+
+function home(){
+  const senarai=SUBJECTS.map(s=>{
+    const r=ringkasanSubjek(s);
+    return `<div class="subj" onclick="EL.subjek('${s.id}')">
+      <div class="ico" style="background:${s.warna}33;border-color:${s.warna}">${s.ico}</div>
+      <div class="t">
+        <b style="color:${s.warna}">${esc(s.nama)}</b>
+        <span>${esc(s.julat)}</span>
+      </div>
+      <div class="sk">
+        ${r?`<b>${r.purata}%</b><span>${r.bil}/${r.jumlah} PELAJARAN</span>`
+           :`<b style="color:var(--text-muted)">—</b><span>BELUM MULA</span>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  const sudah=Object.keys(state.markah).length;
+  const jumlahPel=semuaPelajaran().length;
+  const purataAll = sudah ? Math.round(Object.values(state.markah).reduce((j,m)=>j+m.peratus,0)/sudah) : 0;
+
+  render(`${topbar()}
+    <div class="head"><span class="l1">SEKOLAH AGAMA</span><span class="l2">DARJAH 1</span></div>
+    <div class="subtitle">Jawab soalan · Kumpul markah</div>
+
+    <div class="panel" style="text-align:center;padding:15px">
+      <div style="font-size:10.5px;letter-spacing:2px;font-weight:800;color:var(--text-muted)">MARKAH KESELURUHAN</div>
+      <div class="markah-besar" style="margin-top:6px">${purataAll}<span>%</span></div>
+      <div style="font-size:11px;color:var(--text-soft);margin:8px 0 9px;font-family:var(--read)">
+        ${sudah} daripada ${jumlahPel} pelajaran telah dijawab
+      </div>
+      <div class="pbar"><i style="width:${Math.round(sudah/jumlahPel*100)}%"></i></div>
+    </div>
+
+    <div class="section-label">📚 SUBJEK</div>
+    ${senarai}
+
+    <button class="btn btn-secondary" style="margin-top:6px" onclick="EL.laporan()">📊 LIHAT LAPORAN MARKAH</button>
+    <div class="note">Silabus rujukan: Sekolah Agama Kerajaan Negeri Johor<br>Kandungan perlu disemak oleh guru sebelum digunakan di dalam kelas.</div>
+  `);
+}
+
+function subjek(id){
+  const s=cariSubjek(id); if(!s) return home();
+  const senarai=s.pelajaran.map((p,i)=>{
+    const m=state.markah[p.id];
+    return `<div class="pel" onclick="EL.mula('${p.id}')">
+      <div class="n">${p.no||(i+1)}</div>
+      <div class="t">
+        <b>${esc(p.tajuk)}</b>
+        <span>${p.soalan.length} soalan${m?` · ${m.cubaan} kali cuba`:' · belum dijawab'}</span>
+      </div>
+      <div class="mk">${m?`${m.peratus}%`:'▶'}</div>
+    </div>`;
+  }).join('');
+
+  render(`${topbar(`<button class="iconbtn" onclick="EL.home()">←</button>`)}
+    <div class="panel" style="text-align:center;padding:17px">
+      <div class="ico" style="width:56px;height:56px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-size:25px;font-family:var(--arab);background:${s.warna}33;border:3px solid ${s.warna}">${s.ico}</div>
+      <div style="font-size:20px;font-weight:700;color:${s.warna};margin-top:8px">${esc(s.nama)}</div>
+      <div style="font-size:11px;color:var(--text-soft);margin-top:3px;font-family:var(--read)">${esc(s.julat)}</div>
+    </div>
+    <div class="section-label">📖 PELAJARAN</div>
+    ${senarai}
+    <div class="note">Pelajaran lain akan ditambah setelah senarai tajuk penuh<br>daripada halaman isi kandungan kitab diperoleh.</div>
+  `);
+}
+
+/* ============================================================
+   4) KUIZ
+   ============================================================ */
+let K=null;
+
+function mula(pid){
+  const f=cariPelajaran(pid); if(!f) return;
+  K={
+    pid, subjek:f.subjek, pelajaran:f.pelajaran,
+    soalan: shuffle(f.pelajaran.soalan).map(s=>{
+      const betulTeks=s.pilihan[0];           // indeks 0 sentiasa jawapan betul dlm data
+      const pilihan=shuffle(s.pilihan);
+      return {...s, pilihan, jawapan:pilihan.indexOf(betulTeks)};
+    }),
+    idx:0, betul:0, dijawab:false,
+  };
+  soalan();
+}
+
+function soalan(){
+  const s=K.soalan[K.idx], no=K.idx+1, jum=K.soalan.length;
+  K.dijawab=false;
+
+  const pilihan=s.pilihan.map((p,i)=>
+    `<button class="choice ${s.ar?'ar':''}" id="c${i}" onclick="EL.jawab(${i})">
+       <span class="k">${'ABCD'[i]||i+1}</span><span class="v">${esc(p)}</span>
+     </button>`).join('');
+
+  render(`${topbar(`<button class="iconbtn" onclick="EL.keluar()">←</button>`)}
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
+      <div style="flex:1"><div class="pbar"><i style="width:${Math.round(K.idx/jum*100)}%"></i></div></div>
+      <div style="font-size:11.5px;font-weight:900;color:var(--gold-light);white-space:nowrap;font-family:var(--read)">${no}/${jum}</div>
+    </div>
+    <div style="font-size:10.5px;font-weight:800;letter-spacing:1.6px;color:var(--text-muted);margin-bottom:9px;font-family:var(--read)">
+      ${esc(K.subjek.nama.toUpperCase())} · ${esc(K.pelajaran.tajuk.toUpperCase())}
+    </div>
+    <div class="qcard">
+      <div class="qno">SOALAN ${no}</div>
+      <div class="qtext">${esc(s.q)}</div>
+      ${s.qar?`<div class="qar">${s.qar}</div>`:''}
+    </div>
+    <div>${pilihan}</div>
+    <div id="maklumbalas"></div>
+  `);
+}
+
+function jawab(i){
+  if(K.dijawab) return;
+  K.dijawab=true;
+  const s=K.soalan[K.idx], betul = i===s.jawapan;
+
+  s.pilihan.forEach((_,n)=>{
+    const el=$('c'+n); if(!el) return;
+    el.disabled=true; el.onclick=null;
+    if(n===s.jawapan) el.classList.add('ok');
+    else if(n===i) el.classList.add('no');
+    else el.classList.add('dim');
+  });
+
+  if(betul){ K.betul++; sfxBetul(); } else { sfxSalah(); }
+
+  const akhir=K.idx>=K.soalan.length-1;
+  $('maklumbalas').innerHTML=`
+    <div class="why ${betul?'ok':'no'}">
+      <b class="h">${betul?'✅ Betul':'❌ Belum tepat'}</b>
+      ${betul?'':`<div style="margin-bottom:5px">Jawapan yang betul: <b>${esc(s.pilihan[s.jawapan])}</b></div>`}
+      <div>${s.why}</div>
+    </div>
+    <button class="btn btn-primary" onclick="EL.seterusnya()">${akhir?'LIHAT MARKAH →':'SOALAN SETERUSNYA →'}</button>`;
+  $('maklumbalas').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function seterusnya(){
+  if(K.idx>=K.soalan.length-1) return tamat();
+  K.idx++; soalan();
+}
+
+function keluar(){
+  if(!confirm('Keluar dari kuiz? Markah tidak akan disimpan.')) return;
+  const sid=K?K.subjek.id:SUBJECTS[0].id;
+  K=null; subjek(sid);
+}
+
+function tamat(){
+  const jum=K.soalan.length;
+  const peratus=Math.round(K.betul/jum*100);
+  const lama=state.markah[K.pid];
+
+  state.markah[K.pid]={
+    betul: lama ? Math.max(lama.betul, K.betul) : K.betul,   // simpan markah TERBAIK
+    jumlah: jum,
+    peratus: lama ? Math.max(lama.peratus, peratus) : peratus,
+    cubaan: (lama?lama.cubaan:0)+1,
+    terakhir: peratus,
+  };
+  save();
+  keputusan({pid:K.pid, betul:K.betul, jumlah:jum, peratus, terbaik:state.markah[K.pid].peratus});
+}
+
+function keputusan(r){
+  const f=cariPelajaran(r.pid);
+  const g=gredBagi(r.peratus);
+  const rekod=state.markah[r.pid];
+
+  render(`${topbar(`<button class="iconbtn" onclick="EL.home()">🏠</button>`)}
+    <div class="panel" style="text-align:center;padding:20px 16px">
+      <div style="font-size:10.5px;letter-spacing:2.2px;font-weight:800;color:var(--text-muted)">MARKAH KAMU</div>
+      <div style="font-size:15px;font-weight:700;margin:5px 0 13px">${esc(f.pelajaran.tajuk)}</div>
+      <div class="gred g-${g.g}">${g.g}</div>
+      <div style="font-size:13px;font-weight:800;color:var(--gold-light);margin-top:9px;font-family:var(--read)">${esc(g.kata)}</div>
+      <div class="markah-besar" style="margin-top:12px">${r.betul}<span>/${r.jumlah}</span></div>
+      <div style="font-size:20px;font-weight:900;color:var(--text-soft);font-family:var(--read);margin-top:2px">${r.peratus}%</div>
+      <div style="display:flex;gap:7px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+        <div class="pill">🏆 Terbaik ${r.terbaik}%</div>
+        <div class="pill">🔁 Cubaan ke-${rekod.cubaan}</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="EL.mula('${r.pid}')">CUBA LAGI 🔁</button>
+    <button class="btn btn-secondary" style="margin-top:9px" onclick="EL.subjek('${f.subjek.id}')">PELAJARAN LAIN</button>
+    <button class="btn btn-secondary" style="margin-top:9px" onclick="EL.laporan()">📊 LAPORAN MARKAH</button>
+  `);
+}
+
+/* ============================================================
+   5) LAPORAN MARKAH
+   ============================================================ */
+function laporan(){
+  const blok=SUBJECTS.map(s=>{
+    const baris=s.pelajaran.map(p=>{
+      const m=state.markah[p.id];
+      const g=m?gredBagi(m.peratus):null;
+      return `<div class="lap-row">
+        <div class="t"><b${m?'':' style="color:var(--text-muted)"'}>${esc(p.tajuk)}</b>
+          <span>${m?`${m.betul}/${m.jumlah} betul · ${m.cubaan} kali cuba`:'Belum dijawab'}</span></div>
+        <div class="m" ${m?'':'style="color:var(--text-muted)"'}>${m?`${m.peratus}% · ${g.g}`:'—'}</div>
+      </div>`;
+    }).join('');
+    const r=ringkasanSubjek(s);
+    return `<div class="section-label" style="color:${s.warna}">${esc(s.nama.toUpperCase())}${r?` · ${r.purata}%`:''}</div>
+      <div class="panel" style="padding:5px 14px 9px">${baris}</div>`;
+  }).join('');
+
+  const sudah=Object.keys(state.markah).length;
+  const purata = sudah ? Math.round(Object.values(state.markah).reduce((j,m)=>j+m.peratus,0)/sudah) : 0;
+  const g=gredBagi(purata);
+
+  render(`${topbar(`<button class="iconbtn" onclick="EL.home()">←</button>`)}
+    <div class="panel" style="text-align:center;padding:18px 16px">
+      <div style="font-size:10.5px;letter-spacing:2.2px;font-weight:800;color:var(--text-muted)">LAPORAN MARKAH</div>
+      ${state.nama?`<div style="font-size:15px;font-weight:700;margin-top:5px">${esc(state.nama)}</div>`:''}
+      ${sudah?`<div class="gred g-${g.g}" style="width:82px;height:82px;font-size:34px;margin-top:11px">${g.g}</div>
+               <div class="markah-besar" style="margin-top:11px">${purata}<span>%</span></div>
+               <div style="font-size:11px;color:var(--text-soft);margin-top:5px;font-family:var(--read)">Purata ${sudah} pelajaran yang telah dijawab</div>`
+              :`<div class="kosong">Belum ada markah.<br>Pilih satu pelajaran dan mula menjawab soalan.</div>`}
+    </div>
+    ${blok}
+  `);
+}
+
+/* ============================================================
+   6) TETAPAN
+   ============================================================ */
+function tetapan(){
+  render(`${topbar(`<button class="iconbtn" onclick="EL.home()">←</button>`)}
+    <div class="panel">
+      <div class="section-label" style="margin-top:0">⚙️ TETAPAN</div>
+      <div style="font-size:11.5px;color:var(--text-soft);margin-bottom:7px;font-family:var(--read)">Nama murid (untuk laporan markah)</div>
+      <input id="namaInput" value="${esc(state.nama)}" placeholder="Contoh: Ahmad Danish"
+        style="width:100%;font-family:var(--read);font-size:14px;font-weight:700;padding:12px 14px;border-radius:var(--radius-sm);
+               border:3px solid rgba(255,255,255,.26);background:rgba(0,0,0,.2);color:#fff;outline:none;user-select:text">
+      <button class="btn btn-primary btn-sm" style="margin-top:9px" onclick="EL.simpanNama()">SIMPAN NAMA</button>
+      <button class="btn btn-secondary" style="margin-top:14px" onclick="EL.togglBunyi()">${state.bunyi?'🔊 BUNYI: HIDUP':'🔇 BUNYI: MATI'}</button>
+      <button class="btn btn-secondary" style="margin-top:9px" onclick="EL.reset()">🗑️ PADAM SEMUA MARKAH</button>
+    </div>
+    <div class="panel">
+      <div class="section-label" style="margin-top:0">ℹ️ TENTANG</div>
+      <div style="font-size:12px;line-height:1.75;color:var(--text-soft);font-family:var(--read);font-weight:600">
+        e-Learning Sekolah Agama Darjah 1 — 6 subjek mengikut silabus
+        Sekolah Agama Kerajaan Negeri Johor: Tauhid, Sirah, Akhlak, Bahasa Arab, Ibadat dan Jawi.
+        <br><br>
+        Murid menjawab soalan aneka pilihan dan memperoleh markah serta gred bagi setiap pelajaran.
+        Markah terbaik disimpan dalam peranti ini sahaja.
+        <br><br>
+        <b style="color:var(--gold-light)">Nota:</b> nombor pelajaran (1.1, 2.3 dan seterusnya) belum diisi
+        kerana senarai tajuk penuh perlu diambil daripada halaman isi kandungan kitab.
+        Kandungan soalan perlu disemak oleh guru sebelum digunakan di dalam kelas.
+      </div>
+    </div>
+  `);
+}
+function simpanNama(){
+  const v=$('namaInput'); if(!v) return;
+  state.nama=v.value.trim().slice(0,40); save(); toast('Nama disimpan');
+}
+function togglBunyi(){ state.bunyi=!state.bunyi; save(); tetapan(); }
+function reset(){
+  if(!confirm('Padam semua markah? Tindakan ini tidak boleh dibatalkan.')) return;
+  const nama=state.nama; state=baseState(); state.nama=nama; save(); home(); toast('Semua markah telah dipadam');
+}
+
+/* ============================================================
+   7) BOOT
+   ============================================================ */
+const EL={home, subjek, mula, jawab, seterusnya, keluar, laporan, tetapan, simpanNama, togglBunyi, reset};
+window.EL=EL;
+load();
+home();
+</script>
+</body>
+</html>
