@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penjana Kod Lesen — Monster MathArena</title>
+<!--
+  Penjana kod lesen versi browser, untuk digunakan bila tiada akses Terminal
+  (contoh: guna telefon). Algoritma SAMA dengan keygen/generate-key.js dan
+  vercel-licensed/lib/license-algo.js: HMAC-SHA256(serial, rahsia), ambil
+  6 aksara hex pertama sebagai checksum.
+
+  PENTING - rahsia TIDAK dihantar ke mana-mana. Semua pengiraan berlaku
+  dalam peranti anda melalui Web Crypto API. Halaman ini juga tiada
+  sebarang permintaan rangkaian.
+
+  JANGAN letak fail ini dalam folder yang di-deploy (vercel-licensed/).
+-->
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;padding:20px;background:#3B1A8A;color:#fff;
+       font-family:system-ui,-apple-system,sans-serif;display:flex;justify-content:center}
+  .wrap{width:100%;max-width:460px}
+  h1{font-size:19px;margin:6px 0 4px}
+  .sub{font-size:13px;opacity:.75;line-height:1.5;margin-bottom:18px}
+  label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px}
+  input,button{width:100%;font-size:16px;font-family:inherit;border-radius:12px;padding:13px 14px;border:2px solid rgba(255,255,255,.25)}
+  input{background:rgba(0,0,0,.28);color:#fff}
+  input::placeholder{color:rgba(255,255,255,.4)}
+  .row{display:flex;gap:8px}
+  .row input{flex:1}
+  button{margin-top:16px;background:linear-gradient(180deg,#FFE066,#F5C542);color:#3B1A5C;
+         font-weight:800;border-color:#FFF4D6;cursor:pointer}
+  button:active{transform:translateY(2px)}
+  .keys{margin-top:18px}
+  .key{background:rgba(0,0,0,.3);border:2px dashed rgba(255,255,255,.22);border-radius:12px;
+       padding:13px;margin-bottom:9px;font-family:ui-monospace,Menlo,monospace;font-size:17px;
+       letter-spacing:.5px;text-align:center;cursor:pointer;user-select:all}
+  .key:active{background:rgba(255,224,102,.22)}
+  .hint{font-size:12px;opacity:.7;margin-top:10px;line-height:1.5}
+  .warn{background:rgba(0,0,0,.25);border:2px solid rgba(255,224,102,.4);border-radius:12px;
+        padding:12px;font-size:12.5px;line-height:1.55;margin-top:18px}
+  .err{color:#FFB3B3;font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔑 Penjana Kod Lesen</h1>
+  <div class="sub">Monster MathArena — untuk kegunaan pemilik sahaja.</div>
+
+  <label for="secret">Rahsia (MMA_LICENSE_SECRET)</label>
+  <input id="secret" type="password" autocomplete="off" autocapitalize="off"
+         spellcheck="false" placeholder="Tampal rahsia dari Vercel di sini">
+
+  <label for="count">Berapa kod?</label>
+  <div class="row">
+    <input id="count" type="number" min="1" max="50" value="5" inputmode="numeric">
+  </div>
+
+  <button id="go">Jana Kod</button>
+  <div id="err" class="err"></div>
+  <div id="keys" class="keys"></div>
+  <div class="hint" id="hint"></div>
+
+  <div class="warn">
+    🔒 Rahsia anda <b>tidak dihantar ke mana-mana</b>. Semua pengiraan berlaku
+    dalam telefon anda sendiri. Halaman ini tidak membuat sebarang permintaan
+    rangkaian — anda boleh sahkan dengan memutuskan internet sebelum menjananya.
+  </div>
+</div>
+
+<script>
+const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // sama spt license-algo.js
+
+function randomSerial(len) {
+  const bytes = new Uint8Array(len);
+  crypto.getRandomValues(bytes);
+  let out = '';
+  for (let i = 0; i < len; i++) out += ALPHABET[bytes[i] % ALPHABET.length];
+  return out;
+}
+
+async function checksumFor(serial, secret) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(serial));
+  const hex = [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, '0')).join('');
+  return hex.slice(0, 6).toUpperCase();
+}
+
+async function generateKey(secret) {
+  const serial = randomSerial(8);
+  return 'MMA-' + serial + '-' + await checksumFor(serial, secret);
+}
+
+const $ = id => document.getElementById(id);
+
+$('go').addEventListener('click', async () => {
+  const secret = $('secret').value.trim();
+  const n = Math.max(1, Math.min(50, parseInt($('count').value, 10) || 1));
+  $('err').textContent = '';
+  $('keys').innerHTML = '';
+  $('hint').textContent = '';
+
+  if (!secret) { $('err').textContent = 'Sila masukkan rahsia dahulu.'; return; }
+  if (!crypto.subtle) { $('err').textContent = 'Browser ini tidak menyokong Web Crypto. Cuba Safari/Chrome terkini.'; return; }
+
+  try {
+    for (let i = 0; i < n; i++) {
+      const k = await generateKey(secret);
+      const d = document.createElement('div');
+      d.className = 'key';
+      d.textContent = k;
+      d.title = 'Tekan untuk pilih';
+      d.addEventListener('click', () => {
+        if (navigator.clipboard) navigator.clipboard.writeText(k).catch(() => {});
+      });
+      $('keys').appendChild(d);
+    }
+    $('hint').textContent = 'Tekan mana-mana kod untuk menyalinnya. Kod sah selama-lamanya (tiada tarikh luput).';
+  } catch (e) {
+    $('err').textContent = 'Ralat menjana kod: ' + e.message;
+  }
+});
+</script>
+</body>
+</html>
