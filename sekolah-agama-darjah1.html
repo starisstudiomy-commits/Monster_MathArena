@@ -223,6 +223,59 @@ body{
 .why b.h{display:block;margin-bottom:5px;font-size:13.5px;font-weight:900}
 .arab{font-family:var(--arab);font-size:20px;line-height:1.9;direction:rtl;unicode-bidi:isolate}
 
+/* ---- KAD NOTA (mod BELAJAR) ---- */
+.nkad{
+  background:linear-gradient(180deg,#FFF8E7 0%,#FFEFC4 100%);
+  border:4px solid var(--cream);border-radius:var(--radius);
+  padding:20px 17px;color:var(--text-dark);
+  box-shadow:var(--shadow-card);margin-bottom:13px;
+  animation:screenIn .25s ease;
+}
+.nkad .nikon{font-size:42px;line-height:1.1;text-align:center;display:block;margin-bottom:8px}
+.nkad h3{font-size:18px;font-weight:800;text-align:center;line-height:1.35;margin-bottom:11px;text-wrap:balance}
+.nkad p{font-size:14px;line-height:1.7;font-family:var(--read);font-weight:600}
+/* jarak antara blok dalam kad diuruskan oleh layout, bukan margin per-elemen */
+.nkad .body{display:flex;flex-direction:column;gap:12px}
+
+.nlist{display:flex;flex-direction:column;gap:8px}
+.nlist li{
+  display:flex;align-items:flex-start;gap:10px;list-style:none;
+  background:rgba(10,58,46,.07);border-radius:12px;padding:9px 11px;
+  font-size:13.5px;line-height:1.55;font-family:var(--read);font-weight:600;
+}
+.nlist li .li{flex:0 0 auto;font-size:17px;line-height:1.4;min-width:24px;text-align:center;font-family:var(--arab)}
+
+.nsteps{display:flex;flex-direction:column;gap:8px;counter-reset:s}
+.nsteps li{
+  display:flex;align-items:flex-start;gap:10px;list-style:none;counter-increment:s;
+  font-size:13.5px;line-height:1.55;font-family:var(--read);font-weight:600;
+}
+.nsteps li::before{
+  content:counter(s);flex:0 0 auto;
+  width:25px;height:25px;border-radius:50%;display:grid;place-items:center;
+  font-size:12px;font-weight:900;color:#FFF8E7;background:var(--panel-a);
+}
+
+.arblok{
+  background:rgba(10,58,46,.09);border-radius:14px;padding:14px 13px;margin-top:4px;
+  border:2px solid rgba(10,58,46,.13);
+}
+.arblok .a{font-family:var(--arab);font-size:27px;line-height:2;direction:rtl;unicode-bidi:isolate;text-align:center;font-weight:700}
+.arblok .m{font-size:12.5px;line-height:1.6;text-align:center;margin-top:8px;font-family:var(--read);font-weight:600;opacity:.85}
+
+.ningat{
+  margin-top:12px;background:linear-gradient(180deg,#FDE68A,#FCD34D);
+  border:3px solid #FEF3C7;border-radius:13px;padding:11px 12px;
+  font-size:13px;line-height:1.6;font-family:var(--read);font-weight:700;
+}
+.ningat b.h{display:block;font-size:11px;letter-spacing:1.4px;font-weight:900;opacity:.7;margin-bottom:3px}
+
+.dots{display:flex;gap:6px;justify-content:center;margin:2px 0 12px;flex-wrap:wrap}
+.dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.24);transition:all .2s}
+.dots i.on{background:var(--gold-light);width:20px;border-radius:var(--radius-pill)}
+.navrow{display:flex;gap:9px}
+.navrow .btn{width:auto;flex:1}
+
 /* ---- KEPUTUSAN ---- */
 .gred{
   width:104px;height:104px;margin:4px auto 0;border-radius:50%;display:grid;place-items:center;
@@ -500,7 +553,52 @@ const SUBJECTS = [
   ]},
 
   {id:'ibadat', nama:'Ibadat', ico:'🕋', warna:'#A78BFA', julat:'Pelajaran 2.1 – 4.7', pelajaran:[
-    {id:'ib-wuduk', no:null, tajuk:'Bersuci dan Wuduk', soalan:[
+    {id:'ib-taharah', no:null, tajuk:'Taharah (Bersuci)', soalan:[
+      {q:'Apakah maksud "taharah"?', pilihan:['Bersuci','Berdoa','Bersedekah'],
+       why:'Taharah bermaksud <b>bersuci</b> — membersihkan diri, pakaian dan tempat daripada najis dan hadas.'},
+      {q:'Apakah hukum bersuci sebelum menunaikan solat?', pilihan:['Wajib','Sunat','Harus'],
+       why:'Bersuci daripada najis dan hadas adalah <b>wajib</b> sebelum menunaikan solat.'},
+      {q:'Taharah terbahagi kepada berapa bahagian?', pilihan:['Dua — bersuci daripada najis dan daripada hadas','Tiga','Satu sahaja'],
+       why:'Taharah ada dua bahagian: bersuci daripada <b>najis</b> dan bersuci daripada <b>hadas</b>.'},
+      {q:'Apakah alat utama yang digunakan untuk bersuci?', pilihan:['Air mutlak','Air kopi','Minyak wangi'],
+       why:'Air mutlak ialah air yang suci lagi menyucikan, seperti air hujan, air sungai, air perigi dan air laut.'},
+      {q:'Antara berikut, yang manakah termasuk air mutlak?', pilihan:['Air hujan','Air teh','Air sirap'],
+       why:'Air hujan ialah air mutlak. Air yang sudah berubah menjadi teh atau sirap tidak boleh digunakan untuk bersuci.'},
+      {q:'Hadas kecil dihilangkan dengan cara apa?', pilihan:['Berwuduk','Mandi wajib','Bertayammum sahaja'],
+       why:'Hadas kecil seperti selepas membuang air kecil dihilangkan dengan <b>berwuduk</b>.'},
+      {q:'Hadas besar dihilangkan dengan cara apa?', pilihan:['Mandi wajib','Berwuduk','Membasuh tangan'],
+       why:'Hadas besar dihilangkan dengan <b>mandi wajib</b>, iaitu meratakan air ke seluruh badan.'},
+      {q:'Najis daripada anjing dan babi termasuk najis jenis apa?', pilihan:['Mughallazah (berat)','Mukhaffafah (ringan)','Mutawassitah (sederhana)'],
+       why:'Najis mughallazah ialah najis berat. Cara menyucikannya dibasuh tujuh kali, satu daripadanya bercampur tanah.'},
+      {q:'Kencing dan tahi manusia termasuk najis jenis apa?', pilihan:['Mutawassitah (sederhana)','Mughallazah (berat)','Mukhaffafah (ringan)'],
+       why:'Najis mutawassitah ialah najis sederhana. Ia disucikan dengan membasuh sehingga hilang bau, warna dan rasanya.'},
+      {q:'Mengapakah kita perlu sentiasa bersuci?', pilihan:['Kerana Allah menyukai orang yang bersih','Supaya nampak kaya','Supaya tidak perlu solat'],
+       why:'Allah berfirman bahawa Dia menyukai orang-orang yang membersihkan diri (Surah al-Baqarah, ayat 222).'},
+    ]},
+    {id:'ib-istinjak', no:null, tajuk:'Istinjak', soalan:[
+      {q:'Apakah maksud "istinjak"?', pilihan:['Membersihkan tempat keluar najis','Membasuh pakaian','Mandi pagi'],
+       why:'Istinjak ialah membersihkan tempat keluar najis selepas membuang air kecil atau air besar.'},
+      {q:'Apakah hukum beristinjak selepas membuang air?', pilihan:['Wajib','Sunat','Makruh'],
+       why:'Beristinjak adalah <b>wajib</b> supaya badan dan pakaian kita bersih daripada najis.'},
+      {q:'Apakah alat yang paling baik untuk beristinjak?', pilihan:['Air','Kertas sahaja','Kain baju'],
+       why:'Air adalah yang paling baik kerana ia membersihkan najis dengan sempurna.'},
+      {q:'Jika tiada air, apakah yang boleh digunakan untuk beristinjak?', pilihan:['Batu atau benda keras yang suci','Daun basah','Tangan sahaja'],
+       why:'Boleh menggunakan batu atau benda keras yang suci sebanyak tiga kali sehingga bersih.'},
+      {q:'Tangan yang manakah digunakan semasa beristinjak?', pilihan:['Tangan kiri','Tangan kanan','Dua-dua tangan'],
+       why:'Kita menggunakan tangan kiri semasa beristinjak, dan tangan kanan untuk perkara yang bersih dan mulia.'},
+      {q:'Kaki manakah yang didahulukan semasa masuk ke tandas?', pilihan:['Kaki kiri','Kaki kanan','Mana-mana kaki'],
+       why:'Masuk tandas dengan kaki kiri, dan keluar dengan kaki kanan.'},
+      {q:'Kaki manakah yang didahulukan semasa keluar dari tandas?', pilihan:['Kaki kanan','Kaki kiri','Mana-mana kaki'],
+       why:'Keluar dari tandas dengan kaki kanan sambil membaca doa.'},
+      {q:'Apakah doa yang dibaca semasa keluar dari tandas?', qar:'غُفْرَانَكَ',
+       pilihan:['Ghufranaka','Bismillah','Alhamdulillah'],
+       why:'<span class="arab">غُفْرَانَكَ</span> (Ghufranaka) bermaksud "aku memohon keampunan-Mu".'},
+      {q:'Bolehkah kita bercakap-cakap semasa berada di dalam tandas?', pilihan:['Tidak elok','Boleh sahaja','Boleh kalau kuat'],
+       why:'Adab di dalam tandas ialah tidak bercakap kecuali perkara yang mustahak.'},
+      {q:'Istinjak dianggap sempurna apabila hilang apa pada tempat najis?', pilihan:['Bau, warna dan rasa najis','Warna sahaja','Bau sahaja'],
+       why:'Najis dikira hilang apabila bau, warna dan rasanya sudah tidak ada lagi.'},
+    ]},
+    {id:'ib-wuduk', no:null, tajuk:'Wuduk', soalan:[
       {q:'Sebelum menunaikan solat, apakah yang wajib kita lakukan?', pilihan:['Berwuduk','Bersarapan','Berlari'],
        why:'Wuduk wajib dilakukan sebelum solat untuk menghilangkan hadas kecil.'},
       {q:'Apakah yang kita baca sebelum mula berwuduk?', pilihan:['Bismillah','Alhamdulillah','Takbir'],
@@ -613,6 +711,295 @@ const SUBJECTS = [
 ];
 
 /* ============================================================
+   1b) NOTA PEMBELAJARAN
+   ------------------------------------------------------------
+   Murid membaca nota dahulu, kemudian menjawab kuiz. Dikunci
+   pada id pelajaran supaya nota & soalan boleh disunting
+   berasingan.
+
+   Jenis kad:
+     teks     - perenggan penerangan
+     senarai  - senarai berikon (konsep, bahagian, contoh)
+     langkah  - turutan bernombor (cara buat sesuatu)
+   Medan tambahan pada mana-mana kad:
+     ar       - tulisan Arab besar   arMaksud - maksudnya
+     ingat    - kotak "Ingat!" kuning di bawah kad
+   ============================================================ */
+const NOTA = {
+  /* ---------- TAUHID ---------- */
+  'th-rukuniman':[
+    {ikon:'🤍', tajuk:'Apakah itu Iman?',
+     teks:'Iman bermaksud <b>percaya</b>. Orang Islam percaya kepada Allah dan semua perkara yang wajib dipercayai.',
+     ingat:'Iman itu dipercayai dengan <b>hati</b>, diucapkan dengan <b>lidah</b>, dan dibuktikan dengan <b>amalan</b>.'},
+    {ikon:'📿', tajuk:'Enam Rukun Iman', senarai:[
+      {i:'1️⃣', t:'Beriman kepada <b>Allah</b>'},
+      {i:'2️⃣', t:'Beriman kepada <b>Malaikat</b>'},
+      {i:'3️⃣', t:'Beriman kepada <b>Kitab-kitab</b> Allah'},
+      {i:'4️⃣', t:'Beriman kepada <b>Rasul-rasul</b> Allah'},
+      {i:'5️⃣', t:'Beriman kepada <b>Hari Akhirat</b>'},
+      {i:'6️⃣', t:'Beriman kepada <b>Qada dan Qadar</b>'},
+    ]},
+    {ikon:'🌍', tajuk:'Beriman kepada Allah',
+     teks:'Allah itu <b>Esa</b> — hanya satu, tiada sekutu bagi-Nya. Allah yang menciptakan langit, bumi, manusia dan segala isinya.'},
+    {ikon:'👼', tajuk:'Malaikat dan Kitab',
+     teks:'Malaikat dicipta daripada <b>cahaya</b> dan sentiasa taat kepada Allah. Kitab yang diturunkan kepada Nabi Muhammad ﷺ ialah <b>Al-Quran</b>, kitab yang terakhir.'},
+  ],
+  'th-rukunislam':[
+    {ikon:'🕌', tajuk:'Apakah itu Rukun Islam?',
+     teks:'Rukun Islam ialah <b>lima</b> perkara asas yang wajib dilakukan oleh setiap orang Islam.'},
+    {ikon:'🖐️', tajuk:'Lima Rukun Islam', senarai:[
+      {i:'1️⃣', t:'Mengucap <b>dua kalimah syahadah</b>'},
+      {i:'2️⃣', t:'Mendirikan <b>solat</b> lima waktu'},
+      {i:'3️⃣', t:'Menunaikan <b>zakat</b>'},
+      {i:'4️⃣', t:'<b>Berpuasa</b> pada bulan Ramadan'},
+      {i:'5️⃣', t:'Mengerjakan <b>haji</b> bagi yang berkemampuan'},
+    ]},
+    {ikon:'🗣️', tajuk:'Dua Kalimah Syahadah',
+     ar:'أَشْهَدُ أَنْ لَا إِلٰهَ إِلَّا اللهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُوْلُ اللهِ',
+     arMaksud:'Aku bersaksi bahawa tiada Tuhan melainkan Allah, dan aku bersaksi bahawa Nabi Muhammad itu pesuruh Allah.'},
+    {ikon:'🕐', tajuk:'Solat Lima Waktu',
+     teks:'Solat fardu ialah <b>lima waktu</b> sehari semalam: Subuh, Zohor, Asar, Maghrib dan Isyak — semuanya <b>17 rakaat</b>.'},
+  ],
+
+  /* ---------- SIRAH ---------- */
+  'sr-kelahiran':[
+    {ikon:'🐘', tajuk:'Tahun Gajah',
+     teks:'Nabi Muhammad ﷺ dilahirkan pada <b>Tahun Gajah</b>. Tahun itu tentera bergajah Abrahah datang untuk meruntuhkan Kaabah, tetapi Allah menghalang mereka.'},
+    {ikon:'📅', tajuk:'Bila dan Di Mana?', senarai:[
+      {i:'🏙️', t:'Tempat: kota <b>Mekah</b>'},
+      {i:'📆', t:'Hari: <b>Isnin</b>, 12 Rabiulawal'},
+      {i:'🐘', t:'Tahun: <b>Tahun Gajah</b>'},
+    ]},
+    {ikon:'👨‍👩‍👦', tajuk:'Ibu dan Bapa Baginda',
+     teks:'Bapa baginda <b>Abdullah</b> meninggal dunia semasa baginda masih di dalam kandungan. Ibu baginda ialah <b>Aminah binti Wahab</b>.'},
+    {ikon:'🍼', tajuk:'Ibu Susuan',
+     teks:'Baginda disusukan oleh <b>Halimatus Saadiah</b> dari Bani Saad, mengikut adat orang Arab yang menghantar bayi dibesarkan di kampung.'},
+  ],
+  'sr-keluarga':[
+    {ikon:'🌳', tajuk:'Keluarga Nabi ﷺ', senarai:[
+      {i:'👨', t:'Bapa: <b>Abdullah</b>'},
+      {i:'👩', t:'Ibu: <b>Aminah</b>'},
+      {i:'👴', t:'Datuk: <b>Abdul Muttalib</b>'},
+      {i:'🧔', t:'Bapa saudara: <b>Abu Talib</b>'},
+      {i:'👵', t:'Ibu susuan: <b>Halimatus Saadiah</b>'},
+    ]},
+    {ikon:'🤲', tajuk:'Nabi ﷺ Menjadi Yatim Piatu',
+     teks:'Ibu baginda meninggal dunia ketika baginda berumur <b>6 tahun</b>, dan datuknya pula ketika baginda berumur <b>8 tahun</b>. Selepas itu baginda dipelihara oleh bapa saudaranya, Abu Talib.'},
+    {ikon:'💍', tajuk:'Isteri dan Anak',
+     teks:'Isteri pertama baginda ialah <b>Khadijah binti Khuwailid</b>. Anak perempuan baginda yang bongsu ialah <b>Fatimah az-Zahra</b>.'},
+    {ikon:'⭐', tajuk:'Gelaran Al-Amin',
+     teks:'Sejak muda baginda digelar <b>al-Amin</b> yang bermaksud "yang dipercayai", kerana baginda sangat jujur dan amanah.'},
+  ],
+
+  /* ---------- AKHLAK ---------- */
+  'ak-ibubapa':[
+    {ikon:'❤️', tajuk:'Mengapa Kita Hormat Ibu Bapa?',
+     teks:'Ibu bapa menjaga, memberi makan dan mendidik kita sejak kecil. Allah memerintahkan kita berbuat baik kepada mereka.',
+     ingat:'Sabda Nabi ﷺ: <b>Syurga itu di bawah tapak kaki ibu.</b>'},
+    {ikon:'🌸', tajuk:'Adab kepada Ibu Bapa', senarai:[
+      {i:'🗣️', t:'Bercakap dengan <b>lembut dan sopan</b>'},
+      {i:'🙋', t:'<b>Segera menyahut</b> apabila dipanggil'},
+      {i:'🤝', t:'<b>Menurut perintah</b> mereka dalam perkara yang baik'},
+      {i:'🚪', t:'<b>Memberi salam</b> dan minta izin sebelum keluar'},
+      {i:'🤲', t:'<b>Mendoakan</b> mereka setiap hari'},
+    ]},
+    {ikon:'🤍', tajuk:'Doa untuk Ibu Bapa',
+     ar:'رَبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِيْ صَغِيْرًا',
+     arMaksud:'Wahai Tuhanku, kasihanilah kedua-dua mereka sepertimana mereka memelihara aku semasa kecil.'},
+  ],
+  'ak-makan':[
+    {ikon:'🧼', tajuk:'Sebelum Makan', senarai:[
+      {i:'💧', t:'<b>Basuh tangan</b> hingga bersih'},
+      {i:'🤲', t:'Baca <b>Bismillah</b>'},
+      {i:'🪑', t:'<b>Duduk</b> dengan elok di tempat makan'},
+    ]},
+    {ikon:'🍽️', tajuk:'Semasa Makan', senarai:[
+      {i:'✋', t:'Guna <b>tangan kanan</b>'},
+      {i:'👉', t:'Ambil makanan yang <b>dekat</b> dengan kita'},
+      {i:'🤐', t:'Jangan bercakap semasa <b>mulut penuh</b>'},
+      {i:'🍚', t:'<b>Jangan membazir</b> — habiskan makanan'},
+    ]},
+    {ikon:'🤲', tajuk:'Doa Sebelum Makan',
+     ar:'اَللّٰهُمَّ بَارِكْ لَنَا فِيْمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ',
+     arMaksud:'Ya Allah, berkatilah rezeki yang Engkau kurniakan kepada kami dan peliharalah kami daripada azab neraka.'},
+    {ikon:'😋', tajuk:'Selepas Makan',
+     teks:'Ucapkan <b>Alhamdulillah</b> sebagai tanda bersyukur, dan <b>terima kasih</b> kepada orang yang menyediakan makanan.'},
+  ],
+
+  /* ---------- BAHASA ARAB ---------- */
+  'ar-salam':[
+    {ikon:'🕊️', tajuk:'Memberi Salam',
+     ar:'اَلسَّلَامُ عَلَيْكُمْ',
+     arMaksud:'Selamat sejahtera ke atas kamu.',
+     ingat:'Jawapannya: <span class="arab">وَعَلَيْكُمُ السَّلَامُ</span> (Waalaikumussalam)'},
+    {ikon:'☀️', tajuk:'Ucapan Harian', senarai:[
+      {i:'🌅', t:'<span class="arab">صَبَاحُ الْخَيْرِ</span> — Selamat pagi'},
+      {i:'🌇', t:'<span class="arab">مَسَاءُ الْخَيْرِ</span> — Selamat petang'},
+      {i:'🙏', t:'<span class="arab">شُكْرًا</span> — Terima kasih'},
+      {i:'😊', t:'<span class="arab">عَفْوًا</span> — Sama-sama'},
+    ]},
+    {ikon:'🙋', tajuk:'Berkenalan', senarai:[
+      {i:'❓', t:'<span class="arab">مَا اسْمُكَ؟</span> — Siapakah nama kamu?'},
+      {i:'💬', t:'<span class="arab">اِسْمِي…</span> — Nama saya…'},
+      {i:'❓', t:'<span class="arab">كَيْفَ حَالُكَ؟</span> — Apa khabar?'},
+      {i:'💬', t:'<span class="arab">بِخَيْرٍ</span> — Khabar baik'},
+    ]},
+  ],
+  'ar-nombor':[
+    {ikon:'🔢', tajuk:'Angka Arab',
+     ar:'١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩ ١٠',
+     arMaksud:'1  2  3  4  5  6  7  8  9  10'},
+    {ikon:'✋', tajuk:'Satu hingga Lima', senarai:[
+      {i:'١', t:'<span class="arab">وَاحِدٌ</span> — satu'},
+      {i:'٢', t:'<span class="arab">اِثْنَانِ</span> — dua'},
+      {i:'٣', t:'<span class="arab">ثَلَاثَةٌ</span> — tiga'},
+      {i:'٤', t:'<span class="arab">أَرْبَعَةٌ</span> — empat'},
+      {i:'٥', t:'<span class="arab">خَمْسَةٌ</span> — lima'},
+    ]},
+    {ikon:'🖐️', tajuk:'Enam hingga Sepuluh', senarai:[
+      {i:'٦', t:'<span class="arab">سِتَّةٌ</span> — enam'},
+      {i:'٧', t:'<span class="arab">سَبْعَةٌ</span> — tujuh'},
+      {i:'٨', t:'<span class="arab">ثَمَانِيَةٌ</span> — lapan'},
+      {i:'٩', t:'<span class="arab">تِسْعَةٌ</span> — sembilan'},
+      {i:'١٠', t:'<span class="arab">عَشَرَةٌ</span> — sepuluh'},
+    ]},
+  ],
+
+  /* ---------- IBADAT ---------- */
+  'ib-taharah':[
+    {ikon:'💧', tajuk:'Apakah itu Taharah?',
+     teks:'Taharah bermaksud <b>bersuci</b>. Kita membersihkan badan, pakaian dan tempat solat daripada <b>najis</b> dan <b>hadas</b>.',
+     ingat:'Bersuci adalah <b>wajib</b> sebelum menunaikan solat.'},
+    {ikon:'2️⃣', tajuk:'Dua Bahagian Taharah', senarai:[
+      {i:'🧽', t:'Bersuci daripada <b>najis</b> — membasuh benda kotor pada badan, pakaian atau tempat'},
+      {i:'🚿', t:'Bersuci daripada <b>hadas</b> — berwuduk atau mandi wajib'},
+    ]},
+    {ikon:'🌧️', tajuk:'Air yang Boleh Digunakan',
+     teks:'Kita bersuci dengan <b>air mutlak</b>, iaitu air yang suci lagi menyucikan.',
+     senarai:[
+      {i:'🌧️', t:'Air hujan'},
+      {i:'🌊', t:'Air laut'},
+      {i:'🏞️', t:'Air sungai'},
+      {i:'🪣', t:'Air perigi dan air mata air'},
+     ],
+     ingat:'Air teh, air sirap dan air kopi <b>tidak boleh</b> digunakan untuk bersuci.'},
+    {ikon:'🚿', tajuk:'Hadas Kecil dan Hadas Besar', senarai:[
+      {i:'🤲', t:'<b>Hadas kecil</b> — dihilangkan dengan <b>berwuduk</b>'},
+      {i:'🛁', t:'<b>Hadas besar</b> — dihilangkan dengan <b>mandi wajib</b>'},
+    ]},
+    {ikon:'🧴', tajuk:'Tiga Jenis Najis', senarai:[
+      {i:'🐕', t:'<b>Mughallazah</b> (berat) — anjing dan babi'},
+      {i:'💩', t:'<b>Mutawassitah</b> (sederhana) — kencing, tahi, darah'},
+      {i:'👶', t:'<b>Mukhaffafah</b> (ringan) — kencing bayi lelaki yang belum makan selain susu ibu'},
+    ]},
+    {ikon:'🤍', tajuk:'Allah Suka Orang yang Bersih',
+     teks:'Allah berfirman bahawa Dia menyukai orang-orang yang membersihkan diri. Badan yang bersih menjadikan kita sihat dan solat kita sah.'},
+  ],
+  'ib-istinjak':[
+    {ikon:'🚻', tajuk:'Apakah itu Istinjak?',
+     teks:'Istinjak ialah <b>membersihkan tempat keluar najis</b> selepas membuang air kecil atau air besar.',
+     ingat:'Hukum beristinjak adalah <b>wajib</b>.'},
+    {ikon:'💧', tajuk:'Alat untuk Beristinjak', senarai:[
+      {i:'💧', t:'<b>Air</b> — paling baik dan paling bersih'},
+      {i:'🪨', t:'<b>Batu</b> atau benda keras yang suci, sebanyak tiga kali, jika tiada air'},
+    ]},
+    {ikon:'🧼', tajuk:'Cara Beristinjak dengan Air', langkah:[
+      'Masuk ke tandas dengan <b>kaki kiri</b> sambil membaca doa.',
+      'Selesaikan hajat dengan <b>menutup aurat</b> dan tidak menghadap kiblat.',
+      'Basuh tempat keluar najis dengan <b>air</b> menggunakan <b>tangan kiri</b>.',
+      'Gosok dan basuh sehingga hilang <b>bau, warna dan rasa</b> najis.',
+      'Keringkan, kemudian basuh tangan dengan sabun.',
+      'Keluar dengan <b>kaki kanan</b> sambil membaca doa.',
+    ]},
+    {ikon:'🤲', tajuk:'Doa Masuk Tandas',
+     ar:'اَللّٰهُمَّ إِنِّيْ أَعُوْذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ',
+     arMaksud:'Ya Allah, aku berlindung dengan-Mu daripada syaitan lelaki dan syaitan perempuan.'},
+    {ikon:'🤲', tajuk:'Doa Keluar Tandas',
+     ar:'غُفْرَانَكَ',
+     arMaksud:'Aku memohon keampunan-Mu.'},
+    {ikon:'⚠️', tajuk:'Adab di dalam Tandas', senarai:[
+      {i:'🤐', t:'Jangan <b>bercakap-cakap</b> tanpa keperluan'},
+      {i:'📿', t:'Jangan bawa masuk benda yang tertulis <b>nama Allah</b>'},
+      {i:'🧭', t:'Jangan <b>menghadap atau membelakangi kiblat</b>'},
+      {i:'⏱️', t:'Jangan <b>berlama-lama</b> di dalam tandas'},
+    ]},
+  ],
+  'ib-wuduk':[
+    {ikon:'🚿', tajuk:'Apakah itu Wuduk?',
+     teks:'Wuduk ialah membasuh anggota tertentu dengan air untuk menghilangkan <b>hadas kecil</b>. Wuduk wajib sebelum menunaikan solat.'},
+    {ikon:'6️⃣', tajuk:'Enam Rukun Wuduk', langkah:[
+      '<b>Niat</b> ketika membasuh muka.',
+      'Membasuh <b>muka</b>.',
+      'Membasuh <b>dua tangan</b> hingga ke siku.',
+      'Menyapu <b>sebahagian kepala</b>.',
+      'Membasuh <b>dua kaki</b> hingga ke buku lali.',
+      '<b>Tertib</b> — mengikut turutan di atas.',
+    ]},
+    {ikon:'❌', tajuk:'Perkara yang Membatalkan Wuduk', senarai:[
+      {i:'🚻', t:'Keluar sesuatu daripada <b>qubul atau dubur</b>'},
+      {i:'😴', t:'<b>Tidur</b> dengan tidak menetapkan punggung'},
+      {i:'😵', t:'<b>Hilang akal</b> seperti pengsan atau mabuk'},
+      {i:'🤝', t:'Menyentuh kemaluan dengan <b>tapak tangan</b>'},
+    ]},
+    {ikon:'🤲', tajuk:'Sebelum dan Selepas Wuduk',
+     teks:'Mulakan wuduk dengan membaca <b>Bismillah</b>. Selepas selesai, bacalah doa selepas wuduk sambil mengadap kiblat.'},
+  ],
+  'ib-solat':[
+    {ikon:'🕐', tajuk:'Lima Waktu Solat Fardu', senarai:[
+      {i:'🌅', t:'<b>Subuh</b> — 2 rakaat'},
+      {i:'☀️', t:'<b>Zohor</b> — 4 rakaat'},
+      {i:'🌤️', t:'<b>Asar</b> — 4 rakaat'},
+      {i:'🌇', t:'<b>Maghrib</b> — 3 rakaat'},
+      {i:'🌙', t:'<b>Isyak</b> — 4 rakaat'},
+     ],
+     ingat:'Jumlah semuanya <b>17 rakaat</b> sehari semalam.'},
+    {ikon:'🧭', tajuk:'Mengadap Kiblat',
+     teks:'Semasa solat kita mengadap <b>kiblat</b>, iaitu <b>Kaabah</b> di Masjidil Haram, Mekah.'},
+    {ikon:'✅', tajuk:'Antara Syarat Sah Solat', senarai:[
+      {i:'🕌', t:'Beragama <b>Islam</b>'},
+      {i:'💧', t:'Suci daripada <b>hadas</b> kecil dan besar'},
+      {i:'👕', t:'<b>Menutup aurat</b>'},
+      {i:'🧭', t:'Mengadap <b>kiblat</b>'},
+      {i:'🕐', t:'Sudah <b>masuk waktu</b> solat'},
+    ]},
+  ],
+
+  /* ---------- JAWI ---------- */
+  'jw-huruf':[
+    {ikon:'✍️', tajuk:'Tulisan Jawi',
+     teks:'Tulisan Jawi menggunakan huruf Arab untuk menulis Bahasa Melayu. Ia ditulis dari <b>kanan ke kiri</b>.'},
+    {ikon:'➕', tajuk:'Enam Huruf Tambahan Jawi',
+     teks:'Enam huruf ini <b>tiada</b> dalam tulisan Arab — ia ditambah khas untuk bunyi Bahasa Melayu.',
+     senarai:[
+      {i:'چ', t:'berbunyi <b>ca</b>'},
+      {i:'ڠ', t:'berbunyi <b>nga</b>'},
+      {i:'ڤ', t:'berbunyi <b>pa</b>'},
+      {i:'ݢ', t:'berbunyi <b>ga</b>'},
+      {i:'ڽ', t:'berbunyi <b>nya</b>'},
+      {i:'ۏ', t:'berbunyi <b>va</b>'},
+    ]},
+  ],
+  'jw-perkataan':[
+    {ikon:'📖', tajuk:'Membaca Perkataan Jawi',
+     teks:'Baca huruf dari <b>kanan ke kiri</b>, kemudian cantumkan bunyinya menjadi satu perkataan.'},
+    {ikon:'🏠', tajuk:'Perkataan Harian', senarai:[
+      {i:'📝', t:'<span class="arab">ساي</span> — saya'},
+      {i:'📝', t:'<span class="arab">کيت</span> — kita'},
+      {i:'📝', t:'<span class="arab">امق</span> — emak'},
+      {i:'📝', t:'<span class="arab">باڤ</span> — bapa'},
+      {i:'📝', t:'<span class="arab">رومه</span> — rumah'},
+    ]},
+    {ikon:'🍚', tajuk:'Lagi Perkataan', senarai:[
+      {i:'📝', t:'<span class="arab">ماکن</span> — makan'},
+      {i:'📝', t:'<span class="arab">بوکو</span> — buku'},
+      {i:'📝', t:'<span class="arab">ايکن</span> — ikan'},
+      {i:'📝', t:'<span class="arab">بودق</span> — budak'},
+      {i:'📝', t:'<span class="arab">نام</span> — nama'},
+    ]},
+  ],
+};
+
+/* ============================================================
    2) STATE & SIMPANAN
    ============================================================ */
 const SAVE_KEY='agama_d1_v2';
@@ -623,6 +1010,7 @@ function baseState(){
     v:2,
     nama:'',            // nama murid (pilihan)
     markah:{},          // pelajaranId -> {betul, jumlah, peratus, cubaan, terakhir}
+    dibaca:{},          // pelajaranId -> timestamp bila nota habis dibaca
     bunyi:true,
   };
 }
@@ -747,14 +1135,18 @@ function home(){
 function subjek(id){
   const s=cariSubjek(id); if(!s) return home();
   const senarai=s.pelajaran.map((p,i)=>{
-    const m=state.markah[p.id];
-    return `<div class="pel" onclick="EL.mula('${p.id}')">
+    const m=state.markah[p.id], baca=state.dibaca[p.id];
+    const nota=NOTA[p.id]||[];
+    const status = m ? `Markah terbaik ${m.peratus}%`
+                 : baca ? 'Nota sudah dibaca · belum kuiz'
+                 : `${nota.length} nota · ${p.soalan.length} soalan`;
+    return `<div class="pel" onclick="EL.pelajaran('${p.id}')">
       <div class="n">${p.no||(i+1)}</div>
       <div class="t">
         <b>${esc(p.tajuk)}</b>
-        <span>${p.soalan.length} soalan${m?` · ${m.cubaan} kali cuba`:' · belum dijawab'}</span>
+        <span>${esc(status)}</span>
       </div>
-      <div class="mk">${m?`${m.peratus}%`:'▶'}</div>
+      <div class="mk">${m?`${m.peratus}%`:(baca?'📖':'▶')}</div>
     </div>`;
   }).join('');
 
@@ -771,7 +1163,90 @@ function subjek(id){
 }
 
 /* ============================================================
-   4) KUIZ
+   4) PELAJARAN — pintu masuk kepada BELAJAR dan KUIZ
+   ============================================================ */
+function pelajaran(pid){
+  const f=cariPelajaran(pid); if(!f) return home();
+  const s=f.subjek, p=f.pelajaran;
+  const nota=NOTA[pid]||[];
+  const m=state.markah[pid], baca=state.dibaca[pid];
+
+  render(`${topbar(`<button class="iconbtn" onclick="EL.subjek('${s.id}')">←</button>`)}
+    <div class="panel" style="text-align:center;padding:17px">
+      <div style="font-size:10.5px;letter-spacing:2px;font-weight:800;color:${s.warna}">${esc(s.nama.toUpperCase())}</div>
+      <div style="font-size:19px;font-weight:700;margin-top:6px;line-height:1.35;text-wrap:balance">${esc(p.tajuk)}</div>
+    </div>
+
+    ${nota.length?`
+    <div class="pel" style="padding:15px" onclick="EL.belajar('${pid}',0)">
+      <div class="n" style="background:linear-gradient(180deg,#BFDBFE,#60A5FA);border-color:#DBEAFE;font-size:17px">📖</div>
+      <div class="t">
+        <b>Belajar</b>
+        <span>${nota.length} muka nota${baca?' · sudah dibaca ✓':''}</span>
+      </div>
+      <div class="mk">${baca?'✓':'▶'}</div>
+    </div>`:''}
+
+    <div class="pel" style="padding:15px" onclick="EL.mula('${pid}')">
+      <div class="n" style="background:linear-gradient(180deg,#FDE68A,#F5C542);border-color:#FEF3C7;font-size:17px">📝</div>
+      <div class="t">
+        <b>Kuiz</b>
+        <span>${p.soalan.length} soalan${m?` · terbaik ${m.peratus}% (${m.cubaan} kali cuba)`:''}</span>
+      </div>
+      <div class="mk">${m?`${m.peratus}%`:'▶'}</div>
+    </div>
+
+    ${(!baca && nota.length && !m)?`<div class="note" style="margin-top:4px">Baca nota dahulu, kemudian cuba kuiz.</div>`:''}
+  `);
+}
+
+/* ---- MOD BELAJAR: kad nota berselak ---- */
+function kadHTML(k){
+  const bhg=[];
+  if(k.teks) bhg.push(`<p>${k.teks}</p>`);
+  if(k.ar) bhg.push(`<div class="arblok"><div class="a">${k.ar}</div>${k.arMaksud?`<div class="m">${esc(k.arMaksud)}</div>`:''}</div>`);
+  if(k.senarai) bhg.push(`<ul class="nlist">${k.senarai.map(x=>`<li><span class="li">${x.i}</span><span>${x.t}</span></li>`).join('')}</ul>`);
+  if(k.langkah) bhg.push(`<ol class="nsteps">${k.langkah.map(x=>`<li><span>${x}</span></li>`).join('')}</ol>`);
+  if(k.ingat) bhg.push(`<div class="ningat"><b class="h">INGAT</b>${k.ingat}</div>`);
+  return `<div class="nkad">
+    <span class="nikon">${k.ikon||'📖'}</span>
+    <h3>${esc(k.tajuk)}</h3>
+    <div class="body">${bhg.join('')}</div>
+  </div>`;
+}
+
+function belajar(pid, idx){
+  const f=cariPelajaran(pid); if(!f) return home();
+  const nota=NOTA[pid]||[];
+  if(!nota.length) return pelajaran(pid);
+  const i=Math.max(0, Math.min(idx|0, nota.length-1));
+  const akhir = i===nota.length-1;
+
+  // tanda "sudah dibaca" apabila murid sampai ke kad terakhir
+  if(akhir && !state.dibaca[pid]){ state.dibaca[pid]=Date.now(); save(); }
+
+  const dots=nota.map((_,n)=>`<i class="${n===i?'on':''}"></i>`).join('');
+
+  render(`${topbar(`<button class="iconbtn" onclick="EL.pelajaran('${pid}')">←</button>`)}
+    <div style="font-size:10.5px;font-weight:800;letter-spacing:1.6px;color:var(--text-muted);margin-bottom:9px;font-family:var(--read)">
+      ${esc(f.subjek.nama.toUpperCase())} · ${esc(f.pelajaran.tajuk.toUpperCase())}
+    </div>
+    <div class="dots">${dots}</div>
+    ${kadHTML(nota[i])}
+    <div class="navrow">
+      ${i>0?`<button class="btn btn-secondary" onclick="EL.belajar('${pid}',${i-1})">← SEBELUM</button>`:''}
+      ${akhir
+        ? `<button class="btn btn-primary" onclick="EL.mula('${pid}')">MULA KUIZ 📝</button>`
+        : `<button class="btn btn-primary" onclick="EL.belajar('${pid}',${i+1})">SETERUSNYA →</button>`}
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:11px;font-family:var(--read);font-weight:700">
+      Muka ${i+1} daripada ${nota.length}
+    </div>
+  `);
+}
+
+/* ============================================================
+   5) KUIZ
    ============================================================ */
 let K=null;
 
@@ -849,8 +1324,9 @@ function seterusnya(){
 
 function keluar(){
   if(!confirm('Keluar dari kuiz? Markah tidak akan disimpan.')) return;
-  const sid=K?K.subjek.id:SUBJECTS[0].id;
-  K=null; subjek(sid);
+  const pid=K?K.pid:null;                     // baca dulu sebelum K dibuang
+  K=null;
+  pid ? pelajaran(pid) : home();
 }
 
 function tamat(){
@@ -888,13 +1364,14 @@ function keputusan(r){
       </div>
     </div>
     <button class="btn btn-primary" onclick="EL.mula('${r.pid}')">CUBA LAGI 🔁</button>
+    ${(NOTA[r.pid]||[]).length?`<button class="btn btn-secondary" style="margin-top:9px" onclick="EL.belajar('${r.pid}',0)">📖 BACA NOTA SEMULA</button>`:''}
     <button class="btn btn-secondary" style="margin-top:9px" onclick="EL.subjek('${f.subjek.id}')">PELAJARAN LAIN</button>
     <button class="btn btn-secondary" style="margin-top:9px" onclick="EL.laporan()">📊 LAPORAN MARKAH</button>
   `);
 }
 
 /* ============================================================
-   5) LAPORAN MARKAH
+   6) LAPORAN MARKAH
    ============================================================ */
 function laporan(){
   const blok=SUBJECTS.map(s=>{
@@ -930,7 +1407,7 @@ function laporan(){
 }
 
 /* ============================================================
-   6) TETAPAN
+   7) TETAPAN
    ============================================================ */
 function tetapan(){
   render(`${topbar(`<button class="iconbtn" onclick="EL.home()">←</button>`)}
@@ -950,8 +1427,8 @@ function tetapan(){
         e-Learning Sekolah Agama Darjah 1 — 6 subjek mengikut silabus
         Sekolah Agama Kerajaan Negeri Johor: Tauhid, Sirah, Akhlak, Bahasa Arab, Ibadat dan Jawi.
         <br><br>
-        Murid menjawab soalan aneka pilihan dan memperoleh markah serta gred bagi setiap pelajaran.
-        Markah terbaik disimpan dalam peranti ini sahaja.
+        Setiap pelajaran ada dua bahagian: <b>Belajar</b> (nota berselak) dan <b>Kuiz</b>
+        (soalan aneka pilihan dengan markah serta gred). Markah terbaik disimpan dalam peranti ini sahaja.
         <br><br>
         <b style="color:var(--gold-light)">Nota:</b> nombor pelajaran (1.1, 2.3 dan seterusnya) belum diisi
         kerana senarai tajuk penuh perlu diambil daripada halaman isi kandungan kitab.
@@ -971,9 +1448,9 @@ function reset(){
 }
 
 /* ============================================================
-   7) BOOT
+   8) BOOT
    ============================================================ */
-const EL={home, subjek, mula, jawab, seterusnya, keluar, laporan, tetapan, simpanNama, togglBunyi, reset};
+const EL={home, subjek, pelajaran, belajar, mula, jawab, seterusnya, keluar, laporan, tetapan, simpanNama, togglBunyi, reset};
 window.EL=EL;
 load();
 home();
