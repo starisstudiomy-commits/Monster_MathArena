@@ -406,6 +406,16 @@ body{
 .dmg.enemy{font-size:24px;color:#FCA5A5}
 @keyframes dmgpop{0%{opacity:0;transform:translateY(8px) scale(.5)}20%{opacity:1;transform:translateY(-4px) scale(1.2)}100%{opacity:0;transform:translateY(-60px) scale(.8)}}
 
+/* ---- IDLE BREATHING (sprite tak statik semasa tunggu jawapan) ---- */
+#monArt img,#enemyArt img{animation:mon-breathe 2.6s ease-in-out infinite}
+
+/* ---- SPEECH BUBBLE (reaksi ringkas monster) ---- */
+.speech-bubble{position:absolute;z-index:7;pointer-events:none;font-family:var(--font);font-weight:800;font-size:12px;color:#3B1A5C;background:#fff;padding:5px 11px;border-radius:14px;white-space:nowrap;box-shadow:0 3px 0 0 rgba(0,0,0,.15);animation:bubblepop 1.1s ease-out forwards}
+.speech-bubble::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#fff}
+.speech-bubble.wrong{color:#7F1D1D;background:#FEE2E2}
+.speech-bubble.wrong::after{border-top-color:#FEE2E2}
+@keyframes bubblepop{0%{opacity:0;transform:translate(-50%,4px) scale(.6)}25%{opacity:1;transform:translate(-50%,-4px) scale(1.05)}35%{transform:translate(-50%,-4px) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px) scale(.95)}}
+
 /* ---- COMBAT FX ---- */
 .shake{animation:shake .3s}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px) rotate(-1deg)}75%{transform:translateX(6px) rotate(1deg)}}
@@ -4350,7 +4360,19 @@ function celebrateCombo(){
     setTimeout(()=>el.remove(),1100);
   }catch(e){}
 }
-function updateCombo(){const diff=DIFFICULTIES[B.diff||'medium'];const cf=$('#combo');if(cf){const pct=clamp(B.streak/diff.ultimateReq*100,0,100);cf.style.width=pct+'%';const colors=pct>=100?'#F44336,#FF9800,#FFEB3B':pct>=70?'#FF9800,#FFC107,#FFEB3B':pct>=40?'#4CAF50,#8BC34A,#CDDC39':pct>0?'#2196F3,#03A9F4,#00BCD4':'#888,#999,#aaa';cf.style.background='linear-gradient(90deg,'+colors+')';cf.style.boxShadow=pct>=100?'0 0 16px rgba(244,67,54,.7)':pct>=40?'0 0 10px rgba(76,175,80,.5)':'';}const t=$('#combotxt');if(t)t.textContent=B.streak>=diff.ultimateReq?'🔥 ULTIMATE (x3)':B.streak>=diff.comboReq?'⭐ ATTACK (x2)':B.streak>0?`Combo ${B.streak}`:'';}
+function updateCombo(){const diff=DIFFICULTIES[B.diff||'medium'];const cf=$('#combo');if(cf){const pct=clamp(B.streak/diff.ultimateReq*100,0,100);cf.style.width=pct+'%';const colors=pct>=100?'#F44336,#FF9800,#FFEB3B':pct>=70?'#FF9800,#FFC107,#FFEB3B':pct>=40?'#4CAF50,#8BC34A,#CDDC39':pct>0?'#2196F3,#03A9F4,#00BCD4':'#888,#999,#aaa';cf.style.background='linear-gradient(90deg,'+colors+')';cf.style.boxShadow=pct>=100?'0 0 16px rgba(244,67,54,.7)':pct>=40?'0 0 10px rgba(76,175,80,.5)':'';}const t=$('#combotxt');if(t)t.textContent=B.streak>=diff.ultimateReq?'🔥 ULTIMATE (x3)':B.streak>=diff.comboReq?'⭐ ATTACK (x2)':B.streak>0?`Combo ${B.streak}`:'';
+  // 🔥 Combo aura - glow di sekeliling monster aktif membesar ikut streak (kosong bila streak=0)
+  const monImg=document.querySelector('#monArt img');
+  if(monImg){
+    const t2=clamp((B.streak||0)/diff.ultimateReq,0,1);
+    if(t2<=0)monImg.style.filter='';
+    else{
+      const glowColor=t2>=1?'#F44336':t2>=(diff.comboReq/diff.ultimateReq)?'#FB923C':'#60A5FA';
+      const blur=Math.round(6+t2*16);
+      monImg.style.filter=`drop-shadow(0 0 ${blur}px ${glowColor})`;
+    }
+  }
+}
 
 // Timer Functions
 function startTimer(){
@@ -4624,6 +4646,7 @@ function answer(idx){
     if(tokenDouble){B.doubleDmgPending=false;showToast('⚡','Double Damage!');}
     let dmg=Math.round(atk*mult*(thundyDouble?2:1)*(tokenDouble?2:1));
     if(thundyDouble){sfx.ultimate();}else if(mult===3){sfx.ultimate();}else if(mult===2){sfx.crit();}else sfx.hit();
+    spawnSpeechBubble('#monArt',pick(SPEECH_CORRECT),false);
     const monEl = activeMon();const elem = FAMILIES[monEl.fam]?FAMILIES[monEl.fam].elem:'🔥';playElementAtk(elem);
     // 🐾 Enemy Skill - Guard: block sebahagian/semua serangan SETERUSNYA (sekali sahaja)
     if(B.enemyGuardPct){
@@ -4666,7 +4689,7 @@ function answer(idx){
     state.stats.wrong++;state.stats.byTier[tierKey].w++;state.stats.byDiff[diffKey].w++;state.stats.byTopic[chTopic].w++;
     B.streak=Math.max(0,B.streak>=3?B.streak-2:0);B.wrongInStage++;B.recentWrong++;B.recentCorrect=0;
     if(diff.adaptiveOn&&B.recentWrong>=2){B.tier=clamp(B.tier-1,1,3);B.recentWrong=0;}
-    sfx.wrong();redTint();const fb=$('#feedback');if(fb)fb.textContent='Tak apa, cuba lagi! 💪';if(!state?.settings?.practiceMode)enemyAttack();
+    sfx.wrong();redTint();spawnSpeechBubble('#monArt',pick(SPEECH_WRONG),true);const fb=$('#feedback');if(fb)fb.textContent='Tak apa, cuba lagi! 💪';if(!state?.settings?.practiceMode)enemyAttack();
     // 💰 King Coinza - cabaran luput senyap kalau jawab salah (tiada penalti tambahan)
     if(B.coinzaChallenge){B.coinzaChallenge=false;B.coinzaBoost=false;}
   }
@@ -5240,6 +5263,23 @@ function whiteFlash(){
   w.classList.remove('go');void w.offsetWidth;w.classList.add('go');
 }
 function floatDmg(txt,cls,left,top){const p=$('#arena');if(!p)return;const f=document.createElement('div');f.className='dmg '+cls;f.textContent=txt;f.style.left=left+'%';f.style.top=top+'%';p.appendChild(f);setTimeout(()=>f.remove(),1000);}
+
+// 💬 Speech bubble ringkas di atas sprite (monster/musuh) - reaksi visual betul/salah
+const SPEECH_CORRECT=['Yeah!','Hebat!','Betul!','Wuhuu!','Power!'];
+const SPEECH_WRONG=['Aduh!','Alamak!','Oops!','Cuba lagi!'];
+function spawnSpeechBubble(hostSel,text,isWrong){
+  try{
+    const host=$(hostSel);const arena=document.getElementById('arena');if(!host||!arena)return;
+    const hR=host.getBoundingClientRect(),aR=arena.getBoundingClientRect();
+    const x=hR.left+hR.width/2-aR.left,y=hR.top-aR.top;
+    const b=document.createElement('div');
+    b.className='speech-bubble'+(isWrong?' wrong':'');
+    b.textContent=text;
+    b.style.left=x+'px';b.style.top=y+'px';
+    arena.appendChild(b);
+    setTimeout(()=>b.remove(),1100);
+  }catch(e){}
+}
 
 function confetti(colors){
   const c=colors||['#FBBF24','#10B981','#3B82F6','#F59E0B','#EC4899'];
