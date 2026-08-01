@@ -410,10 +410,10 @@ body{
 #monArt img,#enemyArt img{animation:mon-breathe 2.6s ease-in-out infinite}
 
 /* ---- SPEECH BUBBLE (reaksi ringkas monster) ---- */
-.speech-bubble{position:absolute;z-index:7;pointer-events:none;font-family:var(--font);font-weight:800;font-size:12px;color:#3B1A5C;background:#fff;padding:5px 11px;border-radius:14px;white-space:nowrap;box-shadow:0 3px 0 0 rgba(0,0,0,.15);animation:bubblepop 1.1s ease-out forwards}
-.speech-bubble::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#fff}
-.speech-bubble.wrong{color:#7F1D1D;background:#FEE2E2}
-.speech-bubble.wrong::after{border-top-color:#FEE2E2}
+.battle-bubble{position:absolute;z-index:7;pointer-events:none;font-family:var(--font);font-weight:800;font-size:12px;color:#3B1A5C;background:#fff;padding:5px 11px;border-radius:14px;white-space:nowrap;box-shadow:0 3px 0 0 rgba(0,0,0,.15);animation:bubblepop 1.1s ease-out forwards}
+.battle-bubble::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#fff}
+.battle-bubble.wrong{color:#7F1D1D;background:#FEE2E2}
+.battle-bubble.wrong::after{border-top-color:#FEE2E2}
 @keyframes bubblepop{0%{opacity:0;transform:translate(-50%,4px) scale(.6)}25%{opacity:1;transform:translate(-50%,-4px) scale(1.05)}35%{transform:translate(-50%,-4px) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px) scale(.95)}}
 
 /* ---- COMBAT FX ---- */
@@ -5273,7 +5273,7 @@ function spawnSpeechBubble(hostSel,text,isWrong){
     const hR=host.getBoundingClientRect(),aR=arena.getBoundingClientRect();
     const x=hR.left+hR.width/2-aR.left,y=hR.top-aR.top;
     const b=document.createElement('div');
-    b.className='speech-bubble'+(isWrong?' wrong':'');
+    b.className='battle-bubble'+(isWrong?' wrong':'');
     b.textContent=text;
     b.style.left=x+'px';b.style.top=y+'px';
     arena.appendChild(b);
