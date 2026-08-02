@@ -3095,7 +3095,23 @@ function route(name){if(typeof stopTimer==='function')stopTimer();if(name!=='inc
   else{renderFn();doAnim();}
 }
 
-function isPro(){ return true; } // 👑 Versi berbayar: pembeli automatik PRO, tiada pengaktifan diperlukan
+// 🎟️ Kod lesen TRIAL - serial khas yg pemilik jana sendiri (via keygen, guna rahsia sendiri)
+// utk hantar kpd bakal client. Key trial tetap sah dr segi checksum (server tak berubah),
+// client kenali ia trial cuma drpd senarai serial ni. Tambah serial baru sini bila perlu.
+const TRIAL_SERIALS=['TRY8DEM2'];
+function isTrial(){
+  const key=state?.license;if(!key)return false;
+  const serial=String(key).toUpperCase().split('-')[1];
+  return TRIAL_SERIALS.includes(serial);
+}
+// Bab yg boleh diakses dlm versi TRIAL (index 0 = Bab 1 sahaja)
+const TRIAL_CHAPTER_LIMIT=0;
+function isPro(){ return !isTrial(); } // 👑 Versi berbayar: pembeli automatik PRO. Trial = akses terhad.
+function requirePro(featureName){
+  if(isPro())return true;
+  alert('🔒 '+featureName+' hanya dlm versi PENUH.\n\nOrder sekarang di WhatsApp:\nwasap.my/60104545949/MathArena');
+  return false;
+}
 
 // 🖐️ Pilihan 2 langkah: klik = PILIH (tanda kuning), butang Teruskan = SAHKAN.
 // Dulu satu klik terus melompat ke skrin lain - senang tersalah pilih.
@@ -3357,6 +3373,7 @@ function renderHome(){
     const enemyName = ENEMIES[bossStage.enemy]?.name || 'King Calculator';
 
     app.innerHTML=topbar()+`
+${isTrial()?`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:10px;border-radius:12px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.4)"><span style="font-size:16px">🎟️</span><span style="flex:1;font-size:11px;color:#FBBF24;font-weight:700">MODE TRIAL — Bab 1 sahaja</span><button class="btn btn-sm" style="width:auto;padding:5px 10px;font-size:9px;background:#FFE066;color:#3B1A5C" onclick="MMA.requirePro('Versi penuh')">Order</button></div>`:''}
 ${savedBattle ? `<button class="btn btn-cta" style="margin-bottom:12px;font-size:14px" onclick="MMA.resumeBattle()">⚡ SAMBUNG PERTARUNGAN</button>` : ''}
 
 <!-- Mission Banner -->
@@ -3398,7 +3415,9 @@ ${renderStickerWeek()}
   ${cur>=stages.length
     ?`<div style="text-align:center;margin-top:8px">
         <span class="pill" style="display:inline-flex;font-size:10px">🏆 BAB TAMAT</span>
-        ${curChapter<getChapters().length-1
+        ${isTrial()&&curChapter>=TRIAL_CHAPTER_LIMIT
+          ?`<div style="margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.4)"><div style="font-size:11px;font-weight:700;color:#FBBF24">🔒 Versi Trial — Bab 1 sahaja</div><div style="font-size:10px;color:var(--text-light);margin-top:2px">Order versi penuh utk buka semua bab & mod lain!</div><button class="btn btn-cta btn-sm" style="margin-top:8px" onclick="MMA.requirePro('Bab seterusnya')">👑 Order Versi Penuh</button></div>`
+        :curChapter<getChapters().length-1
           ?`<button class="btn btn-cta" style="margin-top:10px" onclick="MMA.nextChapter()">BAB SETERUSNYA →</button>`
           :`<button class="btn btn-cta" style="margin-top:10px" onclick="MMA.startStage(0)">MAIN SEMULA</button>`}
       </div>`
@@ -3416,7 +3435,8 @@ ${renderStickerWeek()}
     <span style="font-size:22px">🃏</span>
     <span>Deck<br><span style="font-size:10px;opacity:.85">${deckMons.length}/3</span></span>
   </button>
-  <button class="btn btn-sm" style="position:relative;flex-direction:column;gap:2px;min-height:72px;padding:12px 8px;border-radius:18px;color:#fff;font-weight:800;border:3px solid #FEF08A;background:linear-gradient(180deg,#FDE047 0%,#EAB308 100%);box-shadow:0 4px 0 0 #A16207, inset 0 2px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.25);" onclick="MMA.route('incubator')">
+  <button class="btn btn-sm" style="position:relative;flex-direction:column;gap:2px;min-height:72px;padding:12px 8px;border-radius:18px;color:#fff;font-weight:800;border:3px solid #FEF08A;background:linear-gradient(180deg,#FDE047 0%,#EAB308 100%);box-shadow:0 4px 0 0 #A16207, inset 0 2px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.25);${isPro()?'':'opacity:.85'}" onclick="MMA.route('incubator')">
+    ${isPro()?'':'<span style="position:absolute;top:6px;right:8px;font-size:8px;background:#FFE066;color:#3B1A5C;padding:2px 6px;border-radius:8px;font-weight:900;border:1.5px solid #FFF4D6">PRO</span>'}
     ${state.incubator?.status==='ready'?'<span style="position:absolute;top:6px;right:8px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fff"></span>':''}
     <span style="font-size:22px">🥚</span>
     <span>Inkubator<br><span style="font-size:10px;opacity:.85">${state.incubator?.status==='ready'?'Sedia!':state.incubator?.status==='incubating'?'Mengeram':'Kosong'}</span></span>
@@ -3437,7 +3457,8 @@ ${renderStickerWeek()}
     <span style="font-size:22px">🛒</span>
     <span>Kedai Item<br><span style="font-size:10px;opacity:.85">Beli</span></span>
   </button>
-  <button class="btn btn-sm" style="flex-direction:column;gap:2px;min-height:72px;padding:12px 8px;border-radius:18px;color:#fff;font-weight:800;border:3px solid #FDBA74;background:linear-gradient(180deg,#FB923C 0%,#EA580C 100%);box-shadow:0 4px 0 0 #C2410C, inset 0 2px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.25);" onclick="MMA.startRandomBattle()">
+  <button class="btn btn-sm" style="position:relative;flex-direction:column;gap:2px;min-height:72px;padding:12px 8px;border-radius:18px;color:#fff;font-weight:800;border:3px solid #FDBA74;background:linear-gradient(180deg,#FB923C 0%,#EA580C 100%);box-shadow:0 4px 0 0 #C2410C, inset 0 2px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.25);${isPro()?'':'opacity:.85'}" onclick="MMA.startRandomBattle()">
+    ${isPro()?'':'<span style="position:absolute;top:6px;right:8px;font-size:8px;background:#FFE066;color:#3B1A5C;padding:2px 6px;border-radius:8px;font-weight:900;border:1.5px solid #FFF4D6">PRO</span>'}
     <span style="font-size:22px">⚔</span>
     <span>Random Battle<br><span style="font-size:10px;opacity:.85">Tanpa henti</span></span>
   </button>
@@ -3454,11 +3475,13 @@ ${renderStickerWeek()}
     <span style="font-size:22px">🆚</span>
     <span>VS Mode<br><span style="font-size:10px;opacity:.85">Best of 3</span></span>
   </button>
-  <button class="btn btn-sm" style="flex-direction:column;gap:2px;min-height:72px;padding:12px 8px;border-radius:18px;color:#fff;font-weight:800;border:3px solid #6EE7B7;background:linear-gradient(180deg,#34D399 0%,#059669 100%);box-shadow:0 4px 0 0 #065F46, inset 0 2px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.25);" onclick="MMA.startDuelSetup()">
+  <button class="btn btn-sm" style="position:relative;flex-direction:column;gap:2px;min-height:72px;padding:12px 8px;border-radius:18px;color:#fff;font-weight:800;border:3px solid #6EE7B7;background:linear-gradient(180deg,#34D399 0%,#059669 100%);box-shadow:0 4px 0 0 #065F46, inset 0 2px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.25);${isPro()?'':'opacity:.85'}" onclick="MMA.startDuelSetup()">
+    ${isPro()?'':'<span style="position:absolute;top:6px;right:8px;font-size:8px;background:#FFE066;color:#3B1A5C;padding:2px 6px;border-radius:8px;font-weight:900;border:1.5px solid #FFF4D6">PRO</span>'}
     <span style="font-size:22px">👥</span>
     <span>Mod Duel<br><span style="font-size:10px;opacity:.85">2 Pemain</span></span>
   </button>
-  <button class="btn btn-sm" style="flex-direction:column;gap:2px;min-height:72px;padding:12px 8px;border-radius:18px;color:#fff;font-weight:800;border:3px solid #FCD34D;background:linear-gradient(180deg,#F59E0B 0%,#B45309 100%);box-shadow:0 4px 0 0 #78350F, inset 0 2px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.25);" onclick="MMA.route('megabossarena')">
+  <button class="btn btn-sm" style="position:relative;flex-direction:column;gap:2px;min-height:72px;padding:12px 8px;border-radius:18px;color:#fff;font-weight:800;border:3px solid #FCD34D;background:linear-gradient(180deg,#F59E0B 0%,#B45309 100%);box-shadow:0 4px 0 0 #78350F, inset 0 2px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.25);${isPro()?'':'opacity:.85'}" onclick="MMA.route('megabossarena')">
+    ${isPro()?'':'<span style="position:absolute;top:6px;right:8px;font-size:8px;background:#FFE066;color:#3B1A5C;padding:2px 6px;border-radius:8px;font-weight:900;border:1.5px solid #FFF4D6">PRO</span>'}
     <span style="font-size:22px">👑</span>
     <span>Mega Boss<br><span style="font-size:10px;opacity:.85">${MEGA_BOSS_ORDER.filter(id=>state?.megaBossVault?.[MEGA_BOSSES[id].chapterId]?.defeated).length}/8</span></span>
   </button>
@@ -3501,13 +3524,14 @@ function resetStage(){
   }
 }
 
-function nextChapter(){try{if(!state.progress)state.progress={chapter:0,stage:0};if(!state.chapterProgress)state.chapterProgress={};state.chapterProgress[state.progress.chapter]=state.progress.stage;const target=(state.progress.chapter||0)+1;state.progress.chapter=target>=getChapters().length?0:target;state.progress.stage=state.chapterProgress[state.progress.chapter]||0;state.goldBoostChapter=undefined;save();renderHome();}catch(e){route('home');}}
+function nextChapter(){try{if(!state.progress)state.progress={chapter:0,stage:0};if(!state.chapterProgress)state.chapterProgress={};const target=(state.progress.chapter||0)+1;if(isTrial()&&target>TRIAL_CHAPTER_LIMIT){requirePro('Bab seterusnya');return;}state.chapterProgress[state.progress.chapter]=state.progress.stage;state.progress.chapter=target>=getChapters().length?0:target;state.progress.stage=state.chapterProgress[state.progress.chapter]||0;state.goldBoostChapter=undefined;save();renderHome();}catch(e){route('home');}}
 // 🗺️ Tukar ke bab lain yang dah pernah dibuka (simpan progress bab semasa dulu supaya tak hilang)
 function switchChapter(i){
   try{
     if(!state.progress)state.progress={chapter:0,stage:0};
     if(!state.chapterProgress)state.chapterProgress={};
     if(i<0||i>=getChapters().length)return;
+    if(isTrial()&&i>TRIAL_CHAPTER_LIMIT){requirePro('Bab ini');return;}
     const maxUnlocked=Math.max(state.progress.chapter||0,...Object.keys(state.chapterProgress).map(Number));
     if(i>maxUnlocked){showToast('🔒','Bab ini belum dibuka lagi!');return;}
     state.chapterProgress[state.progress.chapter]=state.progress.stage;
@@ -3522,7 +3546,8 @@ function renderChapterMap(){
   try{
     if(!state.chapterProgress)state.chapterProgress={};
     const curChapter=state?.progress?.chapter||0;
-    const maxUnlocked=Math.max(curChapter,...Object.keys(state.chapterProgress).map(Number),0);
+    let maxUnlocked=Math.max(curChapter,...Object.keys(state.chapterProgress).map(Number),0);
+    if(isTrial())maxUnlocked=Math.min(maxUnlocked,TRIAL_CHAPTER_LIMIT);
     app.innerHTML=topbar()+`
     <div class="panel" style="text-align:center">
       <h2 class="display" style="font-size:18px;margin-bottom:4px">🗺️ Peta Bab</h2>
@@ -4197,6 +4222,7 @@ function quitBonusMission(){
    ============================================================ */
 function renderMegaBossArena(){
   try{
+    if(!requirePro('Mega Boss Arena')){route('home');return;}
     const vault=state.megaBossVault||{};
     const cards=MEGA_BOSS_ORDER.map(bossId=>{
       const mega=MEGA_BOSSES[bossId];
@@ -4870,7 +4896,7 @@ function checkEvolve(fam){
   let target=c.stage;if(c.stage===1&&c.correct>=EVO.toStage2)target=2;if(c.stage===2&&c.correct>=EVO.toStage3)target=3;if(target>c.stage)doEvolve(fam,target);
 }
 function useEvoStone(){
-  if(!isPro()){alert('🔒 Item hanya boleh digunakan dalam versi PRO. Dapatkan PRO di Tetapan.');return;}
+  if(!requirePro('Evo Stone'))return;
   if(!B||B.locked)return;
   if((state.evoStones||0)<=0){showToast('💠','Tiada Evo Stone!');return;}
   const fam=B.deck[B.activeIdx];
@@ -5299,10 +5325,7 @@ function redTint(){
   setTimeout(()=>{el.style.opacity='0';},200);
 }
 function useItem(id){
-  if(!isPro()){
-    alert('🔒 Item hanya boleh digunakan dalam versi PRO. Dapatkan PRO di Tetapan.');
-    return;
-  }
+  if(!requirePro('Item pertempuran'))return;
   if(!B||B.locked||!state.items[id]||state.items[id]<=0)return;
   state.items[id]--;
   
@@ -5544,6 +5567,7 @@ function renderLeaderboard(){
 
 // 7. Random Battle
 function startRandomBattle(){
+  if(!requirePro('Random Battle'))return;
   const allEnemies=[];
   getChapters().forEach(ch=>{
     ch.stages.forEach(st=>{
@@ -5573,7 +5597,7 @@ function startRandomStage(){
 
 // VS Mode (PRO) - Best of 3, 3 duel 1v1 berasingan
 function startVsMode(){
-  if(!isPro()){alert('🔒 VS Mode hanya boleh dimainkan dalam versi PRO. Dapatkan PRO di Tetapan.');return;}
+  if(!requirePro('VS Mode'))return;
   if((state.deck||[]).length<3){showToast('🃏','Lengkapkan deck (3 monster) dulu!');route('deck');return;}
   const pool=[];
   getChapters().slice(0,(state?.progress?.chapter||0)+1).forEach(ch=>{
@@ -5666,6 +5690,7 @@ function renderVsResult(overallWon){
    ============================================================ */
 let DUEL=null,curDuelQ=null;
 function startDuelSetup(){
+  if(!requirePro('Mod Duel'))return;
   window._duelNames=window._duelNames||['Pemain 1','Pemain 2'];
   const topics=getTopicMeta();
   window._duelTopic=window._duelTopic||topics[0]?.id;
@@ -5773,6 +5798,7 @@ function quitDuel(){
 // 8. Monster Fusion
 let fusionSlots=[null,null];
 function renderFusion(){
+  if(!requirePro('Monster Fusion')){route('deck');return;}
   const owned=FAMILY_IDS.filter(f=>state?.collection?.[f]?.owned);
   const canFuse=fusionSlots[0]&&fusionSlots[1]&&fusionSlots[0]===fusionSlots[1]&&state.collection[fusionSlots[0]]&&state.collection[fusionSlots[0]].stage<3&&state.gold>=100;
   let resultName='-';
@@ -6072,6 +6098,7 @@ function incGaugeSVG(pct){
 let incSelectedItem=null;
 function renderIncubator(){
   try{
+    if(!requirePro('Egg Incubator')){route('home');return;}
     accrueIncubatorWarmth();save();
     const inc=state.incubator;
     const pct=clamp(inc.warmth/INC_CFG.WARMTH_NEEDED*100,0,100);
@@ -6422,7 +6449,7 @@ function unlockStorageSlot(){
   showToast('🔓','Slot storan dibuka!');renderIncubator();
 }
 
-window.MMA={route,setYear,renderAchievements,startPracticeTopic,pickYear,confirmYear,pickStarterSelect,confirmStarter,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,switchProfile,createProfile,deleteProfile,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,skipTutorial,nextChapter,exportParentReport,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,startDuelSetup,startDuelPlay,duelReady,answerDuel,quitDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,
+window.MMA={route,setYear,renderAchievements,startPracticeTopic,pickYear,confirmYear,pickStarterSelect,confirmStarter,pickStarter,startStage,answer,toggleDeck,swapDeckPos,ackChapterIntro,startBonusMission,answerBonus,quitBonusMission,startMegaBoss,startPracticeRound,buyPack,buyRarePack,buyEvoStone,buyIncubatorItem,switchProfile,createProfile,deleteProfile,toggle,confirmReset,flipCard,finishPack,openReward,quitBattle,closeEvo,pinDigit,pinDel,pinTry,changePin,toggleBGM,nextTutorial,skipTutorial,nextChapter,exportParentReport,setDifficulty,enterGame,_pcCnt,_pcDiff,_saveParentConfig,resetStage,showGuide,closeGuide,useItem,useEvoStone,saveSession,activateLicense,isPro,setPlayerName,openShop,closeShop,buyItem,playElementAtk,spawnEvoSparks,showToast,startEasier,resumeBattle,setBgmVolume,setSfxVolume,setHpDrainRate,togglePractice,startRandomBattle,startRandomStage,startVsMode,startVsDuel,startDuelSetup,startDuelPlay,duelReady,answerDuel,quitDuel,renderFusion,pickFusionMon,selectFusionMon,clearFusion,doFusion,toggleDeckSort,showCardPreview,setTheme,setCustomColor,setAvatar,renderLeaderboard,exportSave,importSave,switchChapter,requirePro,
   startEggHunt,answerEggHunt,quitEggHunt,pickEggChoice,selectIncubatorItem,injectSelectedIncubatorItem,answerIncubatorChallenge,closeIncubatorChallenge,hatchUltraRare,closeHatchOverlay,takeEggFromStorage,unlockStorageSlot,swapActiveMonster};
 
 // Ambient orbs
