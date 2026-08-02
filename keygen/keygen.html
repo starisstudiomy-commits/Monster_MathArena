@@ -58,6 +58,7 @@
   </div>
 
   <button id="go">Jana Kod</button>
+  <button id="goTrial" style="margin-top:8px;background:linear-gradient(180deg,#A78BFA,#7C3AED);color:#fff;border-color:#C4B5FD">🎟️ Jana Kod TRIAL (Bab 1 sahaja)</button>
   <div id="err" class="err"></div>
   <div id="keys" class="keys"></div>
   <div class="hint" id="hint"></div>
@@ -95,6 +96,12 @@ async function generateKey(secret) {
   return 'MMA-' + serial + '-' + await checksumFor(serial, secret);
 }
 
+// Serial trial rasmi - kena SAMA dgn TRIAL_SERIALS dlm vercel-licensed/index.html
+const TRIAL_SERIALS = ['TRY8DEM2'];
+async function generateTrialKey(secret, serial) {
+  return 'MMA-' + serial + '-' + await checksumFor(serial, secret);
+}
+
 const $ = id => document.getElementById(id);
 
 $('go').addEventListener('click', async () => {
@@ -120,6 +127,33 @@ $('go').addEventListener('click', async () => {
       $('keys').appendChild(d);
     }
     $('hint').textContent = 'Tekan mana-mana kod untuk menyalinnya. Kod sah selama-lamanya (tiada tarikh luput).';
+  } catch (e) {
+    $('err').textContent = 'Ralat menjana kod: ' + e.message;
+  }
+});
+
+$('goTrial').addEventListener('click', async () => {
+  const secret = $('secret').value.trim();
+  $('err').textContent = '';
+  $('keys').innerHTML = '';
+  $('hint').textContent = '';
+
+  if (!secret) { $('err').textContent = 'Sila masukkan rahsia dahulu.'; return; }
+  if (!crypto.subtle) { $('err').textContent = 'Browser ini tidak menyokong Web Crypto. Cuba Safari/Chrome terkini.'; return; }
+
+  try {
+    for (const serial of TRIAL_SERIALS) {
+      const k = await generateTrialKey(secret, serial);
+      const d = document.createElement('div');
+      d.className = 'key';
+      d.textContent = k;
+      d.title = 'Tekan untuk pilih';
+      d.addEventListener('click', () => {
+        if (navigator.clipboard) navigator.clipboard.writeText(k).catch(() => {});
+      });
+      $('keys').appendChild(d);
+    }
+    $('hint').textContent = '🎟️ Kod TRIAL — akses Bab 1 sahaja, mod lain (VS Mode, Duel, Mega Boss, Fusion, Incubator, Item) dikunci. Hantar kod ni kpd bakal client.';
   } catch (e) {
     $('err').textContent = 'Ralat menjana kod: ' + e.message;
   }
